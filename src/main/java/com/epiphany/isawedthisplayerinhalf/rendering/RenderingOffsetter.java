@@ -1,0 +1,38 @@
+package com.epiphany.isawedthisplayerinhalf.rendering;
+
+import com.epiphany.isawedthisplayerinhalf.Offsetter;
+import com.epiphany.isawedthisplayerinhalf.ReflectionHelper;
+import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
+import net.minecraft.client.renderer.entity.PlayerRenderer;
+import net.minecraft.client.renderer.entity.model.PlayerModel;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraftforge.client.event.RenderPlayerEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+
+import java.util.HashMap;
+import java.util.UUID;
+
+/**
+ * Offsets the rendering of players by swapping out their normal renderer with a modified version.
+ */
+public class RenderingOffsetter {
+    private static final HashMap<UUID, PlayerRendererWrapper> wrappedRendererMap = new HashMap<>();
+
+    @SubscribeEvent
+    public static void onPlayerPreRender(RenderPlayerEvent.Pre renderPlayerEvent) {
+        PlayerEntity player = renderPlayerEvent.getPlayer();
+        UUID playerUUID = player.getUniqueID();
+
+        if (!wrappedRendererMap.containsKey(playerUUID)) {
+            PlayerRenderer playerRenderer = renderPlayerEvent.getRenderer();
+            PlayerModel<AbstractClientPlayerEntity> playerModel = playerRenderer.getEntityModel();
+            boolean useSmallArms = (boolean) ReflectionHelper.getFieldOrDefault(playerModel.getClass(), playerModel, "smallArms", false);
+
+            wrappedRendererMap.put(playerUUID, new PlayerRendererWrapper(playerRenderer.getRenderManager(), useSmallArms, Offsetter.getOffsets(player)));
+        }
+
+        wrappedRendererMap.get(playerUUID).render((AbstractClientPlayerEntity) renderPlayerEvent.getPlayer(), renderPlayerEvent.getEntity().rotationYaw, renderPlayerEvent.getPartialRenderTick(), renderPlayerEvent.getMatrixStack(), renderPlayerEvent.getBuffers(), renderPlayerEvent.getLight());
+
+        renderPlayerEvent.setCanceled(true);
+    }
+}
