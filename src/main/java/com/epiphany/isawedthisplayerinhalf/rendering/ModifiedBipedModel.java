@@ -3,10 +3,13 @@ package com.epiphany.isawedthisplayerinhalf.rendering;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * A modified version of BipedModel for customizing how players' armor is rendered, or whatever else you might use it for.
  */
+@OnlyIn(Dist.CLIENT)
 public class ModifiedBipedModel<T extends LivingEntity> extends BipedModel<T> {
     private final float[] initialValues = new float[4];
     private float xOffset;

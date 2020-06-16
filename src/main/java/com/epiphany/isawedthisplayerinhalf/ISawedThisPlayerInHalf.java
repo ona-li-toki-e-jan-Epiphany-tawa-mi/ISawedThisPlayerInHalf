@@ -1,5 +1,6 @@
 package com.epiphany.isawedthisplayerinhalf;
 
+import com.epiphany.isawedthisplayerinhalf.rendering.PlayerRendererWrapper;
 import com.epiphany.isawedthisplayerinhalf.rendering.RenderingOffsetter;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -34,7 +35,8 @@ public class ISawedThisPlayerInHalf {
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
-
+        RenderingOffsetter.doClientStuff();
+        PlayerRendererWrapper.doClientStuff();
     }
 
     public void onServerStarting(FMLServerStartingEvent event) {

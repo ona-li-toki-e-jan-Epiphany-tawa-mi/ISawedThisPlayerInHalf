@@ -1,9 +1,7 @@
 package com.epiphany.isawedthisplayerinhalf;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -26,7 +24,7 @@ public class Offsetter {
         UUID playerUUID = player.getUniqueID();
 
         if (!playerOffsetMap.containsKey(playerUUID))
-            playerOffsetMap.put(playerUUID, new Vec3d(0, 0, 0));
+            playerOffsetMap.put(playerUUID, new Vec3d(2, 0, 0));
 
         return playerOffsetMap.get(playerUUID);
     }

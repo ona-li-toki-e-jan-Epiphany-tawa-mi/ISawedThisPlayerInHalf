@@ -6,8 +6,12 @@ import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+
+import java.lang.reflect.Field;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -15,24 +19,45 @@ import java.util.UUID;
 /**
  * Offsets the rendering of players by swapping out their normal renderer with a modified version.
  */
+@OnlyIn(Dist.CLIENT)
 public class RenderingOffsetter {
     private static final HashMap<UUID, PlayerRendererWrapper> wrappedRendererMap = new HashMap<>();
+    private static Field renderer;
+
+    public static void doClientStuff() {
+        renderer = ReflectionHelper.getFieldOrNull(RenderPlayerEvent.class, "renderer");
+        renderer.setAccessible(true);
+    }
+
+
 
     @SubscribeEvent
     public static void onPlayerPreRender(RenderPlayerEvent.Pre renderPlayerEvent) {
         PlayerEntity player = renderPlayerEvent.getPlayer();
         UUID playerUUID = player.getUniqueID();
+        PlayerRendererWrapper wrappedRenderer;
 
+        // Gets the renderer to be used instead of the normal one.
         if (!wrappedRendererMap.containsKey(playerUUID)) {
             PlayerRenderer playerRenderer = renderPlayerEvent.getRenderer();
             PlayerModel<AbstractClientPlayerEntity> playerModel = playerRenderer.getEntityModel();
             boolean useSmallArms = (boolean) ReflectionHelper.getFieldOrDefault(playerModel.getClass(), playerModel, "smallArms", false);
 
-            wrappedRendererMap.put(playerUUID, new PlayerRendererWrapper(playerRenderer.getRenderManager(), useSmallArms, Offsetter.getOffsets(player)));
-        }
+            wrappedRenderer = new PlayerRendererWrapper(playerRenderer.getRenderManager(), useSmallArms, Offsetter.getOffsets(player));
+            wrappedRendererMap.put(playerUUID, wrappedRenderer);
 
-        wrappedRendererMap.get(playerUUID).render((AbstractClientPlayerEntity) renderPlayerEvent.getPlayer(), renderPlayerEvent.getEntity().rotationYaw, renderPlayerEvent.getPartialRenderTick(), renderPlayerEvent.getMatrixStack(), renderPlayerEvent.getBuffers(), renderPlayerEvent.getLight());
+        } else
+            wrappedRenderer = wrappedRendererMap.get(playerUUID);
+
+        // Swaps out renderers, renders modified player model.
+        wrappedRenderer.render((AbstractClientPlayerEntity) renderPlayerEvent.getPlayer(), renderPlayerEvent.getEntity().rotationYaw, renderPlayerEvent.getPartialRenderTick(), renderPlayerEvent.getMatrixStack(), renderPlayerEvent.getBuffers(), renderPlayerEvent.getLight());
+        ReflectionHelper.setField(renderer, renderPlayerEvent, wrappedRenderer.wrappedRenderer);
 
         renderPlayerEvent.setCanceled(true);
+    }
+
+    @SubscribeEvent
+    public static void onPlayerPostRender(RenderPlayerEvent.Post renderPlayerEvent) {
+        ReflectionHelper.setField(renderer, renderPlayerEvent, wrappedRendererMap.get(renderPlayerEvent.getPlayer().getUniqueID()));
     }
 }

@@ -3,10 +3,13 @@ package com.epiphany.isawedthisplayerinhalf.rendering;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * A modified version of PlayerModel for customizing how players are rendered.
  */
+@OnlyIn(Dist.CLIENT)
 public class ModifiedPlayerModel<T extends LivingEntity> extends PlayerModel<T> {
     private final float[] initialValues = new float[4];
     private float xOffset;

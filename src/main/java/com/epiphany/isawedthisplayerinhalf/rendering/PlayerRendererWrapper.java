@@ -13,6 +13,8 @@ import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -20,19 +22,35 @@ import java.util.List;
 /**
  * A semi-wrapper, semi-renderer for players. Used in lieu of PlayerRenderer for custom models.
  */
-class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> {
+@OnlyIn(Dist.CLIENT)
+public class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> {
     /**
      * Conversion value for degrees to radians conversion.
      */
     static final float degrees2Radians = (float) (Math.PI / 180.0);
-
-    private final PlayerRenderer wrappedRenderer;
-    private final ModifiedBipedModel upperArmorModel;
     // Reflected methods grabbed from PlayerRenderer.
-    private final Method setModelVisibilities;
-    private final Method applyRotations;
-    private final Method preRenderCallback;
-    private final Method renderName;
+    private static Method setModelVisibilities;
+    private static Method applyRotations;
+    private static Method preRenderCallback;
+    private static Method renderName;
+
+    final PlayerRenderer wrappedRenderer;
+    private final ModifiedBipedModel upperArmorModel;
+
+
+
+    public static void doClientStuff() {
+        setModelVisibilities = ReflectionHelper.getMethodOrNull(PlayerRenderer.class, "setModelVisibilities", AbstractClientPlayerEntity.class);
+        setModelVisibilities.setAccessible(true);
+        applyRotations = ReflectionHelper.getMethodOrNull(PlayerRenderer.class, "applyRotations", AbstractClientPlayerEntity.class, MatrixStack.class, float.class, float.class, float.class);
+        applyRotations.setAccessible(true);
+        preRenderCallback = ReflectionHelper.getMethodOrNull(PlayerRenderer.class, "preRenderCallback", AbstractClientPlayerEntity.class, MatrixStack.class, float.class);
+        preRenderCallback.setAccessible(true);
+        renderName = ReflectionHelper.getMethodOrNull(PlayerRenderer.class, "renderName", AbstractClientPlayerEntity.class, String.class, MatrixStack.class, IRenderTypeBuffer.class, int.class);
+        renderName.setAccessible(true);
+    }
+
+
 
     /**
      * Creates a new wrapped player renderer.
@@ -65,16 +83,6 @@ class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEntity, P
             ReflectionHelper.setField(LivingRenderer.class, this, "layerRenderers", wrappedLayers);
         }
 
-        // Grabs methods through reflection
-        setModelVisibilities = ReflectionHelper.getMethodOrNull(PlayerRenderer.class, "setModelVisibilities", AbstractClientPlayerEntity.class);
-        setModelVisibilities.setAccessible(true);
-        applyRotations = ReflectionHelper.getMethodOrNull(PlayerRenderer.class, "applyRotations", AbstractClientPlayerEntity.class, MatrixStack.class, float.class, float.class, float.class);
-        applyRotations.setAccessible(true);
-        preRenderCallback = ReflectionHelper.getMethodOrNull(PlayerRenderer.class, "preRenderCallback", AbstractClientPlayerEntity.class, MatrixStack.class, float.class);
-        preRenderCallback.setAccessible(true);
-        renderName = ReflectionHelper.getMethodOrNull(PlayerRenderer.class, "renderName", AbstractClientPlayerEntity.class, String.class, MatrixStack.class, IRenderTypeBuffer.class, int.class);
-        renderName.setAccessible(true);
-
         setOffsets(playerOffsets);
     }
 
@@ -89,9 +97,9 @@ class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEntity, P
         super.render(entityIn, entityYaw, partialTicks, matrixStackIn, bufferIn, packedLightIn);
     }
 
-    private static float pi2 = (float) Math.PI * 2;
+    private static final float pi2 = (float) (Math.PI * 2);
     // Offset to get the yaw to be x-axis + offsetAngle.
-    private static float piOver4 = (float) Math.PI / 4;
+    private static final float piOver4 = (float) (Math.PI / 4);
 
     /**
      * Sets the offsets for the models within this renderer that are affected by them.
@@ -102,11 +110,14 @@ class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEntity, P
         float newXOffset = (float) (offsets.x * 16);
         float newYOffset = (float) (offsets.y * -16);
         float newZOffset = (float) (offsets.z * 16);
-        float offsetDistance2d = (float) Math.sqrt(newXOffset * newXOffset + newZOffset * newZOffset);
-        float offsetAngle = (float) -(Math.acos(newXOffset / offsetDistance2d) + piOver4);
+        float offsetAngle = (float) Math.atan2(-offsets.z, offsets.x);
 
-        if (newXOffset < 0)
-            offsetAngle = pi2 - offsetAngle;
+        // Puts offset of pi/4 to make the offset angle be between (x, z) and (1, 0).
+        if (newZOffset >= 0) {
+            offsetAngle -= piOver4;
+
+        } else
+            offsetAngle += piOver4;
 
         ((ModifiedPlayerModel<?>) entityModel).setOffsets(newXOffset, newYOffset, newZOffset, offsetAngle);
         upperArmorModel.setOffsets(newXOffset, newYOffset, newZOffset, offsetAngle);
@@ -129,8 +140,8 @@ class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEntity, P
 
     private void setModelVisibilities(AbstractClientPlayerEntity clientPlayer) {
         ReflectionHelper.invokeMethod(
-                wrappedRenderer,
                 setModelVisibilities,
+                wrappedRenderer,
                 clientPlayer
         );
     }
@@ -143,8 +154,8 @@ class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEntity, P
     @Override
     protected void preRenderCallback(AbstractClientPlayerEntity entityLiving, MatrixStack matrixStack, float partialTickTime) {
         ReflectionHelper.invokeMethod(
-                wrappedRenderer,
                 preRenderCallback,
+                wrappedRenderer,
                 entityLiving, matrixStack, partialTickTime
         );
     }
@@ -152,8 +163,8 @@ class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEntity, P
     @Override
     protected void renderName(AbstractClientPlayerEntity entityIn, String displayNameIn, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn) {
         ReflectionHelper.invokeMethod(
-                wrappedRenderer,
                 renderName,
+                wrappedRenderer,
                 entityIn, displayNameIn, matrixStackIn, bufferIn, packedLightIn
         );
     }
@@ -161,8 +172,8 @@ class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEntity, P
     @Override
     protected void applyRotations(AbstractClientPlayerEntity entityLiving, MatrixStack matrixStackIn, float ageInTicks, float rotationYaw, float partialTicks) {
         ReflectionHelper.invokeMethod(
-                wrappedRenderer,
                 applyRotations,
+                wrappedRenderer,
                 entityLiving, matrixStackIn, ageInTicks, rotationYaw, partialTicks
         );
     }

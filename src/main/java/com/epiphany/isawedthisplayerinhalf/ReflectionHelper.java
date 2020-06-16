@@ -10,6 +10,28 @@ import java.lang.reflect.Method;
  */
 public class ReflectionHelper {
     /**
+     * Gets a declared field from a class, or null.
+     *
+     * @param clazz The class to get the field from.
+     * @param fieldName The name of the field to get.
+     *
+     * @return The field with the name fieldName in class clazz.
+     */
+    public static Field getFieldOrNull(Class<?> clazz, String fieldName) {
+        Field field;
+
+        try {
+            field = clazz.getDeclaredField(fieldName);
+
+        } catch (NoSuchFieldException exception) {
+            field = null;
+            exception.printStackTrace();
+        }
+
+        return field;
+    }
+
+    /**
      * Gets the value stored in a declared field from an instance of a class, or the default value if something goes wrong.
      *
      * @param clazz The class the field was declared in.
@@ -42,6 +64,33 @@ public class ReflectionHelper {
         }
 
         return returnValue;
+    }
+
+    /**
+     * Sets the value for the field in the given object.
+     *
+     * @param field The field to set the value of.
+     * @param object The object to set the field's value to.
+     * @param value The value to set to the field.
+     */
+    public static void setField(Field field, Object object, Object value) {
+        if (field != null)
+            try {
+                boolean wasNotAccessible = false;
+
+                if (!field.isAccessible()) {
+                    field.setAccessible(true);
+                    wasNotAccessible = true;
+                }
+
+                field.set(object, value);
+
+                if (wasNotAccessible)
+                    field.setAccessible(false);
+
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
     }
 
     /**
@@ -105,7 +154,7 @@ public class ReflectionHelper {
      * @param method The method to invoke.
      * @param methodArguments The arguments to the method.
      */
-    public static void invokeMethod(Object object, Method method, Object... methodArguments) {
+    public static void invokeMethod(Method method, Object object, Object... methodArguments) {
         if (method != null)
             try {
                 boolean notAccessible = false;
