@@ -1,16 +1,20 @@
 package com.epiphany.isawedthisplayerinhalf;
 
+import com.epiphany.isawedthisplayerinhalf.rendering.PlayerRendererWrapper;
+import com.epiphany.isawedthisplayerinhalf.rendering.RenderingOffsetter;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.DistExecutor;
 
 import java.util.HashMap;
 import java.util.UUID;
 
 public class Offsetter {
-    public static final HashMap<UUID, Vec3d> playerOffsetMap = new HashMap<>();
+    private static final HashMap<UUID, Vec3d> playerOffsetMap = new HashMap<>();
 
     /**
      * Gets the offsets a player has.
@@ -22,11 +26,16 @@ public class Offsetter {
      */
     public static Vec3d getOffsets(PlayerEntity player) {
         UUID playerUUID = player.getUniqueID();
+        Vec3d offset;
 
-        if (!playerOffsetMap.containsKey(playerUUID))
-            playerOffsetMap.put(playerUUID, new Vec3d(2, 0, 0));
+        if (!playerOffsetMap.containsKey(playerUUID)) {
+            offset = new Vec3d(2, 0, 0);
+            playerOffsetMap.put(playerUUID, offset);
 
-        return playerOffsetMap.get(playerUUID);
+        } else
+            offset = playerOffsetMap.get(playerUUID);
+
+        return offset;
     }
 
     /**
@@ -37,6 +46,17 @@ public class Offsetter {
      */
     public static void setOffsets(PlayerEntity player, Vec3d offsets) {
         playerOffsetMap.put(player.getUniqueID(), offsets);
+
+        DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> {
+            PlayerRendererWrapper wrappedRenderer = RenderingOffsetter.getRenderer(player);
+
+            if (wrappedRenderer != null) {
+                wrappedRenderer.setOffsets(offsets);
+
+                if (offsets.lengthSquared() == 0)
+                    wrappedRenderer.reset();
+            }
+        });
     }
 
     /**

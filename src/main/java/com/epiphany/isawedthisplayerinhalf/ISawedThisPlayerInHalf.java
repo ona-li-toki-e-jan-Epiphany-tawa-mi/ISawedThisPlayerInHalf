@@ -27,7 +27,6 @@ public class ISawedThisPlayerInHalf {
         //modEventBus.addListener(this::processIMC);
 
         MinecraftForge.EVENT_BUS.register(Offsetter.class);
-        MinecraftForge.EVENT_BUS.register(RenderingOffsetter.class);
     }
 
     private void setup(final FMLCommonSetupEvent event) {
@@ -37,6 +36,8 @@ public class ISawedThisPlayerInHalf {
     private void doClientStuff(final FMLClientSetupEvent event) {
         RenderingOffsetter.doClientStuff();
         PlayerRendererWrapper.doClientStuff();
+
+        MinecraftForge.EVENT_BUS.register(RenderingOffsetter.class);
     }
 
     public void onServerStarting(FMLServerStartingEvent event) {

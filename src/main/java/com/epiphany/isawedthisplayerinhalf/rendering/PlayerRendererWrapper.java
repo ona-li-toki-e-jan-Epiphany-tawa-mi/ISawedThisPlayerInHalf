@@ -16,6 +16,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -33,6 +34,9 @@ public class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEn
     private static Method applyRotations;
     private static Method preRenderCallback;
     private static Method renderName;
+    // Reflected fields grabbed from PlayerRenderer.
+    private static Field entityModelField;
+    private static Field layerRenderers;
 
     final PlayerRenderer wrappedRenderer;
     private final ModifiedBipedModel upperArmorModel;
@@ -41,13 +45,18 @@ public class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEn
 
     public static void doClientStuff() {
         setModelVisibilities = ReflectionHelper.getMethodOrNull(PlayerRenderer.class, "setModelVisibilities", AbstractClientPlayerEntity.class);
-        setModelVisibilities.setAccessible(true);
+        ReflectionHelper.makeAccessible(setModelVisibilities);
         applyRotations = ReflectionHelper.getMethodOrNull(PlayerRenderer.class, "applyRotations", AbstractClientPlayerEntity.class, MatrixStack.class, float.class, float.class, float.class);
-        applyRotations.setAccessible(true);
+        ReflectionHelper.makeAccessible(applyRotations);
         preRenderCallback = ReflectionHelper.getMethodOrNull(PlayerRenderer.class, "preRenderCallback", AbstractClientPlayerEntity.class, MatrixStack.class, float.class);
-        preRenderCallback.setAccessible(true);
+        ReflectionHelper.makeAccessible(preRenderCallback);
         renderName = ReflectionHelper.getMethodOrNull(PlayerRenderer.class, "renderName", AbstractClientPlayerEntity.class, String.class, MatrixStack.class, IRenderTypeBuffer.class, int.class);
-        renderName.setAccessible(true);
+        ReflectionHelper.makeAccessible(renderName);
+
+        entityModelField = ReflectionHelper.getFieldOrNull(LivingRenderer.class, "entityModel");
+        ReflectionHelper.makeAccessible(entityModelField);
+        layerRenderers = ReflectionHelper.getFieldOrNull(LivingRenderer.class, "layerRenderers");
+        ReflectionHelper.makeAccessible(layerRenderers);
     }
 
 
@@ -64,12 +73,12 @@ public class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEn
     private PlayerRendererWrapper(EntityRendererManager renderManager, boolean useSmallArms, ModifiedPlayerModel<AbstractClientPlayerEntity> playerModel, Vec3d playerOffsets) {
         super(renderManager, playerModel, 0.5F);
         wrappedRenderer = new PlayerRenderer(renderManager, useSmallArms);
-        ReflectionHelper.setField(LivingRenderer.class, wrappedRenderer, "entityModel", playerModel);
+        ReflectionHelper.setField(entityModelField, wrappedRenderer, playerModel);
 
         // Modifies the layer renderers of the wrapped class, and then copies it into this class.
         upperArmorModel = new ModifiedBipedModel(1.0F);
         List<LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>> wrappedLayers = (List<LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>>)
-                ReflectionHelper.getFieldOrDefault(LivingRenderer.class, wrappedRenderer, "layerRenderers", null);
+                ReflectionHelper.getFieldOrDefault(layerRenderers, wrappedRenderer, null);
 
         if (wrappedLayers != null) {
             for (int i = 0; i < wrappedLayers.size(); i++)
@@ -80,7 +89,7 @@ public class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEn
                     break;
                 }
 
-            ReflectionHelper.setField(LivingRenderer.class, this, "layerRenderers", wrappedLayers);
+            ReflectionHelper.setField(layerRenderers, this, wrappedLayers);
         }
 
         setOffsets(playerOffsets);
@@ -93,13 +102,9 @@ public class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEn
      */
     @Override
     public void render(AbstractClientPlayerEntity entityIn, float entityYaw, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn) {
-        setModelVisibilities(entityIn);
+        ReflectionHelper.invokeMethod(setModelVisibilities, wrappedRenderer, entityIn);
         super.render(entityIn, entityYaw, partialTicks, matrixStackIn, bufferIn, packedLightIn);
     }
-
-    private static final float pi2 = (float) (Math.PI * 2);
-    // Offset to get the yaw to be x-axis + offsetAngle.
-    private static final float piOver4 = (float) (Math.PI / 4);
 
     /**
      * Sets the offsets for the models within this renderer that are affected by them.
@@ -107,26 +112,37 @@ public class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEn
      * @param offsets A 3d vector containing the offsets.
      */
     public void setOffsets(Vec3d offsets) {
-        float newXOffset = (float) (offsets.x * 16);
-        float newYOffset = (float) (offsets.y * -16);
-        float newZOffset = (float) (offsets.z * 16);
-        float offsetAngle = (float) Math.atan2(-offsets.z, offsets.x);
+        float xOffset;
+        float yOffset;
+        float zOffset;
+        float offsetAngle;
+        boolean shouldRotate;
 
-        // Puts offset of pi/4 to make the offset angle be between (x, z) and (1, 0).
-        if (newZOffset >= 0) {
-            offsetAngle -= piOver4;
+        if (offsets.lengthSquared() != 0) {
+            xOffset = (float) (offsets.x * 16);
+            yOffset = (float) (offsets.y * -16);
+            zOffset = (float) (offsets.z * 16);
+            // Angle Needs to be multiplied by two for whatever reason.
+            offsetAngle = (float) (Math.atan2(-offsets.z, offsets.x) * 2);
+            shouldRotate = true;
 
-        } else
-            offsetAngle += piOver4;
+        } else {
+            xOffset = 0;
+            yOffset = 0;
+            zOffset = 0;
+            offsetAngle = 0;
+            shouldRotate = false;
+        }
 
-        ((ModifiedPlayerModel<?>) entityModel).setOffsets(newXOffset, newYOffset, newZOffset, offsetAngle);
-        upperArmorModel.setOffsets(newXOffset, newYOffset, newZOffset, offsetAngle);
+        if (entityModel instanceof ModifiedPlayerModel<?>)
+            ((ModifiedPlayerModel<?>) entityModel).setOffsets(xOffset, yOffset, zOffset, offsetAngle, shouldRotate);
+        upperArmorModel.setOffsets(xOffset, yOffset, zOffset, offsetAngle, shouldRotate);
     }
 
     /**
      * Resets certain parts of the models within this renderer.
      */
-    void reset() {
+    public void reset() {
         ((ModifiedPlayerModel<?>) entityModel).reset();
         upperArmorModel.reset();
     }
@@ -136,14 +152,6 @@ public class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEn
     @Override
     public Vec3d getRenderOffset(AbstractClientPlayerEntity entityIn, float partialTicks) {
         return wrappedRenderer.getRenderOffset(entityIn, partialTicks);
-    }
-
-    private void setModelVisibilities(AbstractClientPlayerEntity clientPlayer) {
-        ReflectionHelper.invokeMethod(
-                setModelVisibilities,
-                wrappedRenderer,
-                clientPlayer
-        );
     }
 
     @Override

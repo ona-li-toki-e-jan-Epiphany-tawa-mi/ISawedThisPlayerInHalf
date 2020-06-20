@@ -12,10 +12,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class ModifiedPlayerModel<T extends LivingEntity> extends PlayerModel<T> {
     private final float[] initialValues = new float[4];
-    private float xOffset;
-    private float yOffset;
-    private float zOffset;
+    private float xOffset, yOffset, zOffset;
     private float offsetAngle;
+    private boolean shouldRotate;
 
     public ModifiedPlayerModel(float modelSize, boolean smallArmsIn) {
         super(modelSize, smallArmsIn);
@@ -29,13 +28,14 @@ public class ModifiedPlayerModel<T extends LivingEntity> extends PlayerModel<T> 
     public void setRotationAngles(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         super.setRotationAngles(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
 
-        if (xOffset != 0 && zOffset != 0) {
+        if (shouldRotate) {
             // Creates point(x, z) that cancels out the yaw offset put on by the renderer.
             float netYawOffset = MathHelper.lerp(ageInTicks - entity.ticksExisted, entity.prevRenderYawOffset, entity.renderYawOffset) * PlayerRendererWrapper.degrees2Radians + offsetAngle;
-            float offsetCos = (float) Math.cos(netYawOffset);
-            float offsetSin = (float) Math.sin(netYawOffset);
-            float pointX = xOffset * offsetCos - zOffset * offsetSin;
-            float pointZ = zOffset * offsetCos + xOffset * offsetSin;
+            double offsetCos = (float) Math.cos(netYawOffset);
+            double offsetSin = (float) Math.sin(netYawOffset);
+
+            float pointX = (float) (xOffset * offsetCos - zOffset * offsetSin);
+            float pointZ = (float) (xOffset * offsetSin + zOffset * offsetCos);
 
             // Applies offsets.
             bipedHead.rotationPointX = pointX + initialValues[0];
@@ -65,11 +65,12 @@ public class ModifiedPlayerModel<T extends LivingEntity> extends PlayerModel<T> 
     /**
      * Sets the offsets for this model.
      */
-    void setOffsets(float xOffset, float yOffset, float zOffset, float offsetAngle) {
+    void setOffsets(float xOffset, float yOffset, float zOffset, float offsetAngle, boolean shouldRotate) {
         this.xOffset = xOffset;
         this.yOffset = yOffset;
         this.zOffset = zOffset;
         this.offsetAngle = offsetAngle;
+        this.shouldRotate = shouldRotate;
     }
 
     /**

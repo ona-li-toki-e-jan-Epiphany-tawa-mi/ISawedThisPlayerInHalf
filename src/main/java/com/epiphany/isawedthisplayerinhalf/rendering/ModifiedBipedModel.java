@@ -12,10 +12,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class ModifiedBipedModel<T extends LivingEntity> extends BipedModel<T> {
     private final float[] initialValues = new float[4];
-    private float xOffset;
-    private float yOffset;
-    private float zOffset;
+    private float xOffset, yOffset, zOffset;
     private float offsetAngle;
+    private boolean shouldRotate;
 
     public ModifiedBipedModel(float modelSize) {
         super(modelSize);
@@ -29,13 +28,14 @@ public class ModifiedBipedModel<T extends LivingEntity> extends BipedModel<T> {
     public void setRotationAngles(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         super.setRotationAngles(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
 
-        if (xOffset != 0 && zOffset != 0) {
+        if (shouldRotate) {
             // Creates point(x, z) that cancels out the yaw offset put on by the renderer
             float netYawOffset = MathHelper.lerp(ageInTicks - entity.ticksExisted, entity.prevRenderYawOffset, entity.renderYawOffset) * PlayerRendererWrapper.degrees2Radians + offsetAngle;
-            float offsetCos = (float) Math.cos(netYawOffset);
-            float offsetSin = (float) Math.sin(netYawOffset);
-            float pointX = xOffset * offsetCos - zOffset * offsetSin;
-            float pointZ = zOffset * offsetCos + xOffset * offsetSin;
+            double offsetCos = Math.cos(netYawOffset);
+            double offsetSin = Math.sin(netYawOffset);
+
+            float pointX = (float) (xOffset * offsetCos - zOffset * offsetSin);
+            float pointZ = (float) (xOffset * offsetSin + zOffset * offsetCos);
 
             // Applies offsets.
             bipedHead.rotationPointX = pointX + initialValues[0];
@@ -62,11 +62,12 @@ public class ModifiedBipedModel<T extends LivingEntity> extends BipedModel<T> {
     /**
      * Sets the offsets for this model.
      */
-    public void setOffsets(float xOffset, float yOffset, float zOffset, float offsetAngle) {
+    public void setOffsets(float xOffset, float yOffset, float zOffset, float offsetAngle, boolean shouldRotate) {
         this.xOffset = xOffset;
         this.yOffset = yOffset;
         this.zOffset = zOffset;
         this.offsetAngle = offsetAngle;
+        this.shouldRotate = shouldRotate;
     }
 
     /**

@@ -9,10 +9,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderPlayerEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.lang.reflect.Field;
-
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -26,12 +26,23 @@ public class RenderingOffsetter {
 
     public static void doClientStuff() {
         renderer = ReflectionHelper.getFieldOrNull(RenderPlayerEvent.class, "renderer");
-        renderer.setAccessible(true);
+        ReflectionHelper.makeAccessible(renderer);
+    }
+
+    /**
+     * Gets the renderer assigned to the given player.
+     *
+     * @param player The player to get the renderer of.
+     *
+     * @return The renderer for the given player.
+     */
+    public static PlayerRendererWrapper getRenderer(PlayerEntity player) {
+        return wrappedRendererMap.get(player.getUniqueID());
     }
 
 
 
-    @SubscribeEvent
+    @SubscribeEvent(priority=EventPriority.HIGHEST)
     public static void onPlayerPreRender(RenderPlayerEvent.Pre renderPlayerEvent) {
         PlayerEntity player = renderPlayerEvent.getPlayer();
         UUID playerUUID = player.getUniqueID();
@@ -56,7 +67,7 @@ public class RenderingOffsetter {
         renderPlayerEvent.setCanceled(true);
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority=EventPriority.HIGHEST)
     public static void onPlayerPostRender(RenderPlayerEvent.Post renderPlayerEvent) {
         ReflectionHelper.setField(renderer, renderPlayerEvent, wrappedRendererMap.get(renderPlayerEvent.getPlayer().getUniqueID()));
     }

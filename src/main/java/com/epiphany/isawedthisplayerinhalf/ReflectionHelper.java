@@ -32,6 +32,43 @@ public class ReflectionHelper {
     }
 
     /**
+     * Gets the value stored in the field of the given class, or the default value if something goes wrong.
+     *
+     * @param field The field to get the value from.
+     * @param object The object that has the field.
+     * @param defaultValue The value to return if something goes wrong.
+     *
+     * @return The value stored in the field, or the default value.
+     */
+    public static Object getFieldOrDefault(Field field, Object object, Object defaultValue) {
+        if (field != null) {
+            Object returnValue;
+
+            try {
+                boolean wasNotAccessible = false;
+
+                if (!field.isAccessible()) {
+                    field.setAccessible(true);
+                    wasNotAccessible = true;
+                }
+
+                returnValue = field.get(object);
+
+                if (wasNotAccessible)
+                    field.setAccessible(false);
+
+            } catch (IllegalAccessException e) {
+                returnValue = defaultValue;
+                e.printStackTrace();
+            }
+
+            return returnValue;
+        }
+
+        return defaultValue;
+    }
+
+    /**
      * Gets the value stored in a declared field from an instance of a class, or the default value if something goes wrong.
      *
      * @param clazz The class the field was declared in.
@@ -45,18 +82,18 @@ public class ReflectionHelper {
         Object returnValue;
 
         try {
-            Field entityModel = clazz.getDeclaredField(fieldName);
+            Field field = clazz.getDeclaredField(fieldName);
             boolean wasNotAccessible = false;
 
-            if (!entityModel.isAccessible()) {
-                entityModel.setAccessible(true);
+            if (!field.isAccessible()) {
+                field.setAccessible(true);
                 wasNotAccessible = true;
             }
 
-            returnValue = entityModel.get(object);
+            returnValue = field.get(object);
 
             if (wasNotAccessible)
-                entityModel.setAccessible(false);
+                field.setAccessible(false);
 
         } catch (NoSuchFieldException | IllegalAccessException e) {
             returnValue = defaultValue;
@@ -210,5 +247,27 @@ public class ReflectionHelper {
         }
 
         return defaultValue;
+    }
+
+
+    /**
+     * Sets fields and methods to be accessible.
+     *
+     * @param object The field or method to make accessible.
+     */
+    public static void makeAccessible(Object object) {
+        if (object != null)
+            if (object instanceof Method) {
+                Method method = (Method) object;
+
+                if (!method.isAccessible())
+                    method.setAccessible(true);
+
+            } else if (object instanceof Field) {
+                Field field = (Field) object;
+
+                if (!field.isAccessible())
+                    field.setAccessible(true);
+            }
     }
 }
