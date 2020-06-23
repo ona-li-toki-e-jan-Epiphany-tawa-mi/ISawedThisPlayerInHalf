@@ -2,10 +2,12 @@ package com.epiphany.isawedthisplayerinhalf;
 
 import com.epiphany.isawedthisplayerinhalf.rendering.PlayerRendererWrapper;
 import com.epiphany.isawedthisplayerinhalf.rendering.RenderingOffsetter;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
@@ -13,6 +15,9 @@ import net.minecraftforge.fml.DistExecutor;
 import java.util.HashMap;
 import java.util.UUID;
 
+/**
+ * Contains various functions to offset the actions taken by the player.
+ */
 public class Offsetter {
     private static final HashMap<UUID, Vec3d> playerOffsetMap = new HashMap<>();
 
@@ -26,38 +31,37 @@ public class Offsetter {
      */
     public static Vec3d getOffsets(PlayerEntity player) {
         UUID playerUUID = player.getUniqueID();
-        Vec3d offset;
-
-        if (!playerOffsetMap.containsKey(playerUUID)) {
-            offset = new Vec3d(2, 0, 0);
-            playerOffsetMap.put(playerUUID, offset);
-
-        } else
-            offset = playerOffsetMap.get(playerUUID);
-
-        return offset;
+        return playerOffsetMap.containsKey(playerUUID) ? copyVector(playerOffsetMap.get(playerUUID)) : new Vec3d(2, 0, 0);
     }
 
     /**
      * Sets the offsets for the given player.
      *
      * @param player The player to set the offsets of.
-     * @param offsets The offsets to set to the player
+     * @param offsets The offsets to set to the player.
      */
     public static void setOffsets(PlayerEntity player, Vec3d offsets) {
-        playerOffsetMap.put(player.getUniqueID(), offsets);
+        Vec3d offsetsCopy = copyVector(offsets);
+
+        playerOffsetMap.put(player.getUniqueID(), offsetsCopy);
 
         DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> {
             PlayerRendererWrapper wrappedRenderer = RenderingOffsetter.getRenderer(player);
 
             if (wrappedRenderer != null) {
-                wrappedRenderer.setOffsets(offsets);
+                wrappedRenderer.setOffsets(offsetsCopy);
 
-                if (offsets.lengthSquared() == 0)
+                if (offsetsCopy.lengthSquared() == 0)
                     wrappedRenderer.reset();
             }
         });
     }
+
+    private static Vec3d copyVector(Vec3d vector) {
+        return new Vec3d(vector.x, vector.y, vector.z);
+    }
+
+
 
     /**
      * Offsets the initial position of the raycast in the function pick of Entity, if the entity is a player.
@@ -67,14 +71,7 @@ public class Offsetter {
      *
      * @return The offset position for the raycast to use.
      */
-    public static Vec3d offsetRaycast(Entity entity, Vec3d initialPosition) {
+    public static Vec3d offsetRaycast(Vec3d initialPosition, Entity entity) {
         return entity instanceof PlayerEntity ? initialPosition.add(getOffsets((PlayerEntity) entity)) : initialPosition;
-    }
-
-
-
-    @SubscribeEvent
-    public static void onBlockBreak(BlockEvent.BreakEvent breakEvent) {
-
     }
 }

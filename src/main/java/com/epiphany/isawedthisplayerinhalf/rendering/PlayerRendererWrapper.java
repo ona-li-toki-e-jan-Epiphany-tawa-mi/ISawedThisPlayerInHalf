@@ -118,7 +118,7 @@ public class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEn
         float offsetAngle;
         boolean shouldRotate;
 
-        if (offsets.lengthSquared() != 0) {
+        if (!offsets.equals(Vec3d.ZERO)) {
             xOffset = (float) (offsets.x * 16);
             yOffset = (float) (offsets.y * -16);
             zOffset = (float) (offsets.z * 16);

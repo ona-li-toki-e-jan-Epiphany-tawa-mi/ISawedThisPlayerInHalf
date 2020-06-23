@@ -31,11 +31,11 @@ public class ModifiedBipedModel<T extends LivingEntity> extends BipedModel<T> {
         if (shouldRotate) {
             // Creates point(x, z) that cancels out the yaw offset put on by the renderer
             float netYawOffset = MathHelper.lerp(ageInTicks - entity.ticksExisted, entity.prevRenderYawOffset, entity.renderYawOffset) * PlayerRendererWrapper.degrees2Radians + offsetAngle;
-            double offsetCos = Math.cos(netYawOffset);
-            double offsetSin = Math.sin(netYawOffset);
+            float offsetCos = MathHelper.cos(netYawOffset);
+            float offsetSin = MathHelper.sin(netYawOffset);
 
-            float pointX = (float) (xOffset * offsetCos - zOffset * offsetSin);
-            float pointZ = (float) (xOffset * offsetSin + zOffset * offsetCos);
+            float pointX = xOffset * offsetCos - zOffset * offsetSin;
+            float pointZ = xOffset * offsetSin + zOffset * offsetCos;
 
             // Applies offsets.
             bipedHead.rotationPointX = pointX + initialValues[0];
