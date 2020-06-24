@@ -4,10 +4,15 @@ import com.epiphany.isawedthisplayerinhalf.rendering.PlayerRendererWrapper;
 import com.epiphany.isawedthisplayerinhalf.rendering.RenderingOffsetter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MoverType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.AbstractArrowEntity;
+import net.minecraft.item.BowItem;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
@@ -42,21 +47,29 @@ public class Offsetter {
      */
     public static void setOffsets(PlayerEntity player, Vec3d offsets) {
         Vec3d offsetsCopy = copyVector(offsets);
+        UUID playerUUID = player.getUniqueID();
 
-        playerOffsetMap.put(player.getUniqueID(), offsetsCopy);
+        playerOffsetMap.put(playerUUID, offsetsCopy);
 
         DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> {
-            PlayerRendererWrapper wrappedRenderer = RenderingOffsetter.getRenderer(player);
+            PlayerRendererWrapper wrappedRenderer = RenderingOffsetter.wrappedRendererMap.get(playerUUID);
 
             if (wrappedRenderer != null) {
                 wrappedRenderer.setOffsets(offsetsCopy);
 
-                if (offsetsCopy.lengthSquared() == 0)
+                if (offsetsCopy.equals(Vec3d.ZERO))
                     wrappedRenderer.reset();
             }
         });
     }
 
+    /**
+     * Makes a copy of a vector.
+     *
+     * @param vector The vector to copy.
+     *
+     * @return The copied vector.
+     */
     private static Vec3d copyVector(Vec3d vector) {
         return new Vec3d(vector.x, vector.y, vector.z);
     }
@@ -71,7 +84,27 @@ public class Offsetter {
      *
      * @return The offset position for the raycast to use.
      */
+    @OnlyIn(Dist.CLIENT)
     public static Vec3d offsetRaycast(Vec3d initialPosition, Entity entity) {
         return entity instanceof PlayerEntity ? initialPosition.add(getOffsets((PlayerEntity) entity)) : initialPosition;
+    }
+
+    /**
+     * Offsets a projectile based on the offset of its shooter.
+     *
+     * @param projectile The projectile to offset the position of.
+     * @param shooter The shooter of the projectile.
+     */
+    public static void offsetProjectile(AbstractArrowEntity projectile, LivingEntity shooter) {
+        if (shooter instanceof PlayerEntity) {
+            Vec3d offsets = getOffsets((PlayerEntity) shooter);
+
+            if (!offsets.equals(Vec3d.ZERO))
+                projectile.setPosition(
+                        projectile.getPosX() + offsets.x,
+                        projectile.getPosY() + offsets.y,
+                        projectile.getPosZ() + offsets.z
+                );
+        }
     }
 }

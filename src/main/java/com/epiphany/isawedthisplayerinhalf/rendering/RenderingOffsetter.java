@@ -24,7 +24,7 @@ import java.util.UUID;
  */
 @OnlyIn(Dist.CLIENT)
 public class RenderingOffsetter {
-    private static final HashMap<UUID, PlayerRendererWrapper> wrappedRendererMap = new HashMap<>();
+    public static final HashMap<UUID, PlayerRendererWrapper> wrappedRendererMap = new HashMap<>();
     private static Field renderer;
 
     public static void doClientStuff() {
@@ -33,17 +33,6 @@ public class RenderingOffsetter {
     }
 
 
-
-    /**
-     * Gets the renderer assigned to the given player.
-     *
-     * @param player The player to get the renderer of.
-     *
-     * @return The renderer for the given player.
-     */
-    public static PlayerRendererWrapper getRenderer(PlayerEntity player) {
-        return wrappedRendererMap.get(player.getUniqueID());
-    }
 
     /**
      * Gets whether or not the arm of the player should be rendered.
@@ -102,6 +91,9 @@ public class RenderingOffsetter {
 
     @SubscribeEvent(priority=EventPriority.HIGHEST)
     public static void onPlayerPostRender(RenderPlayerEvent.Post renderPlayerEvent) {
-        ReflectionHelper.setField(renderer, renderPlayerEvent, wrappedRendererMap.get(renderPlayerEvent.getPlayer().getUniqueID()));
+        UUID playerUUID = renderPlayerEvent.getPlayer().getUniqueID();
+
+        if (wrappedRendererMap.containsKey(playerUUID))
+            ReflectionHelper.setField(renderer, renderPlayerEvent, wrappedRendererMap.get(playerUUID));
     }
 }

@@ -14,6 +14,9 @@ import org.apache.logging.log4j.Logger;
 
 // TODO Make projectiles be shot from offset position.
 // TODO Fix problem with not being able to break far away blocks.
+// TODO Get players to drop items at the offset position.
+
+// TODO Reset both hashmaps when the client leaves a server.
 
 // TODO Add option to turn graphics off.
 
