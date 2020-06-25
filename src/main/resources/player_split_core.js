@@ -200,7 +200,7 @@ function initializeCoreMod() {
             }
         },
 
-        /*"AbstractArrowEntity": {
+        "AbstractArrowEntity": {
             "target": {
                 "type": "METHOD",
                 "class": "net.minecraft.entity.projectile.AbstractArrowEntity",
@@ -216,7 +216,7 @@ function initializeCoreMod() {
                     for (var i = 1; i < oldInstructions.size(); i++) {
                         var instruction = oldInstructions.get(i);
 
-                        if (instruction.getOpcode() === Opcodes.INVOKEVIRTUAL && instruction.name === "getPosX" && instruction.desc === "()D") {
+                        if (instruction.getOpcode() === Opcodes.INVOKESPECIAL && instruction.name === "<init>" && instruction.desc === "(Lnet/minecraft/entity/EntityType;DDDLnet/minecraft/world/World;)V") {
                             var newInstructions = new InsnList();
 
                             newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
@@ -225,28 +225,175 @@ function initializeCoreMod() {
                                 Opcodes.INVOKESTATIC,
                                 "com/epiphany/isawedthisplayerinhalf/Offsetter",
                                 "offsetProjectile",
-                                "(Lnet/minecraft/entity/projectile/AbstractArrowEntity;Lnet/minecraft/entity/LivingEntity;)V",
+                                "(Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/LivingEntity;)V",
                                 false
                             ));
 
                             oldInstructions.insert(instruction, newInstructions);
 
                             success = true;
-                            logMessage("INFO", "Successfully transformed updateCameraAndRender function in net.minecraft.entity.projectile.AbstractArrowEntity");
+                            logMessage("INFO", "Successfully transformed constructor in net.minecraft.entity.projectile.AbstractArrowEntity");
 
                             break;
                         }
                     }
 
                     if (!success)
-                        logMessage("ERROR", "An error occurred while transforming updateCameraAndRender function in net.minecraft.entity.projectile.AbstractArrowEntity:\n    Unable to find injection point");
+                        logMessage("ERROR", "An error occurred while transforming constructor in net.minecraft.entity.projectile.AbstractArrowEntity:\n    Unable to find injection point");
 
                 } catch (exception) {
-                    logMessage("ERROR", "An error occurred while transforming updateCameraAndRender function in net.minecraft.entity.projectile.AbstractArrowEntity:\n    " + exception);
+                    logMessage("ERROR", "An error occurred while transforming constructor in net.minecraft.entity.projectile.AbstractArrowEntity:\n    " + exception);
                 }
 
                 return methodNode;
             }
-        }*/
+        },
+
+        "ThrowableEntity": {
+            "target": {
+                "type": "METHOD",
+                "class": "net.minecraft.entity.projectile.ThrowableEntity",
+                "methodName": "<init>",
+                "methodDesc": "(Lnet/minecraft/entity/EntityType;Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/world/World;)V"
+            },
+
+            "transformer": function(methodNode) {
+                try {
+                    var oldInstructions = methodNode.instructions;
+                    var success = false;
+
+                    for (var i = 1; i < oldInstructions.size(); i++) {
+                        var instruction = oldInstructions.get(i);
+
+                        if (instruction.getOpcode() === Opcodes.INVOKESPECIAL && instruction.name === "<init>" && instruction.desc === "(Lnet/minecraft/entity/EntityType;DDDLnet/minecraft/world/World;)V") {
+                            var newInstructions = new InsnList();
+
+                            newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                            newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 2));
+                            newInstructions.add(new MethodInsnNode(
+                                Opcodes.INVOKESTATIC,
+                                "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                "offsetProjectile",
+                                "(Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/LivingEntity;)V",
+                                false
+                            ));
+
+                            oldInstructions.insert(instruction, newInstructions);
+
+                            success = true;
+                            logMessage("INFO", "Successfully transformed constructor in net.minecraft.entity.projectile.ThrowableEntity");
+
+                            break;
+                        }
+                    }
+
+                    if (!success)
+                        logMessage("ERROR", "An error occurred while transforming constructor in net.minecraft.entity.projectile.ThrowableEntity:\n    Unable to find injection point");
+
+                } catch (exception) {
+                    logMessage("ERROR", "An error occurred while transforming constructor in net.minecraft.entity.projectile.ThrowableEntity:\n    " + exception);
+                }
+
+                return methodNode;
+            }
+        },
+
+        "EnderEyeItem": {
+            "target": {
+                "type": "METHOD",
+                "class": "net.minecraft.item.EnderEyeItem",
+                "methodName": "onItemRightClick",
+                "methodDesc": "(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResult;"
+            },
+
+            "transformer": function(methodNode) {
+                try {
+                    var oldInstructions = methodNode.instructions;
+                    var success = false;
+
+                    for (var i = 1; i < oldInstructions.size(); i++) {
+                        var instruction = oldInstructions.get(i);
+
+                        if (instruction.getOpcode() === Opcodes.INVOKESPECIAL && instruction.name === "<init>" && instruction.desc === "(Lnet/minecraft/world/World;DDD)V") {
+                            var newInstructions = new InsnList();
+
+                            newInstructions.add(new InsnNode(Opcodes.DUP));
+                            newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 2));
+                            newInstructions.add(new MethodInsnNode(
+                                Opcodes.INVOKESTATIC,
+                                "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                "offsetProjectile",
+                                "(Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/LivingEntity;)V",
+                                false
+                            ));
+
+                            oldInstructions.insert(instruction, newInstructions);
+
+                            success = true;
+                            logMessage("INFO", "Successfully transformed onItemRightClick function in net.minecraft.item.EnderEyeItem");
+
+                            break;
+                        }
+                    }
+
+                    if (!success)
+                        logMessage("ERROR", "An error occurred while transforming onItemRightClick function in net.minecraft.item.EnderEyeItem:\n    Unable to find injection point");
+
+                } catch (exception) {
+                    logMessage("ERROR", "An error occurred while transforming onItemRightClick function in net.minecraft.item.EnderEyeItem:\n    " + exception);
+                }
+
+                return methodNode;
+            }
+        },
+
+        "FishingRodItem": {
+            "target": {
+                "type": "METHOD",
+                "class": "net.minecraft.item.FishingRodItem",
+                "methodName": "onItemRightClick",
+                "methodDesc": "(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResult;"
+            },
+
+            "transformer": function(methodNode) {
+                try {
+                    var oldInstructions = methodNode.instructions;
+                    var success = false;
+
+                    for (var i = 1; i < oldInstructions.size(); i++) {
+                        var instruction = oldInstructions.get(i);
+
+                        if (instruction.getOpcode() === Opcodes.INVOKESPECIAL && instruction.name === "<init>" && instruction.desc === "(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/world/World;II)V") {
+                            var newInstructions = new InsnList();
+
+                            newInstructions.add(new InsnNode(Opcodes.DUP));
+                            newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 2));
+                            newInstructions.add(new MethodInsnNode(
+                                Opcodes.INVOKESTATIC,
+                                "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                "offsetProjectile",
+                                "(Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/LivingEntity;)V",
+                                false
+                            ));
+
+                            oldInstructions.insert(instruction, newInstructions);
+
+                            success = true;
+                            logMessage("INFO", "Successfully transformed onItemRightClick function in net.minecraft.item.FishingRodItem");
+
+                            break;
+                        }
+                    }
+
+                    if (!success)
+                        logMessage("ERROR", "An error occurred while transforming onItemRightClick function in net.minecraft.item.FishingRodItem:\n    Unable to find injection point");
+
+                } catch (exception) {
+                    logMessage("ERROR", "An error occurred while transforming onItemRightClick function in net.minecraft.item.FishingRodItem:\n    " + exception);
+                }
+
+                return methodNode;
+            }
+        }
     }
 }

@@ -2,19 +2,11 @@ package com.epiphany.isawedthisplayerinhalf;
 
 import com.epiphany.isawedthisplayerinhalf.rendering.PlayerRendererWrapper;
 import com.epiphany.isawedthisplayerinhalf.rendering.RenderingOffsetter;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MoverType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.AbstractArrowEntity;
-import net.minecraft.item.BowItem;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.event.entity.ProjectileImpactEvent;
-import net.minecraftforge.event.world.BlockEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 
 import java.util.HashMap;
@@ -77,16 +69,22 @@ public class Offsetter {
 
 
     /**
-     * Offsets the initial position of the raycast in the function pick of Entity, if the entity is a player.
+     * Offsets the initial position of A raycast if the entity is a player.
      *
      * @param entity The entity whose raycast is being offset.
      * @param initialPosition The initial position of the raycast.
      *
      * @return The offset position for the raycast to use.
      */
-    @OnlyIn(Dist.CLIENT)
     public static Vec3d offsetRaycast(Vec3d initialPosition, Entity entity) {
-        return entity instanceof PlayerEntity ? initialPosition.add(getOffsets((PlayerEntity) entity)) : initialPosition;
+        if (entity instanceof PlayerEntity) {
+            Vec3d offsets = getOffsets((PlayerEntity) entity);
+
+            if (!offsets.equals(Vec3d.ZERO))
+                return initialPosition.add(offsets);
+        }
+
+        return initialPosition;
     }
 
     /**
@@ -95,7 +93,7 @@ public class Offsetter {
      * @param projectile The projectile to offset the position of.
      * @param shooter The shooter of the projectile.
      */
-    public static void offsetProjectile(AbstractArrowEntity projectile, LivingEntity shooter) {
+    public static void offsetProjectile(Entity projectile, LivingEntity shooter) {
         if (shooter instanceof PlayerEntity) {
             Vec3d offsets = getOffsets((PlayerEntity) shooter);
 

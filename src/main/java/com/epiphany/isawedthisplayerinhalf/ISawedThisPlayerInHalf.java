@@ -12,7 +12,6 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-// TODO Make projectiles be shot from offset position.
 // TODO Fix problem with not being able to break far away blocks.
 // TODO Get players to drop items at the offset position.
 
