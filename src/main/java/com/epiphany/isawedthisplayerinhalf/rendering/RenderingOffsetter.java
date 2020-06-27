@@ -58,6 +58,9 @@ public class RenderingOffsetter {
 
 
 
+    /**
+     * Intercepts normal player-rendering and replaces it with the modified form.
+     */
     @SubscribeEvent(priority=EventPriority.HIGHEST)
     public static void onPlayerPreRender(RenderPlayerEvent.Pre renderPlayerEvent) {
         if (!renderPlayerEvent.isCanceled()) {
@@ -89,6 +92,9 @@ public class RenderingOffsetter {
         }
     }
 
+    /**
+     * Swaps out
+     */
     @SubscribeEvent(priority=EventPriority.HIGHEST)
     public static void onPlayerPostRender(RenderPlayerEvent.Post renderPlayerEvent) {
         UUID playerUUID = renderPlayerEvent.getPlayer().getUniqueID();

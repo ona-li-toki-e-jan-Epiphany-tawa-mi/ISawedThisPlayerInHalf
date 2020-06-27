@@ -2,11 +2,15 @@ package com.epiphany.isawedthisplayerinhalf;
 
 import com.epiphany.isawedthisplayerinhalf.rendering.PlayerRendererWrapper;
 import com.epiphany.isawedthisplayerinhalf.rendering.RenderingOffsetter;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 
 import java.util.HashMap;
@@ -17,6 +21,31 @@ import java.util.UUID;
  */
 public class Offsetter {
     private static final HashMap<UUID, Vec3d> playerOffsetMap = new HashMap<>();
+    public static final Vec3d defaultValue = new Vec3d(2, 0, 0);
+
+    /**
+     * Sets the initial offset for the client.
+     */
+    @OnlyIn(Dist.CLIENT)
+    @SubscribeEvent
+    public static void onJoinServer(ClientPlayerNetworkEvent.LoggedInEvent loggedInEvent) {
+        ClientPlayerEntity player = loggedInEvent.getPlayer();
+
+        if (player != null)
+            setOffsets(player, defaultValue);
+    }
+
+    /**
+     * Clears the offset maps when the client leaves a server.
+     */
+    @OnlyIn(Dist.CLIENT)
+    @SubscribeEvent
+    public static void onLeaveServer(ClientPlayerNetworkEvent.LoggedOutEvent loggedOutEvent) {
+        playerOffsetMap.clear();
+        RenderingOffsetter.wrappedRendererMap.clear();
+    }
+
+
 
     /**
      * Gets the offsets a player has.
@@ -28,7 +57,7 @@ public class Offsetter {
      */
     public static Vec3d getOffsets(PlayerEntity player) {
         UUID playerUUID = player.getUniqueID();
-        return playerOffsetMap.containsKey(playerUUID) ? copyVector(playerOffsetMap.get(playerUUID)) : new Vec3d(2, 0, 0);
+        return playerOffsetMap.containsKey(playerUUID) ? copyVector(playerOffsetMap.get(playerUUID)) : new Vec3d(0, 0, 0);
     }
 
     /**

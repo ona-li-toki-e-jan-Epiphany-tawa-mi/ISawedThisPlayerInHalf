@@ -14,8 +14,7 @@ import org.apache.logging.log4j.Logger;
 
 // TODO Fix problem with not being able to break far away blocks.
 // TODO Get players to drop items at the offset position.
-
-// TODO Reset both hashmaps when the client leaves a server.
+// TODO Have fished items be launched towards the offset position.
 
 // TODO Add option to turn graphics off.
 
@@ -30,12 +29,12 @@ public class ISawedThisPlayerInHalf {
     }
 
     @SubscribeEvent
-    public static void setup(final FMLCommonSetupEvent event) {
+    public static void setup(final FMLCommonSetupEvent fmlCommonSetupEvent) {
 
     }
 
     @SubscribeEvent
-    public static void doClientStuff(final FMLClientSetupEvent event) {
+    public static void doClientStuff(final FMLClientSetupEvent fmlClientSetupEvent) {
         RenderingOffsetter.doClientStuff();
         PlayerRendererWrapper.doClientStuff();
 
@@ -43,7 +42,7 @@ public class ISawedThisPlayerInHalf {
     }
 
     @SubscribeEvent
-    public static void onServerStarting(FMLServerStartingEvent event) {
+    public static void onServerStarting(FMLServerStartingEvent fmlServerStartingEvent) {
 
     }
 
