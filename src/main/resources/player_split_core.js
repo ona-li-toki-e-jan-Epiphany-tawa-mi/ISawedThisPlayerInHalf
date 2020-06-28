@@ -94,8 +94,14 @@ function logMessage(level, message) {
 
 
 
+/**
+ * Gets this CoreMod's list of transformers.
+ */
 function initializeCoreMod() {
     return {
+        /**
+         * Adds an offset to the raycast that finds what block an entity is looking at.
+         */
         "Entity": {
             "target": {
                 "type": "METHOD",
@@ -124,7 +130,10 @@ function initializeCoreMod() {
                                 false
                             ));
 
+                            // ...
+                            // INVOKEVIRTUAL net/minecraft/entity/Entity.getEyePosition (F)Lnet/minecraft/util/math/Vec3d;
                             oldInstructions.insert(instruction, newInstructions);
+                            // ...
 
                             logMessage("INFO", "Successfully transformed pick function in net.minecraft.entity.Entity");
                             success = true;
@@ -144,6 +153,9 @@ function initializeCoreMod() {
             }
         },
 
+        /**
+         * Adds an offset to the raycast that finds what entity the player is looking at.
+         */
         "GameRenderer": {
             "target": {
                 "type": "METHOD",
@@ -172,7 +184,10 @@ function initializeCoreMod() {
                                 false
                             ));
 
+                            // ...
+                            // INVOKEVIRTUAL net/minecraft/entity/Entity.getEyePosition (F)Lnet/minecraft/util/math/Vec3d;
                             oldInstructions.insert(instruction, newInstructions);
+                            // ...
 
                             logMessage("INFO", "Successfully transformed getMouseOver function in net.minecraft.client.renderer.GameRenderer");
                             success = true;
@@ -192,6 +207,9 @@ function initializeCoreMod() {
             }
         },
 
+        /**
+         * Prevents a player from rendering their first-person hand if they have an offset.
+         */
         "FirstPersonRenderer": {
             "target": {
                 "type": "METHOD",
@@ -231,6 +249,9 @@ function initializeCoreMod() {
             }
         },
 
+        /**
+         * Forces players to render their third-person model in first-person if they have an offset.
+         */
         "WorldRenderer": {
             "target": {
                 "type": "METHOD",
@@ -275,6 +296,9 @@ function initializeCoreMod() {
             }
         },
 
+        /**
+         * Offsets arrows shot by players.
+         */
         "AbstractArrowEntity": {
             "target": {
                 "type": "METHOD",
@@ -304,7 +328,10 @@ function initializeCoreMod() {
                                 false
                             ));
 
+                            // ...
+                            // INVOKESPECIAL net/minecraft/entity/projectile/AbstractArrowEntity.<init> (Lnet/minecraft/entity/EntityType;DDDLnet/minecraft/world/World;)V
                             oldInstructions.insert(instruction, newInstructions);
+                            // ...
 
                             success = true;
                             logMessage("INFO", "Successfully transformed constructor in net.minecraft.entity.projectile.AbstractArrowEntity");
@@ -324,6 +351,9 @@ function initializeCoreMod() {
             }
         },
 
+        /**
+         * Offsets throwables thrown by players.
+         */
         "ThrowableEntity": {
             "target": {
                 "type": "METHOD",
@@ -353,7 +383,10 @@ function initializeCoreMod() {
                                 false
                             ));
 
+                            // ...
+                            // INVOKESPECIAL net/minecraft/entity/projectile/ThrowableEntity.<init> (Lnet/minecraft/entity/EntityType;DDDLnet/minecraft/world/World;)V
                             oldInstructions.insert(instruction, newInstructions);
+                            // ...
 
                             success = true;
                             logMessage("INFO", "Successfully transformed constructor in net.minecraft.entity.projectile.ThrowableEntity");
@@ -373,6 +406,9 @@ function initializeCoreMod() {
             }
         },
 
+        /**
+         * Offsets eyes of ender launched by players.
+         */
         "EnderEyeItem": {
             "target": {
                 "type": "METHOD",
@@ -402,7 +438,10 @@ function initializeCoreMod() {
                                 false
                             ));
 
+                            // ...
+                            // INVOKESPECIAL net/minecraft/entity/item/EyeOfEnderEntity.<init> (Lnet/minecraft/world/World;DDD)V
                             oldInstructions.insert(instruction, newInstructions);
+                            // ...
 
                             success = true;
                             logMessage("INFO", "Successfully transformed onItemRightClick function in net.minecraft.item.EnderEyeItem");
@@ -422,6 +461,9 @@ function initializeCoreMod() {
             }
         },
 
+        /**
+         * Offsets cast fishing bobbers.
+         */
         "FishingRodItem": {
             "target": {
                 "type": "METHOD",
@@ -451,7 +493,10 @@ function initializeCoreMod() {
                                 false
                             ));
 
+                            // ...
+                            // INVOKESPECIAL net/minecraft/entity/projectile/FishingBobberEntity.<init> (Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/world/World;II)V
                             oldInstructions.insert(instruction, newInstructions);
+                            // ...
 
                             success = true;
                             logMessage("INFO", "Successfully transformed onItemRightClick function in net.minecraft.item.FishingRodItem");
@@ -471,6 +516,9 @@ function initializeCoreMod() {
             }
         },
 
+        /**
+         * Offsets the fishing line, and forces it to always render if it was in third-person.
+         */
         "FishRenderer": {
             "target": {
                 "type": "METHOD",
@@ -576,14 +624,29 @@ function initializeCoreMod() {
                                 addZList.add(new InsnNode(Opcodes.DADD));
 
 
-                                // DLOAD 25
+                                // ...
                                 oldInstructions.insertBefore(instructions[0], getVectorList);
+                                // DLOAD 25
+                                // DLOAD 32
                                 // DSUB
                                 oldInstructions.insert(instructions[2], addXList);
+                                // D2F
+                                // FSTORE 38
+                                // DLOAD 27
+                                // DLOAD 34
                                 // DSUB
                                 oldInstructions.insert(instructions[7], addYList);
+                                // D2F
+                                // FLOAD 31
+                                // FADD
+                                // FSTORE 39
+                                // DLOAD 29
+                                // DLOAD 36
                                 // DSUB
                                 oldInstructions.insert(instructions[14], addZList);
+                                // D2F
+                                // FSTORE 40
+                                // ...
 
                                 success2 = true;
                                 break;
@@ -605,6 +668,9 @@ function initializeCoreMod() {
             }
         },
 
+        /**
+         * Offsets the destination of reeled-in entities.
+         */
         "FishingBobberEntity": {
             "target": {
                 "type": "CLASS",
