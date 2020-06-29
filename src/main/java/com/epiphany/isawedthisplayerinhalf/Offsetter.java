@@ -5,11 +5,14 @@ import com.epiphany.isawedthisplayerinhalf.rendering.RenderingOffsetter;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
+import net.minecraftforge.event.entity.item.ItemTossEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 
@@ -132,6 +135,26 @@ public class Offsetter {
                         projectile.getPosY() + offsets.y,
                         projectile.getPosZ() + offsets.z
                 );
+        }
+    }
+
+    /**
+     * Offsets the position of thrown items.
+     */
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void offsetDroppedItem(ItemTossEvent itemTossEvent) {
+        if (!itemTossEvent.isCanceled()) {
+            Vec3d offsets = getOffsets(itemTossEvent.getPlayer());
+
+            if (!offsets.equals(Vec3d.ZERO)) {
+                ItemEntity itemEntity = itemTossEvent.getEntityItem();
+
+                itemTossEvent.getEntityItem().setPosition(
+                        itemEntity.getPosX() + offsets.x,
+                        itemEntity.getPosY() + offsets.y,
+                        itemEntity.getPosZ() + offsets.z
+                );
+            }
         }
     }
 }

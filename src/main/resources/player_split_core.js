@@ -669,7 +669,7 @@ function initializeCoreMod() {
         },
 
         /**
-         * Offsets the destination of reeled-in entities.
+         * Offsets the destination of reeled-in entities and items.
          */
         "FishingBobberEntity": {
             "target": {
@@ -678,6 +678,132 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
+                // Offsets the destination of reeled-in items.
+                var handleHookRetraction = findMethodWithSignature(classNode, "handleHookRetraction", "(Lnet/minecraft/item/ItemStack;)I");
+
+                if (handleHookRetraction != null) {
+                    try {
+                        var oldInstructions = handleHookRetraction.instructions;
+                        var success = false;
+
+                        for (var i = 0; i < oldInstructions.size() - 25; i++) {
+                            var instruction = oldInstructions.get(i);
+
+                            if (checkVarInsn(instruction, Opcodes.ALOAD, 0)) {
+                                var instructions = [instruction];
+
+                                for (var k = 1; k < 25; k++) {
+                                    var potentialInstruction = oldInstructions.get(i + k);
+
+                                    if (potentialInstruction.getOpcode() !== -1)
+                                        instructions.push(potentialInstruction);
+                                }
+
+                                if (checkFieldInsn(instructions[1], Opcodes.GETFIELD, "net/minecraft/entity/projectile/FishingBobberEntity", "angler", "Lnet/minecraft/entity/player/PlayerEntity;") && checkMethodInsn(instructions[2], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getPosX", "()D") && checkVarInsn(instructions[3], Opcodes.ALOAD, 0) && checkMethodInsn(instructions[4], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/projectile/FishingBobberEntity", "getPosX", "()D") && checkInsn(instructions[5], Opcodes.DSUB) && checkVarInsn(instructions[6], Opcodes.DSTORE, 10) &&
+                                        checkVarInsn(instructions[7], Opcodes.ALOAD, 0) && checkFieldInsn(instructions[8], Opcodes.GETFIELD, "net/minecraft/entity/projectile/FishingBobberEntity", "angler", "Lnet/minecraft/entity/player/PlayerEntity;") && checkMethodInsn(instructions[9], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getPosY", "()D") && checkVarInsn(instructions[10], Opcodes.ALOAD, 0) && checkMethodInsn(instructions[11], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/projectile/FishingBobberEntity", "getPosY", "()D") && checkInsn(instructions[12], Opcodes.DSUB) && checkVarInsn(instructions[13], Opcodes.DSTORE, 12) &&
+                                        checkVarInsn(instructions[14], Opcodes.ALOAD, 0) && checkFieldInsn(instructions[15], Opcodes.GETFIELD, "net/minecraft/entity/projectile/FishingBobberEntity", "angler", "Lnet/minecraft/entity/player/PlayerEntity;") && checkMethodInsn(instructions[16], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getPosZ", "()D") && checkVarInsn(instructions[17], Opcodes.ALOAD, 0) && checkMethodInsn(instructions[18], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/projectile/FishingBobberEntity", "getPosZ", "()D") && checkInsn(instructions[19], Opcodes.DSUB) && checkVarInsn(instructions[20], Opcodes.DSTORE, 14)) {
+                                    var getVectorList = new InsnList();
+                                    var addXList = new InsnList();
+                                    var addYList = new InsnList();
+                                    var addZList = new InsnList();
+
+
+                                    getVectorList.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                                    getVectorList.add(new FieldInsnNode(
+                                        Opcodes.GETFIELD,
+                                        "net/minecraft/entity/projectile/FishingBobberEntity",
+                                        "angler",
+                                        "Lnet/minecraft/entity/player/PlayerEntity;"
+                                    ));
+                                    getVectorList.add(new MethodInsnNode(
+                                        Opcodes.INVOKESTATIC,
+                                        "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                        "getOffsets",
+                                        "(Lnet/minecraft/entity/player/PlayerEntity;)Lnet/minecraft/util/math/Vec3d;",
+                                        false
+                                    ));
+                                    getVectorList.add(new InsnNode(Opcodes.DUP));
+                                    getVectorList.add(new InsnNode(Opcodes.DUP));
+
+                                    addXList.add(new InsnNode(Opcodes.DUP2_X1));
+                                    addXList.add(new InsnNode(Opcodes.POP2));
+                                    addXList.add(new FieldInsnNode(
+                                        Opcodes.GETFIELD,
+                                        "net/minecraft/util/math/Vec3d",
+                                        "x",
+                                        "D"
+                                    ));
+                                    addXList.add(new InsnNode(Opcodes.DADD));
+
+                                    addYList.add(new InsnNode(Opcodes.DUP2_X1));
+                                    addYList.add(new InsnNode(Opcodes.POP2));
+                                    addYList.add(new FieldInsnNode(
+                                        Opcodes.GETFIELD,
+                                        "net/minecraft/util/math/Vec3d",
+                                        "y",
+                                        "D"
+                                    ));
+                                    addYList.add(new InsnNode(Opcodes.DADD));
+
+                                    addZList.add(new InsnNode(Opcodes.DUP2_X1));
+                                    addZList.add(new InsnNode(Opcodes.POP2));
+                                    addZList.add(new FieldInsnNode(
+                                        Opcodes.GETFIELD,
+                                        "net/minecraft/util/math/Vec3d",
+                                        "z",
+                                        "D"
+                                    ));
+                                    addZList.add(new InsnNode(Opcodes.DADD));
+
+
+                                    // ...
+                                    oldInstructions.insertBefore(instructions[0], getVectorList);
+                                    // ALOAD 0
+                                    // GETFIELD net/minecraft/entity/projectile/FishingBobberEntity.angler : Lnet/minecraft/entity/player/PlayerEntity;
+                                    // INVOKEVIRTUAL net/minecraft/entity/player/PlayerEntity.getPosX ()D
+                                    // ALOAD 0
+                                    // INVOKEVIRTUAL net/minecraft/entity/projectile/FishingBobberEntity.getPosX ()D
+                                    // DSUB
+                                    oldInstructions.insert(instructions[5], addXList);
+                                    // DSTORE 10
+                                    // ALOAD 0
+                                    // GETFIELD net/minecraft/entity/projectile/FishingBobberEntity.angler : Lnet/minecraft/entity/player/PlayerEntity;
+                                    // INVOKEVIRTUAL net/minecraft/entity/player/PlayerEntity.getPosY ()D
+                                    // ALOAD 0
+                                    // INVOKEVIRTUAL net/minecraft/entity/projectile/FishingBobberEntity.getPosY ()D
+                                    // DSUB
+                                    oldInstructions.insert(instructions[12], addYList);
+                                    // DSTORE 10
+                                    // ALOAD 0
+                                    // GETFIELD net/minecraft/entity/projectile/FishingBobberEntity.angler : Lnet/minecraft/entity/player/PlayerEntity;
+                                    // INVOKEVIRTUAL net/minecraft/entity/player/PlayerEntity.getPosZ ()D
+                                    // ALOAD 0
+                                    // INVOKEVIRTUAL net/minecraft/entity/projectile/FishingBobberEntity.getPosZ ()D
+                                    // DSUB
+                                    oldInstructions.insert(instructions[19], addZList);
+                                    // DSTORE 14
+                                    // ...
+
+                                    logMessage("INFO", "Successfully transformed handleHookRetraction function in net.minecraft.entity.projectile.FishingBobberEntity");
+                                    success = true;
+
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (!success)
+                            logMessage("ERROR", "An error occurred while transforming handleHookRetraction function in net.minecraft.entity.projectile.FishingBobberEntity:\n    Unable to find injection points");
+
+                    } catch (exception) {
+                        logMessage("ERROR", "An error occurred while transforming handleHookRetraction function in net.minecraft.entity.projectile.FishingBobberEntity:\n    " + exception);
+                    }
+
+                } else
+                    logMessage("ERROR", "An error occurred while transforming handleHookRetraction function in net.minecraft.entity.projectile.FishingBobberEntity:\n    Unable to find function to transform");
+
+
+                // Offsets the destination of reeled-in entities and Entities.
                 var bringInHookedEntity = findMethodWithSignature(classNode, "bringInHookedEntity", "()V");
 
                 if (bringInHookedEntity != null) {
@@ -807,6 +933,7 @@ function initializeCoreMod() {
                     } catch (exception) {
                         logMessage("ERROR", "An error occurred while transforming bringInHookedEntity function in net.minecraft.entity.projectile.FishingBobberEntity:\n    " + exception);
                     }
+
                 } else
                     logMessage("ERROR", "An error occurred while transforming bringInHookedEntity function in net.minecraft.entity.projectile.FishingBobberEntity:\n    Unable to find function to transform");
 

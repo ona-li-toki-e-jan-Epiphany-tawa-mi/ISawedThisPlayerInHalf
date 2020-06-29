@@ -6,31 +6,18 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 // TODO Fix problem with not being able to break far away blocks.
-// TODO Get players to drop items at the offset position.
-// TODO Have fished items be launched towards the offset position.
 
 // TODO Add option to turn graphics off.
 
-@Mod("iswdthsplrinhlf")
+@Mod("swdthsplyrnhlf")
 public class ISawedThisPlayerInHalf {
-    public static final Logger LOGGER = LogManager.getLogger();
-    public static final String MOD_ID = "iswdthsplrinhlf";
-
     public ISawedThisPlayerInHalf() {
         FMLJavaModLoadingContext.get().getModEventBus().register(ISawedThisPlayerInHalf.class);
         MinecraftForge.EVENT_BUS.register(Offsetter.class);
-    }
-
-    @SubscribeEvent
-    public static void setup(final FMLCommonSetupEvent fmlCommonSetupEvent) {
-
     }
 
     @SubscribeEvent
