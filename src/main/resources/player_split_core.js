@@ -6,6 +6,7 @@ var JumpInsnNode = Java.type("org.objectweb.asm.tree.JumpInsnNode");
 var LabelNode = Java.type("org.objectweb.asm.tree.LabelNode");
 var FieldInsnNode = Java.type("org.objectweb.asm.tree.FieldInsnNode");
 var InsnNode = Java.type("org.objectweb.asm.tree.InsnNode");
+var LdcInsnNode = Java.type("org.objectweb.asm.tree.LdcInsnNode");
 var ASMAPI = Java.type("net.minecraftforge.coremod.api.ASMAPI");
 
 
@@ -52,6 +53,17 @@ function checkFieldInsn(instructionNode, opCode, owner, name, descriptor) {
  */
 function checkInsn(instructionNode, opCode) {
     return instructionNode.getOpcode() === opCode;
+}
+
+/**
+ * Checks if a instruction node has the given opcode and constant.
+ *
+ * @param {object} instructionNode The instruction node to check.
+ * @param {number} opCode The opcode the instruction should have.
+ * @param {number/string/object} constant The constant the instruction should have.
+ */
+function checkLdcInsn(instructionNode, opCode, constant) {
+    return instructionNode.getOpcode() === opCode && instructionNode.cst === constant;
 }
 
 /**
@@ -938,6 +950,151 @@ function initializeCoreMod() {
                     logMessage("ERROR", "An error occurred while transforming bringInHookedEntity function in net.minecraft.entity.projectile.FishingBobberEntity:\n    Unable to find function to transform");
 
                 return classNode;
+            }
+        },
+
+        /**
+         * Allows players to break far away blocks.
+         */
+        "PlayerInteractionManager": {
+            "target": {
+                "type": "METHOD",
+                "class": "net.minecraft.server.management.PlayerInteractionManager",
+                "methodName": "func_225416_a",
+                "methodDesc": "(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/network/play/client/CPlayerDiggingPacket$Action;Lnet/minecraft/util/Direction;I)V"
+            },
+
+            "transformer": function(methodNode) {
+                try {
+                    var oldInstructions = methodNode.instructions;
+                    var success = false;
+
+                    // Puts in offset to fishing line position.
+                    for (var i = 0; i < oldInstructions.size() - 38; i++) {
+                        var instruction = oldInstructions.get(i);
+
+                        if (checkVarInsn(instruction, Opcodes.ALOAD, 0)) {
+                            var instructions = [instruction];
+
+                            for (var k = 1; k < 38; k++) {
+                                var potentialInstruction = oldInstructions.get(i + k);
+
+                                if (potentialInstruction.getOpcode() !== -1)
+                                    instructions.push(potentialInstruction);
+                            }
+
+                            if (checkFieldInsn(instructions[1], Opcodes.GETFIELD, "net/minecraft/server/management/PlayerInteractionManager", "player", "Lnet/minecraft/entity/player/ServerPlayerEntity;") && checkMethodInsn(instructions[2], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/ServerPlayerEntity", "getPosX", "()D") && checkVarInsn(instructions[3], Opcodes.ALOAD, 1) && checkMethodInsn(instructions[4], Opcodes.INVOKEVIRTUAL, "net/minecraft/util/math/BlockPos", "getX", "()I") && checkInsn(instructions[5], Opcodes.I2D) && checkLdcInsn(instructions[6], Opcodes.LDC, 0.5) && checkInsn(instructions[7], Opcodes.DADD) && checkInsn(instructions[8], Opcodes.DSUB) && checkVarInsn(instructions[9], Opcodes.DSTORE, 5) &&
+                                    checkVarInsn(instructions[10], Opcodes.ALOAD, 0) && checkFieldInsn(instructions[11], Opcodes.GETFIELD, "net/minecraft/server/management/PlayerInteractionManager", "player", "Lnet/minecraft/entity/player/ServerPlayerEntity;") && checkMethodInsn(instructions[12], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/ServerPlayerEntity", "getPosY", "()D") && checkVarInsn(instructions[13], Opcodes.ALOAD, 1) && checkMethodInsn(instructions[14], Opcodes.INVOKEVIRTUAL, "net/minecraft/util/math/BlockPos", "getY", "()I") && checkInsn(instructions[15], Opcodes.I2D) && checkLdcInsn(instructions[16], Opcodes.LDC, 0.5) && checkInsn(instructions[17], Opcodes.DADD) && checkInsn(instructions[18], Opcodes.DSUB) && checkLdcInsn(instructions[19], Opcodes.LDC, 1.5) && checkInsn(instructions[20], Opcodes.DADD) && checkVarInsn(instructions[21], Opcodes.DSTORE, 7) &&
+                                    checkVarInsn(instructions[22], Opcodes.ALOAD, 0) && checkFieldInsn(instructions[23], Opcodes.GETFIELD, "net/minecraft/server/management/PlayerInteractionManager", "player", "Lnet/minecraft/entity/player/ServerPlayerEntity;") && checkMethodInsn(instructions[24], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/ServerPlayerEntity", "getPosZ", "()D") && checkVarInsn(instructions[25], Opcodes.ALOAD, 1) && checkMethodInsn(instructions[26], Opcodes.INVOKEVIRTUAL, "net/minecraft/util/math/BlockPos", "getZ", "()I") && checkInsn(instructions[27], Opcodes.I2D) && checkLdcInsn(instructions[28], Opcodes.LDC, 0.5) && checkInsn(instructions[29], Opcodes.DADD) && checkInsn(instructions[30], Opcodes.DSUB) && checkVarInsn(instructions[31], Opcodes.DSTORE, 9)) {
+                                var getVectorList = new InsnList();
+                                var addXList = new InsnList();
+                                var addYList = new InsnList();
+                                var addZList = new InsnList();
+
+
+                                getVectorList.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                                getVectorList.add(new FieldInsnNode(
+                                    Opcodes.GETFIELD,
+                                    "net/minecraft/server/management/PlayerInteractionManager",
+                                    "player",
+                                    "Lnet/minecraft/entity/player/ServerPlayerEntity;"
+                                ));
+                                getVectorList.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                    "getOffsets",
+                                    "(Lnet/minecraft/entity/player/PlayerEntity;)Lnet/minecraft/util/math/Vec3d;",
+                                    false
+                                ));
+                                getVectorList.add(new InsnNode(Opcodes.DUP));
+                                getVectorList.add(new InsnNode(Opcodes.DUP));
+
+                                addXList.add(new InsnNode(Opcodes.DUP2_X1));
+                                addXList.add(new InsnNode(Opcodes.POP2));
+                                addXList.add(new FieldInsnNode(
+                                    Opcodes.GETFIELD,
+                                    "net/minecraft/util/math/Vec3d",
+                                    "x",
+                                    "D"
+                                ));
+                                addXList.add(new InsnNode(Opcodes.DADD));
+
+                                addYList.add(new InsnNode(Opcodes.DUP2_X1));
+                                addYList.add(new InsnNode(Opcodes.POP2));
+                                addYList.add(new FieldInsnNode(
+                                    Opcodes.GETFIELD,
+                                    "net/minecraft/util/math/Vec3d",
+                                    "y",
+                                    "D"
+                                ));
+                                addYList.add(new InsnNode(Opcodes.DADD));
+
+                                addZList.add(new InsnNode(Opcodes.DUP2_X1));
+                                addZList.add(new InsnNode(Opcodes.POP2));
+                                addZList.add(new FieldInsnNode(
+                                    Opcodes.GETFIELD,
+                                    "net/minecraft/util/math/Vec3d",
+                                    "z",
+                                    "D"
+                                ));
+                                addZList.add(new InsnNode(Opcodes.DADD));
+
+
+                                // ...
+                                oldInstructions.insertBefore(instructions[0], getVectorList);
+                                // ALOAD 0
+                                // GETFIELD net/minecraft/server/management/PlayerInteractionManager.player : Lnet/minecraft/entity/player/ServerPlayerEntity;
+                                //INVOKEVIRTUAL net/minecraft/entity/player/ServerPlayerEntity.getPosX ()D
+                                // ALOAD 1
+                                // INVOKEVIRTUAL net/minecraft/util/math/BlockPos.getX ()I
+                                // I2D
+                                // LDC 0.5
+                                // DADD
+                                // DSUB
+                                oldInstructions.insert(instructions[8], addXList);
+                                // DSTORE 5
+                                // ALOAD 0
+                                // GETFIELD net/minecraft/server/management/PlayerInteractionManager.player : Lnet/minecraft/entity/player/ServerPlayerEntity;
+                                // INVOKEVIRTUAL net/minecraft/entity/player/ServerPlayerEntity.getPosY ()D
+                                // ALOAD 1
+                                // INVOKEVIRTUAL net/minecraft/util/math/BlockPos.getY ()I
+                                // I2D
+                                // LDC 0.5
+                                // DADD
+                                // DSUB
+                                // LDC 1.5
+                                // DADD
+                                oldInstructions.insert(instructions[20], addYList);
+                                // DSTORE 7
+                                // ALOAD 0
+                                // GETFIELD net/minecraft/server/management/PlayerInteractionManager.player : Lnet/minecraft/entity/player/ServerPlayerEntity;
+                                // INVOKEVIRTUAL net/minecraft/entity/player/ServerPlayerEntity.getPosZ ()D
+                                // ALOAD 1
+                                // INVOKEVIRTUAL net/minecraft/util/math/BlockPos.getZ ()I
+                                // I2D
+                                // LDC 0.5
+                                // DADD
+                                // DSUB
+                                oldInstructions.insert(instructions[30], addZList);
+                                // DSTORE 9
+                                // ...
+
+                                logMessage("INFO", "Successfully transformed func_225416_a function in net.minecraft.server.management.PlayerInteractionManager");
+                                success = true;
+
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!success)
+                        logMessage("ERROR", "An error occurred while transforming func_225416_a function in net.minecraft.server.management.PlayerInteractionManager:\n    Unable to find injection points");
+
+                } catch (exception) {
+                    logMessage("ERROR", "An error occurred while transforming func_225416_a function in net.minecraft.server.management.PlayerInteractionManager:\n    " + exception);
+                }
+
+                return methodNode;
             }
         }
     }

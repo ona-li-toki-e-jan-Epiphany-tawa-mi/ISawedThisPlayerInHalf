@@ -93,7 +93,7 @@ public class RenderingOffsetter {
     }
 
     /**
-     * Swaps out
+     * Swaps out normal renderer for the modified one.
      */
     @SubscribeEvent(priority=EventPriority.HIGHEST)
     public static void onPlayerPostRender(RenderPlayerEvent.Post renderPlayerEvent) {
