@@ -24,7 +24,8 @@ import java.util.UUID;
  */
 public class Offsetter {
     private static final HashMap<UUID, Vec3d> playerOffsetMap = new HashMap<>();
-    public static final Vec3d defaultValue = new Vec3d(2, 0, 0);
+    @OnlyIn(Dist.CLIENT)
+    private static final Vec3d defaultValue = new Vec3d(3, 0, 0);
 
     /**
      * Sets the initial offset for the client.
@@ -156,5 +157,18 @@ public class Offsetter {
                 );
             }
         }
+    }
+
+    /**
+     * Gets the corrected distance from an entity to a player.
+     *
+     * @param entity The entity to use for the first position.
+     * @param player The player to use for the second position.
+     *
+     * @return The distance between the player and the entity.
+     */
+    public static double modifiedGetDistanceSq(Entity entity, PlayerEntity player) {
+        Vec3d offsets = getOffsets(player);
+        return !offsets.equals(Vec3d.ZERO) ? entity.getDistanceSq(player.getPositionVec().add(offsets)) : entity.getDistanceSq(entity);
     }
 }
