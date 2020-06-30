@@ -681,6 +681,7 @@ function initializeCoreMod() {
         },
 
         /**
+         * Corrects player-bobber distance calculation.
          * Offsets the destination of reeled-in entities and items.
          */
         "FishingBobberEntity": {
@@ -690,6 +691,45 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
+                // Corrects player-bobber distance calculation.
+                var shouldStopFishing = findMethodWithSignature(classNode, "shouldStopFishing", "()Z");
+
+                if (shouldStopFishing != null) {
+                    try {
+                        var oldInstructions = shouldStopFishing.instructions;
+                        var success = false;
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i);
+
+                            if (checkMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/projectile/FishingBobberEntity", "getDistanceSq", "(Lnet/minecraft/entity/Entity;)D")) {
+                                oldInstructions.insert(instruction, new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                    "modifiedGetDistanceSq",
+                                    "(Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/player/PlayerEntity;)D",
+                                    false
+                                ));
+                                oldInstructions.remove(instruction);
+
+                                success = true;
+                                logMessage("INFO", "Successfully transformed shouldStopFishing function in net.minecraft.entity.projectile.FishingBobberEntity");
+
+                                break;
+                            }
+                        }
+
+                        if (!success)
+                            logMessage("ERROR", "An error occurred while transforming shouldStopFishing function in net.minecraft.entity.projectile.FishingBobberEntity:\n    Unable to find injection point");
+
+                    } catch (exception) {
+                        logMessage("ERROR", "An error occurred while transforming shouldStopFishing function in net.minecraft.entity.projectile.FishingBobberEntity:\n    " + exception);
+                    }
+
+                } else
+                    logMessage("ERROR", "An error occurred while transforming shouldStopFishing function in net.minecraft.entity.projectile.FishingBobberEntity:\n    Unable to find function to transform");
+
+
                 // Offsets the destination of reeled-in items.
                 var handleHookRetraction = findMethodWithSignature(classNode, "handleHookRetraction", "(Lnet/minecraft/item/ItemStack;)I");
 
