@@ -7,6 +7,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -53,7 +54,6 @@ public class Offsetter {
 
     /**
      * Gets the offsets a player has.
-     * If the player has no offsets, new ones will be created.
      *
      * @param player The player to get the offsets from.
      *
@@ -62,6 +62,17 @@ public class Offsetter {
     public static Vec3d getOffsets(PlayerEntity player) {
         UUID playerUUID = player.getUniqueID();
         return playerOffsetMap.containsKey(playerUUID) ? copyVector(playerOffsetMap.get(playerUUID)) : new Vec3d(0, 0, 0);
+    }
+
+    /**
+     * Gets the offsets an entity has, if they are a player.
+     *
+     * @param entity The entity to get the offsets from.
+     *
+     * @return The offsets a entity has.
+     */
+    public static Vec3d getOffsets(Entity entity) {
+        return entity instanceof PlayerEntity ? getOffsets((PlayerEntity) entity) : new Vec3d(0, 0, 0);
     }
 
     /**
@@ -160,15 +171,39 @@ public class Offsetter {
     }
 
     /**
-     * Gets the corrected distance from an entity to a player.
+     * Gets the corrected distance squared from an entity to the player.
      *
      * @param entity The entity to use for the first position.
      * @param player The player to use for the second position.
      *
-     * @return The distance between the player and the entity.
+     * @return The distance, squared, between the entity and the player.
      */
     public static double modifiedGetDistanceSq(Entity entity, PlayerEntity player) {
         Vec3d offsets = getOffsets(player);
-        return !offsets.equals(Vec3d.ZERO) ? entity.getDistanceSq(player.getPositionVec().add(offsets)) : entity.getDistanceSq(entity);
+        return !offsets.equals(Vec3d.ZERO) ? entity.getDistanceSq(player.getPositionVec().add(offsets)) : entity.getDistanceSq(player);
+    }
+
+    /**
+     * Gets the corrected distance from an entity to the player.
+     *
+     * @param entity1 The entity to use for the first position.
+     * @param entity2 The entity to use for the second position.
+     *
+     * @return The distance between the first entity and second entity.
+     */
+    public static float modifiedGetDistance(Entity entity1, Entity entity2) {
+        return entity2 instanceof PlayerEntity ? (float) Math.sqrt(modifiedGetDistanceSq(entity1, (PlayerEntity) entity2)) : entity1.getDistance(entity2);
+    }
+
+    /**
+     * Creates a new BlockPos from an entity's position with offset.
+     *
+     * @param entity The entity to get the position from.
+     *
+     * @return The position of the entity.
+     */
+    public static BlockPos modifiedBlockPos(Entity entity) {
+        Vec3d offsets = getOffsets(entity);
+        return !offsets.equals(Vec3d.ZERO) ? new BlockPos(entity.getPositionVec().add(offsets)) : new BlockPos(entity);
     }
 }

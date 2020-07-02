@@ -9,8 +9,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-// TODO Change fishing bobber range check.
-// TODO Have leashes pull entities to the offset position.
+// TODO Have entities look at the offset position.
 
 // TODO Add option to turn graphics off.
 
