@@ -1146,6 +1146,9 @@ function initializeCoreMod() {
             }
         },
 
+        /**
+         * Modifies the logic of leashes.
+         */
         "CreatureEntity": {
             "target": {
                 "type": "METHOD",
@@ -1439,11 +1442,190 @@ function initializeCoreMod() {
                     if (successes & 8 == 0) {
                         logMessage("ERROR", "An error occurred while transforming updateLeashedState function in net.minecraft.entity.CreatureEntity:\n    Unable to find the fourth set of injection points");
 
-                    } else if ((successes & 7) ^ 7 == 0)
+                    } else if (successes ^ 15 == 0)
                         logMessage("INFO", "Successfully transformed updateLeashedState function in net.minecraft.entity.CreatureEntity");
 
                 } catch (exception) {
                     logMessage("ERROR", "An error occurred while transforming updateLeashedState function in net.minecraft.entity.CreatureEntity:\n    " + exception);
+                }
+
+                return methodNode;
+            }
+        },
+
+        /**
+         * Modifies the rendering of leashes.
+         */
+        "MobRenderer": {
+            "target": {
+                "type": "METHOD",
+                "class": "net.minecraft.client.renderer.entity.MobRenderer",
+                "methodName": "renderLeash",
+                "methodDesc": "(Lnet/minecraft/entity/MobEntity;FLcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;Lnet/minecraft/entity/Entity;)V"
+            },
+
+            "transformer": function(methodNode) {
+                try {
+                    var oldInstructions = methodNode.instructions;
+                    var successes = 0;
+                    var vectorIndex = methodNode.maxLocals;
+
+                    // Modifies the x-component of the leash render position.
+                    for (var i = 0; i < oldInstructions.size() - 7; i++) {
+                        var instruction = oldInstructions.get(i);
+
+                        if (checkVarInsn(instruction, Opcodes.FLOAD, 2)) {
+                            var instructions = [instruction];
+
+                            for (var k = 1; k < 7; k++)
+                                instructions.push(oldInstructions.get(i + k));
+
+                            if (checkInsn(instructions[1], Opcodes.F2D) && checkVarInsn(instructions[2], Opcodes.ALOAD, 5) && checkFieldInsn(instructions[3], Opcodes.GETFIELD, "net/minecraft/entity/Entity", "prevPosX", "D") && checkVarInsn(instructions[4], Opcodes.ALOAD, 5) && checkMethodInsn(instructions[5], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosX", "()D") && checkMethodInsn(instructions[6], Opcodes.INVOKESTATIC, "net/minecraft/util/math/MathHelper", "lerp", "(DDD)D")) {
+                                var getVectorList = new InsnList();
+                                var addXList = new InsnList();
+
+
+                                getVectorList.add(new VarInsnNode(Opcodes.ALOAD, 5));
+                                getVectorList.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                    "getOffsets",
+                                    "(Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/math/Vec3d;",
+                                    false
+                                ));
+                                getVectorList.add(new VarInsnNode(Opcodes.ASTORE, vectorIndex));
+
+                                addXList.add(new VarInsnNode(Opcodes.ALOAD, vectorIndex));
+                                addXList.add(new FieldInsnNode(
+                                    Opcodes.GETFIELD,
+                                    "net/minecraft/util/math/Vec3d",
+                                    "x",
+                                    "D"
+                                ));
+                                addXList.add(new InsnNode(Opcodes.DADD));
+
+
+                                // ...
+                                oldInstructions.insertBefore(instructions[0], getVectorList);
+                                // FLOAD 2
+                                // F2D
+                                // ALOAD 5
+                                // GETFIELD net/minecraft/entity/Entity.prevPosX : D
+                                // ALOAD 5
+                                // INVOKEVIRTUAL net/minecraft/entity/Entity.getPosX ()D
+                                // INVOKESTATIC net/minecraft/util/math/MathHelper.lerp (DDD)D
+                                oldInstructions.insert(instructions[6], addXList);
+                                // ...
+
+                                successes |= 1;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (successes & 1 == 0) {
+                        logMessage("ERROR", "An error occurred while transforming renderLeash function in net.minecraft.client.renderer.entity.MobRenderer:\n    Unable to find primary injection points");
+
+                    } else {
+                        // Modifies the y-component of the leash render position.
+                        for (var i = 0; i < oldInstructions.size() - 15; i++) {
+                            var instruction = oldInstructions.get(i);
+
+                            if (checkVarInsn(instruction, Opcodes.FLOAD, 2)) {
+                                var instructions = [instruction];
+
+                                for (var k = 1; k < 15; k++)
+                                    instructions.push(oldInstructions.get(i + k));
+
+                                if (checkInsn(instructions[1], Opcodes.F2D) && checkVarInsn(instructions[2], Opcodes.ALOAD, 5) && checkFieldInsn(instructions[3], Opcodes.GETFIELD, "net/minecraft/entity/Entity", "prevPosY", "D") && checkVarInsn(instructions[4], Opcodes.ALOAD, 5) && checkMethodInsn(instructions[5], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getEyeHeight", "()F") && checkInsn(instructions[6], Opcodes.F2D) && checkLdcInsn(instructions[7], Opcodes.LDC, 0.7) && checkInsn(instructions[8], Opcodes.DMUL) && checkInsn(instructions[9], Opcodes.DADD) &&
+                                        checkVarInsn(instructions[10], Opcodes.ALOAD, 5) && checkMethodInsn(instructions[11], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosY", "()D") && checkVarInsn(instructions[12], Opcodes.ALOAD, 5) && checkMethodInsn(instructions[13], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getEyeHeight", "()F") && checkInsn(instructions[14], Opcodes.F2D)) {
+                                    var addYList = new InsnList();
+
+                                    addYList.add(new VarInsnNode(Opcodes.ALOAD, vectorIndex))
+                                    addYList.add(new FieldInsnNode(
+                                        Opcodes.GETFIELD,
+                                        "net/minecraft/util/math/Vec3d",
+                                        "y",
+                                        "D"
+                                    ));
+                                    addYList.add(new InsnNode(Opcodes.DADD));
+
+                                    // ...
+                                    // FLOAD 2
+                                    // F2D
+                                    // ALOAD 5
+                                    // GETFIELD net/minecraft/entity/Entity.prevPosY : D
+                                    // ALOAD 5
+                                    // INVOKEVIRTUAL net/minecraft/entity/Entity.getEyeHeight ()F
+                                    // F2D
+                                    // LDC 0.7
+                                    // DMUL
+                                    // DADD
+                                    // ALOAD 5
+                                    // INVOKEVIRTUAL net/minecraft/entity/Entity.getPosY ()D
+                                    // ALOAD 5
+                                    // INVOKEVIRTUAL net/minecraft/entity/Entity.getEyeHeight ()F
+                                    // F2D
+                                    oldInstructions.insert(instructions[14], addYList);
+                                    // ...
+
+                                    successes |= 2;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (successes & 2 == 0)
+                            logMessage("ERROR", "An error occurred while transforming renderLeash function in net.minecraft.client.renderer.entity.MobRenderer:\n    Unable to find secondary injection points");
+
+
+                        // Modifies the z-component of the leash render position.
+                        for (var i = 0; i < oldInstructions.size() - 7; i++) {
+                            var instruction = oldInstructions.get(i);
+
+                            if (checkVarInsn(instruction, Opcodes.FLOAD, 2)) {
+                                var instructions = [instruction];
+
+                                for (var k = 1; k < 7; k++)
+                                    instructions.push(oldInstructions.get(i + k));
+
+                                if (checkInsn(instructions[1], Opcodes.F2D) && checkVarInsn(instructions[2], Opcodes.ALOAD, 5) && checkFieldInsn(instructions[3], Opcodes.GETFIELD, "net/minecraft/entity/Entity", "prevPosZ", "D") && checkVarInsn(instructions[4], Opcodes.ALOAD, 5) && checkMethodInsn(instructions[5], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosZ", "()D") && checkMethodInsn(instructions[6], Opcodes.INVOKESTATIC, "net/minecraft/util/math/MathHelper", "lerp", "(DDD)D")) {
+                                    var addZList = new InsnList();
+
+                                    addZList.add(new VarInsnNode(Opcodes.ALOAD, vectorIndex));
+                                    addZList.add(new FieldInsnNode(
+                                        Opcodes.GETFIELD,
+                                        "net/minecraft/util/math/Vec3d",
+                                        "z",
+                                        "D"
+                                    ));
+                                    addZList.add(new InsnNode(Opcodes.DADD));
+
+                                    // ...
+                                    // FLOAD 2
+                                    // F2D
+                                    // ALOAD 5
+                                    // GETFIELD net/minecraft/entity/Entity.prevPosZ : D
+                                    // ALOAD 5
+                                    // INVOKEVIRTUAL net/minecraft/entity/Entity.getPosZ ()D
+                                    // INVOKESTATIC net/minecraft/util/math/MathHelper.lerp (DDD)D
+                                    oldInstructions.insert(instructions[6], addZList);
+                                    // ...
+
+                                    successes |= 4;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (successes & 4 == 0) {
+                            logMessage("ERROR", "An error occurred while transforming renderLeash function in net.minecraft.client.renderer.entity.MobRenderer:\n    Unable to find tertiary injection points");
+
+                        } else if (successes ^ 7 == 0)
+                            logMessage("INFO", "Successfully transformed renderLeash function in net.minecraft.client.renderer.entity.MobRenderer");
+                    }
+                } catch (exception) {
+                    logMessage("ERROR", "An error occurred while transforming renderLeash function in net.minecraft.client.renderer.entity.MobRenderer:\n    " + exception);
                 }
 
                 return methodNode;
