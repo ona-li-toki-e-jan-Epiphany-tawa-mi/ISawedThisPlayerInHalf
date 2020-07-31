@@ -1346,19 +1346,24 @@ function initializeCoreMod() {
                                     checkVarInsn(instructions[7], Opcodes.ALOAD, 1) && checkMethodInsn(instructions[8], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosY", "()D") && checkVarInsn(instructions[9], Opcodes.ALOAD, 0) && checkMethodInsn(instructions[10], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/CreatureEntity", "getPosY", "()D") && checkInsn(instructions[11], Opcodes.DSUB) &&
                                     checkVarInsn(instructions[12], Opcodes.ALOAD, 1) && checkMethodInsn(instructions[13], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosZ", "()D") && checkVarInsn(instructions[14], Opcodes.ALOAD, 0) && checkMethodInsn(instructions[15], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/CreatureEntity", "getPosZ", "()D") && checkInsn(instructions[16], Opcodes.DSUB) &&
                                     checkMethodInsn(instructions[17], Opcodes.INVOKESPECIAL, "net/minecraft/util/math/Vec3d", "<init>", "(DDD)V") && checkMethodInsn(instructions[18], Opcodes.INVOKEVIRTUAL, "net/minecraft/util/math/Vec3d", "normalize", "()Lnet/minecraft/util/math/Vec3d;") && checkVarInsn(instructions[19], Opcodes.FLOAD, 2) && checkInsn(instructions[20], Opcodes.FCONST_2) && checkInsn(instructions[21], Opcodes.FSUB) && checkInsn(instructions[22], Opcodes.FCONST_0) && checkMethodInsn(instructions[23], Opcodes.INVOKESTATIC, "java/lang/Math", "max", "(FF)F") && checkInsn(instructions[24], Opcodes.F2D) && checkMethodInsn(instructions[25], Opcodes.INVOKEVIRTUAL, "net/minecraft/util/math/Vec3d", "scale", "(D)Lnet/minecraft/util/math/Vec3d;") && checkVarInsn(instructions[26], Opcodes.ASTORE, 4)) {
+                                var getVectorList = new InsnList();
                                 var addXList = new InsnList();
                                 var addYList = new InsnList();
                                 var addZList = new InsnList();
+                                var vectorIndex = methodNode.maxLocals;
 
 
-                                addXList.add(new VarInsnNode(Opcodes.ALOAD, 1));
-                                addXList.add(new MethodInsnNode(
+                                getVectorList.add(new VarInsnNode(Opcodes.ALOAD, 1));
+                                getVectorList.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
                                     "com/epiphany/isawedthisplayerinhalf/Offsetter",
                                     "getOffsets",
                                     "(Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/math/Vec3d;",
                                     false
                                 ));
+                                getVectorList.add(new VarInsnNode(Opcodes.ASTORE, vectorIndex));
+
+                                addXList.add(new VarInsnNode(Opcodes.ALOAD, vectorIndex));
                                 addXList.add(new FieldInsnNode(
                                     Opcodes.GETFIELD,
                                     "net/minecraft/util/math/Vec3d",
@@ -1367,14 +1372,7 @@ function initializeCoreMod() {
                                 ));
                                 addXList.add(new InsnNode(Opcodes.DADD));
 
-                                addYList.add(new VarInsnNode(Opcodes.ALOAD, 1));
-                                addYList.add(new MethodInsnNode(
-                                    Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
-                                    "getOffsets",
-                                    "(Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/math/Vec3d;",
-                                    false
-                                ));
+                                addYList.add(new VarInsnNode(Opcodes.ALOAD, vectorIndex));
                                 addYList.add(new FieldInsnNode(
                                     Opcodes.GETFIELD,
                                     "net/minecraft/util/math/Vec3d",
@@ -1383,14 +1381,7 @@ function initializeCoreMod() {
                                 ));
                                 addYList.add(new InsnNode(Opcodes.DADD));
 
-                                addZList.add(new VarInsnNode(Opcodes.ALOAD, 1));
-                                addZList.add(new MethodInsnNode(
-                                    Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
-                                    "getOffsets",
-                                    "(Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/math/Vec3d;",
-                                    false
-                                ));
+                                addZList.add(new VarInsnNode(Opcodes.ALOAD, vectorIndex));
                                 addZList.add(new FieldInsnNode(
                                     Opcodes.GETFIELD,
                                     "net/minecraft/util/math/Vec3d",
@@ -1401,6 +1392,7 @@ function initializeCoreMod() {
 
 
                                 // ...
+                                oldInstructions.insertBefore(instructions[0], getVectorList);
                                 // NEW net/minecraft/util/math/Vec3d
                                 // DUP
                                 // ALOAD 1

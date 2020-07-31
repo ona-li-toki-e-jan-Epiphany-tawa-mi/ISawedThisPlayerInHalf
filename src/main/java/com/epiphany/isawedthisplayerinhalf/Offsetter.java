@@ -1,5 +1,7 @@
 package com.epiphany.isawedthisplayerinhalf;
 
+import com.epiphany.isawedthisplayerinhalf.networking.Networker;
+import com.epiphany.isawedthisplayerinhalf.networking.SetOffsetPacket;
 import com.epiphany.isawedthisplayerinhalf.rendering.PlayerRendererWrapper;
 import com.epiphany.isawedthisplayerinhalf.rendering.RenderingOffsetter;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
@@ -13,6 +15,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
@@ -24,8 +27,8 @@ import java.util.UUID;
  * Contains various functions to offset the actions taken by the player.
  */
 public class Offsetter {
-    private static final HashMap<UUID, Vec3d> playerOffsetMap = new HashMap<>();
-    @OnlyIn(Dist.CLIENT)
+    public static final HashMap<UUID, Vec3d> playerOffsetMap = new HashMap<>();
+    //@OnlyIn(Dist.CLIENT)
     private static final Vec3d defaultValue = new Vec3d(3, 0, 0);
 
     /**
@@ -36,8 +39,12 @@ public class Offsetter {
     public static void onJoinServer(ClientPlayerNetworkEvent.LoggedInEvent loggedInEvent) {
         ClientPlayerEntity player = loggedInEvent.getPlayer();
 
-        if (player != null)
+        if (player != null) {
             setOffsets(player, defaultValue);
+
+            if (player.world.isRemote)
+                Networker.modChannel.sendToServer(new SetOffsetPacket(player, defaultValue));
+        }
     }
 
     /**
@@ -48,6 +55,15 @@ public class Offsetter {
     public static void onLeaveServer(ClientPlayerNetworkEvent.LoggedOutEvent loggedOutEvent) {
         playerOffsetMap.clear();
         RenderingOffsetter.wrappedRendererMap.clear();
+    }
+
+    /**
+     * Removes players from the offset map when they leave.
+     */
+    @OnlyIn(Dist.DEDICATED_SERVER)
+    @SubscribeEvent
+    public static void onPlayerLeaveServer(PlayerEvent.PlayerLoggedOutEvent playerLoggedOutEvent) {
+        playerOffsetMap.remove(playerLoggedOutEvent.getPlayer().getUniqueID());
     }
 
 
@@ -61,7 +77,7 @@ public class Offsetter {
      */
     public static Vec3d getOffsets(PlayerEntity player) {
         UUID playerUUID = player.getUniqueID();
-        return playerOffsetMap.containsKey(playerUUID) ? copyVector(playerOffsetMap.get(playerUUID)) : new Vec3d(0, 0, 0);
+        return playerOffsetMap.containsKey(playerUUID) ? playerOffsetMap.get(playerUUID) : new Vec3d(0, 0, 0);
     }
 
     /**
@@ -78,36 +94,32 @@ public class Offsetter {
     /**
      * Sets the offsets for the given player.
      *
-     * @param player The player to set the offsets of.
+     * @param playerUUID The UUID of the player to set the offsets of.
      * @param offsets The offsets to set to the player.
      */
-    public static void setOffsets(PlayerEntity player, Vec3d offsets) {
-        Vec3d offsetsCopy = copyVector(offsets);
-        UUID playerUUID = player.getUniqueID();
-
-        playerOffsetMap.put(playerUUID, offsetsCopy);
+    public static void setOffsets(UUID playerUUID, Vec3d offsets) {
+        playerOffsetMap.put(playerUUID, offsets);
 
         DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> {
             PlayerRendererWrapper wrappedRenderer = RenderingOffsetter.wrappedRendererMap.get(playerUUID);
 
             if (wrappedRenderer != null) {
-                wrappedRenderer.setOffsets(offsetsCopy);
+                wrappedRenderer.setOffsets(offsets);
 
-                if (offsetsCopy.equals(Vec3d.ZERO))
+                if (offsets.equals(Vec3d.ZERO))
                     wrappedRenderer.reset();
             }
         });
     }
 
     /**
-     * Makes a copy of a vector.
+     * Sets the offsets for the given player.
      *
-     * @param vector The vector to copy.
-     *
-     * @return The copied vector.
+     * @param player The player to set the offsets of.
+     * @param offsets The offsets to set to the player.
      */
-    private static Vec3d copyVector(Vec3d vector) {
-        return new Vec3d(vector.x, vector.y, vector.z);
+    public static void setOffsets(PlayerEntity player, Vec3d offsets) {
+        setOffsets(player.getUniqueID(), offsets);
     }
 
 
