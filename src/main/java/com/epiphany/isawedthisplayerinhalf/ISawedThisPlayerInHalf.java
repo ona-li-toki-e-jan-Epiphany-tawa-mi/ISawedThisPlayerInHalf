@@ -1,5 +1,6 @@
 package com.epiphany.isawedthisplayerinhalf;
 
+import com.epiphany.isawedthisplayerinhalf.networking.Networker;
 import com.epiphany.isawedthisplayerinhalf.rendering.PlayerRendererWrapper;
 import com.epiphany.isawedthisplayerinhalf.rendering.RenderingOffsetter;
 import net.minecraftforge.common.MinecraftForge;
@@ -15,9 +16,12 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 @Mod("swdthsplyrnhlf")
 public class ISawedThisPlayerInHalf {
+    public static final String MOD_ID = "swdthsplyrnhlf";
+
     public ISawedThisPlayerInHalf() {
         FMLJavaModLoadingContext.get().getModEventBus().register(ISawedThisPlayerInHalf.class);
         MinecraftForge.EVENT_BUS.register(Offsetter.class);
+        Networker.registerPackets();
     }
 
     @SubscribeEvent
