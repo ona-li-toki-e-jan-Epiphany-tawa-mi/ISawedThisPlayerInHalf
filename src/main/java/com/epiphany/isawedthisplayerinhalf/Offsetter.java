@@ -43,7 +43,7 @@ public class Offsetter {
             setOffsets(player, defaultValue);
 
             if (player.world.isRemote)
-                Networker.modChannel.sendToServer(new SetOffsetPacket(player, defaultValue));
+                Networker.modChannel.sendToServer(new SetOffsetPacket(player, defaultValue, true));
         }
     }
 

@@ -20,20 +20,24 @@ import java.util.function.Supplier;
 public class SetOffsetPacket {
     private final String playerName;
     private final Vec3d offsets;
+    private final boolean requestOffsets;
 
     /**
      * Creates a new set offset packet.
      *
      * @param player The player who's offset is being set.
      * @param offsets The offset to be set to the player.
+     * @param requestOffsets Whether to return the offsets of the other players on the server.
      */
-    public SetOffsetPacket(PlayerEntity player, Vec3d offsets) {
+    public SetOffsetPacket(PlayerEntity player, Vec3d offsets, boolean requestOffsets) {
         playerName = player.getGameProfile().getName();
         this.offsets = offsets;
+        this.requestOffsets = requestOffsets;
     }
 
     public SetOffsetPacket(PacketBuffer packetBuffer) {
         offsets = new Vec3d(packetBuffer.readDouble(), packetBuffer.readDouble(), packetBuffer.readDouble());
+        requestOffsets = packetBuffer.readBoolean();
         playerName = packetBuffer.readString(packetBuffer.readInt());
     }
 
@@ -42,11 +46,12 @@ public class SetOffsetPacket {
         packetBuffer.writeDouble(offsets.y);
         packetBuffer.writeDouble(offsets.z);
 
+        packetBuffer.writeBoolean(requestOffsets);
+
         packetBuffer.writeInt(playerName.length());
         packetBuffer.writeString(playerName);
     }
 
-    // TODO Change to use player names instead of game profile UUIDs
     public void handle(Supplier<NetworkEvent.Context> contextSupplier) {
         NetworkEvent.Context context = contextSupplier.get();
 
@@ -72,12 +77,18 @@ public class SetOffsetPacket {
 
                         PlayerList playerList = player.getServer().getPlayerList();
 
-                        // Routes packet to the other players on the server with the mod.
                         for (UUID otherPlayerID : Offsetter.playerOffsetMap.keySet()) {
                             ServerPlayerEntity otherPlayer = playerList.getPlayerByUUID(otherPlayerID);
 
-                            if (otherPlayer != null && !otherPlayer.getGameProfile().getName().equals(playerName))
-                                Networker.modChannel.send(PacketDistributor.PLAYER.with(() -> otherPlayer), this);
+                            if (otherPlayer != null) {
+                                // Routes packet to the other players on the server with the mod.
+                                if (!otherPlayer.getGameProfile().getName().equals(playerName))
+                                    Networker.modChannel.send(PacketDistributor.PLAYER.with(() -> otherPlayer), this);
+
+                                // Returns all players' offsets to client if requested.
+                                if (requestOffsets)
+                                    Networker.modChannel.send(PacketDistributor.PLAYER.with(() -> player), new SetOffsetPacket(otherPlayer, Offsetter.playerOffsetMap.get(otherPlayerID), false));
+                            }
                         }
                     }
 

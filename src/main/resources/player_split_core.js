@@ -883,25 +883,30 @@ function initializeCoreMod() {
                                 if (checkFieldInsn(instructions[1], Opcodes.GETFIELD, "net/minecraft/entity/projectile/FishingBobberEntity", "angler", "Lnet/minecraft/entity/player/PlayerEntity;") && checkMethodInsn(instructions[2], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getPosX", "()D") && checkVarInsn(instructions[3], Opcodes.ALOAD, 0) && checkMethodInsn(instructions[4], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/projectile/FishingBobberEntity", "getPosX", "()D") && checkInsn(instructions[5], Opcodes.DSUB) &&
                                         checkVarInsn(instructions[6], Opcodes.ALOAD, 0) && checkFieldInsn(instructions[7], Opcodes.GETFIELD, "net/minecraft/entity/projectile/FishingBobberEntity", "angler", "Lnet/minecraft/entity/player/PlayerEntity;") && checkMethodInsn(instructions[8], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getPosY", "()D") && checkVarInsn(instructions[9], Opcodes.ALOAD, 0) && checkMethodInsn(instructions[10], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/projectile/FishingBobberEntity", "getPosY", "()D") && checkInsn(instructions[11], Opcodes.DSUB) &&
                                         checkVarInsn(instructions[12], Opcodes.ALOAD, 0) && checkFieldInsn(instructions[13], Opcodes.GETFIELD, "net/minecraft/entity/projectile/FishingBobberEntity", "angler", "Lnet/minecraft/entity/player/PlayerEntity;") && checkMethodInsn(instructions[14], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getPosZ", "()D") && checkVarInsn(instructions[15], Opcodes.ALOAD, 0) && checkMethodInsn(instructions[16], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/projectile/FishingBobberEntity", "getPosZ", "()D") && checkInsn(instructions[17], Opcodes.DSUB)) {
+                                    var getVectorList = new InsnList();
+                                    var vectorIndex = bringInHookedEntity.maxLocals;
                                     var addXList = new InsnList();
                                     var addYList = new InsnList();
                                     var addZList = new InsnList();
 
-
-                                    addXList.add(new VarInsnNode(Opcodes.ALOAD, 0));
-                                    addXList.add(new FieldInsnNode(
+                                    getVectorList.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                                    getVectorList.add(new FieldInsnNode(
                                         Opcodes.GETFIELD,
                                         "net/minecraft/entity/projectile/FishingBobberEntity",
                                         "angler",
                                         "Lnet/minecraft/entity/player/PlayerEntity;"
                                     ));
-                                    addXList.add(new MethodInsnNode(
+                                    getVectorList.add(new MethodInsnNode(
                                         Opcodes.INVOKESTATIC,
                                         "com/epiphany/isawedthisplayerinhalf/Offsetter",
                                         "getOffsets",
-                                        "(Lnet/minecraft/entity/player/PlayerEntity;)Lnet/minecraft/util/math/Vec3d;",
+                                        "(Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/math/Vec3d;",
                                         false
                                     ));
+                                    getVectorList.add(new VarInsnNode(Opcodes.ASTORE, vectorIndex));
+
+
+                                    addXList.add(new VarInsnNode(Opcodes.ALOAD, vectorIndex));
                                     addXList.add(new FieldInsnNode(
                                         Opcodes.GETFIELD,
                                         "net/minecraft/util/math/Vec3d",
@@ -910,20 +915,7 @@ function initializeCoreMod() {
                                     ));
                                     addXList.add(new InsnNode(Opcodes.DADD));
 
-                                    addYList.add(new VarInsnNode(Opcodes.ALOAD, 0));
-                                    addYList.add(new FieldInsnNode(
-                                        Opcodes.GETFIELD,
-                                        "net/minecraft/entity/projectile/FishingBobberEntity",
-                                        "angler",
-                                        "Lnet/minecraft/entity/player/PlayerEntity;"
-                                    ));
-                                    addYList.add(new MethodInsnNode(
-                                        Opcodes.INVOKESTATIC,
-                                        "com/epiphany/isawedthisplayerinhalf/Offsetter",
-                                        "getOffsets",
-                                        "(Lnet/minecraft/entity/player/PlayerEntity;)Lnet/minecraft/util/math/Vec3d;",
-                                        false
-                                    ));
+                                    addYList.add(new VarInsnNode(Opcodes.ALOAD, vectorIndex));
                                     addYList.add(new FieldInsnNode(
                                         Opcodes.GETFIELD,
                                         "net/minecraft/util/math/Vec3d",
@@ -932,20 +924,7 @@ function initializeCoreMod() {
                                     ));
                                     addYList.add(new InsnNode(Opcodes.DADD));
 
-                                    addZList.add(new VarInsnNode(Opcodes.ALOAD, 0));
-                                    addZList.add(new FieldInsnNode(
-                                        Opcodes.GETFIELD,
-                                        "net/minecraft/entity/projectile/FishingBobberEntity",
-                                        "angler",
-                                        "Lnet/minecraft/entity/player/PlayerEntity;"
-                                    ));
-                                    addZList.add(new MethodInsnNode(
-                                        Opcodes.INVOKESTATIC,
-                                        "com/epiphany/isawedthisplayerinhalf/Offsetter",
-                                        "getOffsets",
-                                        "(Lnet/minecraft/entity/player/PlayerEntity;)Lnet/minecraft/util/math/Vec3d;",
-                                        false
-                                    ));
+                                    addZList.add(new VarInsnNode(Opcodes.ALOAD, vectorIndex));
                                     addZList.add(new FieldInsnNode(
                                         Opcodes.GETFIELD,
                                         "net/minecraft/util/math/Vec3d",
@@ -956,6 +935,7 @@ function initializeCoreMod() {
 
 
                                     // ...
+                                    oldInstructions.insertBefore(instructions[5], getVectorList);
                                     // ALOAD 0
                                     // GETFIELD net/minecraft/entity/projectile/FishingBobberEntity.angler : Lnet/minecraft/entity/player/PlayerEntity;
                                     // INVOKEVIRTUAL net/minecraft/entity/player/PlayerEntity.getPosX ()D
