@@ -10,7 +10,6 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-// TODO Have entities look at the offset position.
 // TODO Check out why bytecode manipulators are not working in release builds.
 // TODO Add config options to change offset.
 

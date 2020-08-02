@@ -1602,6 +1602,118 @@ function initializeCoreMod() {
 
                 return methodNode;
             }
+        },
+
+        "LookAtGoal": {
+            "target": {
+                "type": "METHOD",
+                "class": "net.minecraft.entity.ai.goal.LookAtGoal",
+                "methodName": "tick",
+                "methodDesc": "()V"
+            },
+
+            "transformer": function(methodNode) {
+                try {
+                    var oldInstructions = methodNode.instructions;
+                    var success = false;
+
+                    // Puts in offset to fishing line position.
+                    for (var i = 0; i < oldInstructions.size() - 9; i++) {
+                        var instruction = oldInstructions.get(i);
+
+                        if (checkVarInsn(instruction, Opcodes.ALOAD, 0)) {
+                            var instructions = [instruction];
+
+                            for (var k = 1; k < 9; k++)
+                                instructions.push(oldInstructions.get(i + k));
+
+                            if (checkFieldInsn(instructions[1], Opcodes.GETFIELD, "net/minecraft/entity/ai/goal/LookAtGoal", "closestEntity", "Lnet/minecraft/entity/Entity;") && checkMethodInsn(instructions[2], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosX", "()D") &&
+                                    checkVarInsn(instructions[3], Opcodes.ALOAD, 0) && checkFieldInsn(instructions[4], Opcodes.GETFIELD, "net/minecraft/entity/ai/goal/LookAtGoal", "closestEntity", "Lnet/minecraft/entity/Entity;") && checkMethodInsn(instructions[5], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosYEye", "()D") &&
+                                    checkVarInsn(instructions[6], Opcodes.ALOAD, 0) && checkFieldInsn(instructions[7], Opcodes.GETFIELD, "net/minecraft/entity/ai/goal/LookAtGoal", "closestEntity", "Lnet/minecraft/entity/Entity;") && checkMethodInsn(instructions[8], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosZ", "()D")) {
+                                var getVectorList = new InsnList();
+                                var addXList = new InsnList();
+                                var addYList = new InsnList();
+                                var addZList = new InsnList();
+                                var vectorIndex = methodNode.maxLocals;
+
+
+                                getVectorList.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                                getVectorList.add(new FieldInsnNode(
+                                    Opcodes.GETFIELD,
+                                    "net/minecraft/entity/ai/goal/LookAtGoal",
+                                    "closestEntity",
+                                    "Lnet/minecraft/entity/Entity;"
+                                ));
+                                getVectorList.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                    "getOffsets",
+                                    "(Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/math/Vec3d;",
+                                    false
+                                ));
+                                getVectorList.add(new VarInsnNode(Opcodes.ASTORE, vectorIndex));
+
+                                addXList.add(new VarInsnNode(Opcodes.ALOAD, vectorIndex));
+                                addXList.add(new FieldInsnNode(
+                                    Opcodes.GETFIELD,
+                                    "net/minecraft/util/math/Vec3d",
+                                    "x",
+                                    "D"
+                                ));
+                                addXList.add(new InsnNode(Opcodes.DADD));
+
+                                addYList.add(new VarInsnNode(Opcodes.ALOAD, vectorIndex));
+                                addYList.add(new FieldInsnNode(
+                                    Opcodes.GETFIELD,
+                                    "net/minecraft/util/math/Vec3d",
+                                    "y",
+                                    "D"
+                                ));
+                                addYList.add(new InsnNode(Opcodes.DADD));
+
+                                addZList.add(new VarInsnNode(Opcodes.ALOAD, vectorIndex));
+                                addZList.add(new FieldInsnNode(
+                                    Opcodes.GETFIELD,
+                                    "net/minecraft/util/math/Vec3d",
+                                    "z",
+                                    "D"
+                                ));
+                                addZList.add(new InsnNode(Opcodes.DADD));
+
+
+                                oldInstructions.insertBefore(instructions[0], getVectorList);
+                                // ALOAD 0
+                                // GETFIELD net/minecraft/entity/ai/goal/LookAtGoal.closestEntity : Lnet/minecraft/entity/Entity;
+                                // INVOKEVIRTUAL net/minecraft/entity/Entity.getPosX ()D
+                                oldInstructions.insert(instructions[2], addXList);
+                                // ALOAD 0
+                                // GETFIELD net/minecraft/entity/ai/goal/LookAtGoal.closestEntity : Lnet/minecraft/entity/Entity;
+                                // INVOKEVIRTUAL net/minecraft/entity/Entity.getPosYEye ()D
+                                oldInstructions.insert(instructions[5], addYList);
+                                // ALOAD 0
+                                // GETFIELD net/minecraft/entity/ai/goal/LookAtGoal.closestEntity : Lnet/minecraft/entity/Entity;
+                                // INVOKEVIRTUAL net/minecraft/entity/Entity.getPosZ ()D
+                                oldInstructions.insert(instructions[8], addZList);
+                                // ...
+
+                                success = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (success) {
+                        logMessage("INFO", "Successfully transformed tick function in net.minecraft.entity.ai.goal.LookAtGoal");
+
+                    } else
+                        logMessage("ERROR", "An error occurred while transforming tick function in net.minecraft.entity.ai.goal.LookAtGoal:\n    Unable to find injection points");
+
+                } catch (exception) {
+                    logMessage("ERROR", "An error occurred while transforming tick function in net.minecraft.entity.ai.goal.LookAtGoal:\n    " + exception);
+                }
+
+                return methodNode;
+            }
         }
     }
 }
