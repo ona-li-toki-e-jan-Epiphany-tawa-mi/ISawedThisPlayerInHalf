@@ -25,9 +25,9 @@ import java.util.UUID;
 @OnlyIn(Dist.CLIENT)
 public class RenderingOffsetter {
     public static final HashMap<UUID, PlayerRendererWrapper> wrappedRendererMap = new HashMap<>();
-    private static Field renderer;
+    private static final Field renderer;
 
-    public static void doClientStuff() {
+    static {
         renderer = ReflectionHelper.getFieldOrNull(RenderPlayerEvent.class, "renderer");
         ReflectionHelper.makeAccessible(renderer);
     }

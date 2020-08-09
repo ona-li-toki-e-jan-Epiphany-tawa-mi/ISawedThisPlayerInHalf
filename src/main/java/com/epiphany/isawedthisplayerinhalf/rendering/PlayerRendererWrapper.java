@@ -30,20 +30,20 @@ public class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEn
      */
     static final float degrees2Radians = (float) (Math.PI / 180.0);
     // Reflected methods grabbed from PlayerRenderer.
-    private static Method setModelVisibilities;
-    private static Method applyRotations;
-    private static Method preRenderCallback;
-    private static Method renderName;
+    private static final Method setModelVisibilities;
+    private static final Method applyRotations;
+    private static final Method preRenderCallback;
+    private static final Method renderName;
     // Reflected fields grabbed from PlayerRenderer.
-    private static Field entityModelField;
-    private static Field layerRenderers;
+    private static final Field entityModelField;
+    private static final Field layerRenderers;
 
     final PlayerRenderer wrappedRenderer;
     private final ModifiedBipedModel upperArmorModel;
 
 
 
-    public static void doClientStuff() {
+    static {
         setModelVisibilities = ReflectionHelper.getMethodOrNull(PlayerRenderer.class, "setModelVisibilities", AbstractClientPlayerEntity.class);
         ReflectionHelper.makeAccessible(setModelVisibilities);
         applyRotations = ReflectionHelper.getMethodOrNull(PlayerRenderer.class, "applyRotations", AbstractClientPlayerEntity.class, MatrixStack.class, float.class, float.class, float.class);

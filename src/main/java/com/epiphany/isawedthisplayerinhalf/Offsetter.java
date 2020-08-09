@@ -4,6 +4,7 @@ import com.epiphany.isawedthisplayerinhalf.networking.Networker;
 import com.epiphany.isawedthisplayerinhalf.networking.SetOffsetPacket;
 import com.epiphany.isawedthisplayerinhalf.rendering.PlayerRendererWrapper;
 import com.epiphany.isawedthisplayerinhalf.rendering.RenderingOffsetter;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -11,8 +12,10 @@ import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.ClientChatEvent;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -28,8 +31,6 @@ import java.util.UUID;
  */
 public class Offsetter {
     public static final HashMap<UUID, Vec3d> playerOffsetMap = new HashMap<>();
-    //@OnlyIn(Dist.CLIENT)
-    private static final Vec3d defaultValue = new Vec3d(3, 0, 0);
 
     /**
      * Sets the initial offset for the client.
@@ -40,10 +41,12 @@ public class Offsetter {
         ClientPlayerEntity player = loggedInEvent.getPlayer();
 
         if (player != null) {
-            setOffsets(player, defaultValue);
+            Vec3d offsets = Config.getOffsets();
+
+            setOffsets(player, offsets);
 
             if (player.world.isRemote)
-                Networker.modChannel.sendToServer(new SetOffsetPacket(player, defaultValue, true));
+                Networker.modChannel.sendToServer(new SetOffsetPacket(player, offsets, true));
         }
     }
 
@@ -217,5 +220,67 @@ public class Offsetter {
     public static BlockPos modifiedBlockPos(Entity entity) {
         Vec3d offsets = getOffsets(entity);
         return !offsets.equals(Vec3d.ZERO) ? new BlockPos(entity.getPositionVec().add(offsets)) : new BlockPos(entity);
+    }
+
+
+    /**
+     * In-game config options implemented via chat "commands."
+     */
+    @OnlyIn(Dist.CLIENT)
+    @SubscribeEvent
+    public static void onPlayerChat(ClientChatEvent clientChatEvent) {
+        String[] possibleCommand = clientChatEvent.getOriginalMessage().toLowerCase().split(" ");
+
+        if (possibleCommand[0].equals("::offsets")) {
+            clientChatEvent.setCanceled(true);
+
+        } else
+            return;
+
+        ClientPlayerEntity player = Minecraft.getInstance().player;
+
+        if (possibleCommand.length >= 2) {
+            switch (possibleCommand[1]) {
+                // What?
+                case "what":Config.a();break;
+
+                // Displays offsets.
+                case "get":
+                    player.sendMessage(new StringTextComponent("Current offsets: " + Config.offsetX.get() + ", " + Config.offsetY.get() + ", " + Config.offsetZ.get()));
+                    break;
+
+                // Sets the offsets for the player, and sends it to the server.
+                case "set":
+                    if (possibleCommand.length >= 5) {
+                        try {
+                            double x = Double.parseDouble(possibleCommand[2]), y = Double.parseDouble(possibleCommand[3]), z = Double.parseDouble(possibleCommand[4]);
+
+                            Config.setOffsets(x, y, z);
+
+                            setOffsets(player.getUniqueID(), new Vec3d(x, y, z));
+
+                            if (player.world.isRemote)
+                                Networker.modChannel.sendToServer(new SetOffsetPacket(player, x, y, z, false));
+
+                            player.sendMessage(new StringTextComponent("Offsets set"));
+
+                        } catch (NumberFormatException exception) {
+                            player.sendMessage(new StringTextComponent("Usage: ::offsets set <x> <y> <z>"));
+                        }
+
+                    } else
+                        player.sendMessage(new StringTextComponent("Usage: ::offsets set <x> <y> <z>"));
+
+                    break;
+
+                default:
+                    player.sendMessage(new StringTextComponent("Usage: ::offsets (help|get)"));
+                    player.sendMessage(new StringTextComponent("Usage: ::offsets set <x> <y> <z>"));
+            }
+
+        } else {
+            player.sendMessage(new StringTextComponent("Usage: ::offsets (help|get)"));
+            player.sendMessage(new StringTextComponent("Usage: ::offsets set <x> <y> <z>"));
+        }
     }
 }

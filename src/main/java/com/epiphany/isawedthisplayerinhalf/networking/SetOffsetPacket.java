@@ -35,6 +35,19 @@ public class SetOffsetPacket {
         this.requestOffsets = requestOffsets;
     }
 
+    /**
+     * Creates a new set offset packet.
+     *
+     * @param player The player who's offset is being set.
+     * @param x The x offset.
+     * @param y The y offset.
+     * @param z The z offset.
+     * @param requestOffsets Whether to return the offsets of the other players on the server.
+     */
+    public SetOffsetPacket(PlayerEntity player, double x, double y, double z, boolean requestOffsets) {
+        this(player, new Vec3d(x, y, z), requestOffsets);
+    }
+
     public SetOffsetPacket(PacketBuffer packetBuffer) {
         offsets = new Vec3d(packetBuffer.readDouble(), packetBuffer.readDouble(), packetBuffer.readDouble());
         requestOffsets = packetBuffer.readBoolean();

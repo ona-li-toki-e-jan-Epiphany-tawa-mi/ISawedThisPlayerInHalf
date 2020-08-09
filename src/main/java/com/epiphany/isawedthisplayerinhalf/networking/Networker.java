@@ -10,7 +10,6 @@ import net.minecraftforge.fml.network.simple.SimpleChannel;
  */
 public class Networker {
     public static SimpleChannel modChannel;
-    private static int IDCounter = 0;
 
     /**
      * Registers packets to the mod's channel.
@@ -19,7 +18,7 @@ public class Networker {
         modChannel = NetworkRegistry.newSimpleChannel(new ResourceLocation(ISawedThisPlayerInHalf.MOD_ID, "offsettransfer"), () -> "1.0", s -> true, s -> true);
 
         modChannel.registerMessage(
-                IDCounter++,
+                0,
                 SetOffsetPacket.class,
                 SetOffsetPacket::toBytes,
                 SetOffsetPacket::new,
