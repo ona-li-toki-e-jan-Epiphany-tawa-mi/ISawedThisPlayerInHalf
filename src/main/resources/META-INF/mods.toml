@@ -1,50 +1,25 @@
-# The name of the mod loader type to load
-modLoader="javafml" #mandatory
+modLoader="javafml"
 # A version range to match for said mod loader
 loaderVersion="[31,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
 # A URL to refer people to when problems occur with this mod
-issueTrackerURL="http://my.issue.tracker/" #optional
+# issueTrackerURL="http://my.issue.tracker/" #optional
 # A list of mods - how many allowed here is determined by the individual mod loader
 [[mods]] #mandatory
-# The modid of the mod
-modId="swdthsplyrnhlf" #mandatory
-# The version number of the mod
-version="1.15.2-1.0.0" #mandatory
- # A display name for the mod
-displayName="I Sawed This Player In Half!" #mandatory
+modId="swdthsplyrnhlf"
+version="1.15.2-1.0"
+displayName="I Sawed This Player In Half!"
 # A URL to query for updates for this mod. See the JSON update specification <here>
 # updateJSONURL="http://myurl.me/" #optional
 # A URL for the "homepage" for this mod, displayed in the mod UI
 # displayURL="http://example.com/" #optional
 # A file name (in the root of the mod JAR) containing a logo for display
 # logoFile="examplemod.png" #optional
-# A text field displayed in the mod UI
-credits="Forge, Mojang, my parents, and the apple I ate 5 minutes ago. Oh, and PhoenixSC." #optional
-# A text field displayed in the mod UI
-authors="Epiphany" #optional
-# The description text for the mod (multi line!) (#mandatory)
+credits="Forge, Mojang, my parents, and the apple I ate 5 minutes ago. Oh, and PhoenixSC."
+authors="Epiphany"
 description='''
     To demonstrate the power of memes, I sawed this player in half!
 Keep up the cursed content PhoenixSC, 'tis some good stuff.
 
 This mod splits the upper and lower halves of the player's body.
 '''
-# A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
-[[dependencies.examplemod]] #optional
-    # the modid of the dependency
-    modId="forge" #mandatory
-    # Does this dependency have to exist - if not, ordering below must be specified
-    mandatory=true #mandatory
-    # The version range of the dependency
-    versionRange="[31,)" #mandatory
-    # An ordering relationship for the dependency - BEFORE or AFTER required if the relationship is not mandatory
-    ordering="NONE"
-    # Side this dependency is applied on - BOTH, CLIENT or SERVER
-    side="BOTH"
-# Here's another dependency
-[[dependencies.examplemod]]
-    modId="minecraft"
-    mandatory=true
-    versionRange="[1.15.2]"
-    ordering="NONE"
-    side="BOTH"
+
