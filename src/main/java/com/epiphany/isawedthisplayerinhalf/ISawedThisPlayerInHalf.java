@@ -8,7 +8,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-// TODO Check out why bytecode manipulators are not working in release builds.
+// TODO Change ::offsets to a proper command.
 
 // TODO Try and change rendering calculations so Minecraft will render the offset position, even if the original is not in view.
 

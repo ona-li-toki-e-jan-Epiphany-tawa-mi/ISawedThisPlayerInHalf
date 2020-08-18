@@ -1,7 +1,7 @@
 package com.epiphany.isawedthisplayerinhalf.rendering;
 
 import com.epiphany.isawedthisplayerinhalf.Offsetter;
-import com.epiphany.isawedthisplayerinhalf.ReflectionHelper;
+import com.epiphany.isawedthisplayerinhalf.helpers.ReflectionHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.ActiveRenderInfo;
@@ -26,9 +26,13 @@ import java.util.UUID;
 public class RenderingOffsetter {
     public static final HashMap<UUID, PlayerRendererWrapper> wrappedRendererMap = new HashMap<>();
     private static final Field renderer;
+    private static final Field smallArms;
 
     static {
         renderer = ReflectionHelper.getFieldOrNull(RenderPlayerEvent.class, "renderer");
+        ReflectionHelper.makeAccessible(renderer);
+
+        smallArms = ReflectionHelper.getFieldOrNull(PlayerModel.class, "smallArms", "field_178735_y");
         ReflectionHelper.makeAccessible(renderer);
     }
 
@@ -75,7 +79,7 @@ public class RenderingOffsetter {
                 if (!wrappedRendererMap.containsKey(playerUUID)) {
                     PlayerRenderer playerRenderer = renderPlayerEvent.getRenderer();
                     PlayerModel<AbstractClientPlayerEntity> playerModel = playerRenderer.getEntityModel();
-                    boolean useSmallArms = (boolean) ReflectionHelper.getFieldOrDefault(playerModel.getClass(), playerModel, "smallArms", false);
+                    boolean useSmallArms = (boolean) ReflectionHelper.getFieldOrDefault(smallArms, playerModel, false);
 
                     wrappedRenderer = new PlayerRendererWrapper(playerRenderer.getRenderManager(), useSmallArms, Offsetter.getOffsets(player));
                     wrappedRendererMap.put(playerUUID, wrappedRenderer);
@@ -100,6 +104,6 @@ public class RenderingOffsetter {
         UUID playerUUID = renderPlayerEvent.getPlayer().getUniqueID();
 
         if (wrappedRendererMap.containsKey(playerUUID))
-            ReflectionHelper.setField(renderer, renderPlayerEvent, wrappedRendererMap.get(playerUUID));
+            ReflectionHelper.setField(renderer, renderPlayerEvent, wrappedRendererMap.get(playerUUID).wrappedRenderer);
     }
 }

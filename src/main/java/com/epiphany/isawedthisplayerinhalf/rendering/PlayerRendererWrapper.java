@@ -1,6 +1,6 @@
 package com.epiphany.isawedthisplayerinhalf.rendering;
 
-import com.epiphany.isawedthisplayerinhalf.ReflectionHelper;
+import com.epiphany.isawedthisplayerinhalf.helpers.ReflectionHelper;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -44,18 +44,18 @@ public class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEn
 
 
     static {
-        setModelVisibilities = ReflectionHelper.getMethodOrNull(PlayerRenderer.class, "setModelVisibilities", AbstractClientPlayerEntity.class);
+        setModelVisibilities = ReflectionHelper.getMethodOrNull(PlayerRenderer.class, "setModelVisibilities", "func_177137_d", AbstractClientPlayerEntity.class);
         ReflectionHelper.makeAccessible(setModelVisibilities);
-        applyRotations = ReflectionHelper.getMethodOrNull(PlayerRenderer.class, "applyRotations", AbstractClientPlayerEntity.class, MatrixStack.class, float.class, float.class, float.class);
+        applyRotations = ReflectionHelper.getMethodOrNull(PlayerRenderer.class, "applyRotations", "func_225621_a_", AbstractClientPlayerEntity.class, MatrixStack.class, float.class, float.class, float.class);
         ReflectionHelper.makeAccessible(applyRotations);
-        preRenderCallback = ReflectionHelper.getMethodOrNull(PlayerRenderer.class, "preRenderCallback", AbstractClientPlayerEntity.class, MatrixStack.class, float.class);
+        preRenderCallback = ReflectionHelper.getMethodOrNull(PlayerRenderer.class, "preRenderCallback", "func_225620_a_", AbstractClientPlayerEntity.class, MatrixStack.class, float.class);
         ReflectionHelper.makeAccessible(preRenderCallback);
-        renderName = ReflectionHelper.getMethodOrNull(PlayerRenderer.class, "renderName", AbstractClientPlayerEntity.class, String.class, MatrixStack.class, IRenderTypeBuffer.class, int.class);
+        renderName = ReflectionHelper.getMethodOrNull(PlayerRenderer.class, "renderName", "func_225629_a_", AbstractClientPlayerEntity.class, String.class, MatrixStack.class, IRenderTypeBuffer.class, int.class);
         ReflectionHelper.makeAccessible(renderName);
 
-        entityModelField = ReflectionHelper.getFieldOrNull(LivingRenderer.class, "entityModel");
+        entityModelField = ReflectionHelper.getFieldOrNull(LivingRenderer.class, "entityModel", "field_77045_g");
         ReflectionHelper.makeAccessible(entityModelField);
-        layerRenderers = ReflectionHelper.getFieldOrNull(LivingRenderer.class, "layerRenderers");
+        layerRenderers = ReflectionHelper.getFieldOrNull(LivingRenderer.class, "layerRenderers", "field_177097_h");
         ReflectionHelper.makeAccessible(layerRenderers);
     }
 
