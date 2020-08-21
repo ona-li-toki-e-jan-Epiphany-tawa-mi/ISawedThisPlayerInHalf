@@ -46,7 +46,7 @@ public class Offsetter {
             setOffsets(player, offsets);
 
             if (player.world.isRemote)
-                Networker.modChannel.sendToServer(new SetOffsetPacket(player, offsets, true));
+                Networker.modChannel.sendToServer(new SetOffsetPacket(player, offsets));
         }
     }
 
@@ -227,7 +227,7 @@ public class Offsetter {
      * In-game config options implemented via chat "commands."
      */
     @OnlyIn(Dist.CLIENT)
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onPlayerChat(ClientChatEvent clientChatEvent) {
         String[] possibleCommand = clientChatEvent.getOriginalMessage().toLowerCase().split(" ");
 
@@ -260,7 +260,7 @@ public class Offsetter {
                             setOffsets(player.getUniqueID(), new Vec3d(x, y, z));
 
                             if (player.world.isRemote)
-                                Networker.modChannel.sendToServer(new SetOffsetPacket(player, x, y, z, false));
+                                Networker.modChannel.sendToServer(new SetOffsetPacket(player, x, y, z));
 
                             player.sendMessage(new StringTextComponent("Offsets set"));
 

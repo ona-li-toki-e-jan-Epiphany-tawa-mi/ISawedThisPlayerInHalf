@@ -22,6 +22,7 @@ public class Config {
 
     static final ForgeConfigSpec.DoubleValue offsetX, offsetY, offsetZ;
     private static final ForgeConfigSpec.BooleanValue a;
+    private static boolean b;
 
     // Builds config file.
     static {
@@ -31,7 +32,7 @@ public class Config {
         offsetY = configBuilder.defineInRange("offset.y", 0, -Double.MAX_VALUE, Double.MAX_VALUE);
         offsetZ = configBuilder.defineInRange("offset.z", 0, -Double.MAX_VALUE, Double.MAX_VALUE);
 
-        a = configBuilder.define("what.renderGraphics", true);
+        a=configBuilder.define("what.renderGraphics", true);
 
         clientConfig = configBuilder.build();
     }
@@ -42,6 +43,8 @@ public class Config {
     public static void onEnable() {
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, clientConfig);
         loadConfig(FMLPaths.CONFIGDIR.get().resolve("swdthsplyrnhlf-client.toml").toString());
+
+        b=a.get();
     }
 
     /**
@@ -78,5 +81,5 @@ public class Config {
         offsetZ.set(z);
     }
 
-    static void a() {a.set(!a.get());}public static boolean b() {return a.get();}
+    static void a() {boolean c=!a.get();a.set(c);b=c;}public static boolean b() {return b;}
 }

@@ -20,19 +20,16 @@ import java.util.function.Supplier;
 public class SetOffsetPacket {
     private final String playerName;
     private final Vec3d offsets;
-    private final boolean requestOffsets;
 
     /**
      * Creates a new set offset packet.
      *
      * @param player The player who's offset is being set.
      * @param offsets The offset to be set to the player.
-     * @param requestOffsets Whether to return the offsets of the other players on the server.
      */
-    public SetOffsetPacket(PlayerEntity player, Vec3d offsets, boolean requestOffsets) {
+    public SetOffsetPacket(PlayerEntity player, Vec3d offsets) {
         playerName = player.getGameProfile().getName();
         this.offsets = offsets;
-        this.requestOffsets = requestOffsets;
     }
 
     /**
@@ -42,15 +39,13 @@ public class SetOffsetPacket {
      * @param x The x offset.
      * @param y The y offset.
      * @param z The z offset.
-     * @param requestOffsets Whether to return the offsets of the other players on the server.
      */
-    public SetOffsetPacket(PlayerEntity player, double x, double y, double z, boolean requestOffsets) {
-        this(player, new Vec3d(x, y, z), requestOffsets);
+    public SetOffsetPacket(PlayerEntity player, double x, double y, double z) {
+        this(player, new Vec3d(x, y, z));
     }
 
     public SetOffsetPacket(PacketBuffer packetBuffer) {
         offsets = new Vec3d(packetBuffer.readDouble(), packetBuffer.readDouble(), packetBuffer.readDouble());
-        requestOffsets = packetBuffer.readBoolean();
         playerName = packetBuffer.readString(packetBuffer.readInt());
     }
 
@@ -58,8 +53,6 @@ public class SetOffsetPacket {
         packetBuffer.writeDouble(offsets.x);
         packetBuffer.writeDouble(offsets.y);
         packetBuffer.writeDouble(offsets.z);
-
-        packetBuffer.writeBoolean(requestOffsets);
 
         packetBuffer.writeInt(playerName.length());
         packetBuffer.writeString(playerName);
@@ -86,7 +79,11 @@ public class SetOffsetPacket {
                     ServerPlayerEntity player = context.getSender();
 
                     if (player != null) {
-                        Offsetter.setOffsets(player, offsets);
+                        UUID playerUUID = player.getUniqueID();
+                        // Whether or send all players' offsets to the sender.
+                        boolean informSender = Offsetter.playerOffsetMap.containsKey(playerUUID);
+
+                        Offsetter.setOffsets(playerUUID, offsets);
 
                         PlayerList playerList = player.getServer().getPlayerList();
 
@@ -98,9 +95,8 @@ public class SetOffsetPacket {
                                 if (!otherPlayer.getGameProfile().getName().equals(playerName))
                                     Networker.modChannel.send(PacketDistributor.PLAYER.with(() -> otherPlayer), this);
 
-                                // Returns all players' offsets to client if requested.
-                                if (requestOffsets)
-                                    Networker.modChannel.send(PacketDistributor.PLAYER.with(() -> player), new SetOffsetPacket(otherPlayer, Offsetter.playerOffsetMap.get(otherPlayerID), false));
+                                if (informSender)
+                                    Networker.modChannel.send(PacketDistributor.PLAYER.with(() -> player), new SetOffsetPacket(otherPlayer, Offsetter.playerOffsetMap.get(otherPlayerID)));
                             }
                         }
                     }
