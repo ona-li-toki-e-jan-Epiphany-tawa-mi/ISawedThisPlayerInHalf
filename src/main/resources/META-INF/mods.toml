@@ -9,8 +9,7 @@ version="1.15.2-1.0"
 displayName="I Sawed This Player In Half!"
 # A URL to query for updates for this mod. See the JSON update specification <here>
 # updateJSONURL="http://myurl.me/" #optional
-# A URL for the "homepage" for this mod, displayed in the mod UI
-# displayURL="http://example.com/" #optional
+displayURL="https://www.curseforge.com/minecraft/mc-mods/i-sawed-this-player-in-half/"
 logoFile="modicon.png"
 credits="Forge, Mojang, my parents, and the apple I ate 5 minutes ago. Oh, and PhoenixSC."
 authors="Epiphany"
