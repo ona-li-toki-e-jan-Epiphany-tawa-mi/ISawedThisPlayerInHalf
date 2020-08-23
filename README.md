@@ -6,7 +6,7 @@ This mod splits apart the player's mid-section, freeing the torso from the legs.
 ## How to Build
 Open a terminal in the project directory and run: **gradle build**
   
-## How to use
+## How to Use
 These chat commands allow you to control offsets in-game.
 
 Set offsets: **::offsets set <x> <y> <z>**
