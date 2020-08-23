@@ -10,6 +10,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.StringTextComponent;
@@ -196,6 +197,24 @@ public class Offsetter {
     public static double modifiedGetDistanceSq(Entity entity, PlayerEntity player) {
         Vec3d offsets = getOffsets(player);
         return !offsets.equals(Vec3d.ZERO) ? entity.getDistanceSq(player.getPositionVec().add(offsets)) : entity.getDistanceSq(player);
+    }
+
+    /**
+     * Gets the corrected distance squared from a player to a point.
+     *
+     * @param serverPlayerEntity The player to use for the first position.
+     * @param x The x-position of the second position.
+     * @param y The y-position of the second position.
+     * @param z The z-position of the second position.
+     *
+     * @return The distance, squared, between the player and the point.
+     */
+    public static double modifiedGetDistanceSq(ServerPlayerEntity serverPlayerEntity, double x, double y, double z) {
+        Vec3d offsets = getOffsets(serverPlayerEntity);
+        double dx = serverPlayerEntity.getPosX() + offsets.x - x;
+        double dy = serverPlayerEntity.getPosY() + offsets.y - y;
+        double dz = serverPlayerEntity.getPosZ() + offsets.z - z;
+        return dx * dx + dy * dy + dz * dz;
     }
 
     /**

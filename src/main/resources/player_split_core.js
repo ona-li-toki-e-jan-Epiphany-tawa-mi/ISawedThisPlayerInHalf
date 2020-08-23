@@ -1835,6 +1835,59 @@ function initializeCoreMod() {
 
                 return classNode;
             }
+        },
+
+        /**
+         * Allows players to interact with blocks relative to their offsets.
+         */
+        "ServerPlayNetHandler": {
+            "target": {
+                "type": "CLASS",
+                "name": "net.minecraft.network.play.ServerPlayNetHandler"
+            },
+
+            "transformer": function(classNode) {
+                var processTryUseItemOnBlock = findObfuscatedMethodWithSignature(classNode, "processTryUseItemOnBlock", "func_184337_a", "(Lnet/minecraft/network/play/client/CPlayerTryUseItemOnBlockPacket;)V");
+
+                if (processTryUseItemOnBlock !== null) {
+                    try {
+                        var oldInstructions = processTryUseItemOnBlock.instructions;
+                        var success = false;
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i);
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/ServerPlayerEntity", "getDistanceSq", "func_70092_e", "(DDD)D")) {
+                                    oldInstructions.insert(instruction, new MethodInsnNode(
+                                        Opcodes.INVOKESTATIC,
+                                        "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                        "modifiedGetDistanceSq",
+                                        "(Lnet/minecraft/entity/player/ServerPlayerEntity;DDD)D",
+                                        false
+                                    ));
+
+                                    oldInstructions.remove(instruction)
+
+                                    success = true;
+                                    break;
+                            }
+                        }
+
+                        if (success) {
+                            logMessage("DEBUG", "Successfully transformed processTryUseItemOnBlock function in net.minecraft.network.play.ServerPlayNetHandler");
+
+                        } else
+                            logMessage("ERROR", "An error occurred while transforming processTryUseItemOnBlock function in net.minecraft.network.play.ServerPlayNetHandler:\n    Unable to find injection point");
+
+                    } catch (exception) {
+                        logMessage("ERROR", "An error occurred while transforming processTryUseItemOnBlock function in net.minecraft.network.play.ServerPlayNetHandler:\n    " + exception);
+                    }
+
+                } else
+                    logMessage("ERROR", "An error occurred while transforming processTryUseItemOnBlock function in net.minecraft.network.play.ServerPlayNetHandler:\n    Unable to find function to transform");
+
+                return classNode;
+            }
         }
     }
 }
