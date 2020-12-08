@@ -1862,7 +1862,7 @@ function initializeCoreMod() {
                                         Opcodes.INVOKESTATIC,
                                         "com/epiphany/isawedthisplayerinhalf/Offsetter",
                                         "modifiedGetDistanceSq",
-                                        "(Lnet/minecraft/entity/player/ServerPlayerEntity;DDD)D",
+                                        "(Lnet/minecraft/entity/player/PlayerEntity;DDD)D",
                                         false
                                     ));
 
@@ -1885,6 +1885,59 @@ function initializeCoreMod() {
 
                 } else
                     logMessage("ERROR", "An error occurred while transforming processTryUseItemOnBlock function in net.minecraft.network.play.ServerPlayNetHandler:\n    Unable to find function to transform");
+
+                return classNode;
+            }
+        },
+
+        /**
+         * Allows players to keep using furnace inventories relative to their offsets.
+         */
+        "AbstractFurnaceTileEntity": {
+            "target": {
+                "type": "CLASS",
+                "name": "net.minecraft.tileentity.AbstractFurnaceTileEntity"
+            },
+
+            "transformer": function(classNode) {
+                var isUsableByPlayer = findObfuscatedMethodWithSignature(classNode, "isUsableByPlayer", "func_70300_a", "(Lnet/minecraft/entity/player/PlayerEntity;)Z");
+
+                if (isUsableByPlayer !== null) {
+                    try {
+                        var oldInstructions = isUsableByPlayer.instructions;
+                        var success = false;
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i);
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getDistanceSq", "func_70092_e", "(DDD)D")) {
+                                    oldInstructions.insert(instruction, new MethodInsnNode(
+                                        Opcodes.INVOKESTATIC,
+                                        "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                        "modifiedGetDistanceSq",
+                                        "(Lnet/minecraft/entity/player/PlayerEntity;DDD)D",
+                                        false
+                                    ));
+
+                                    oldInstructions.remove(instruction)
+
+                                    success = true;
+                                    break;
+                            }
+                        }
+
+                        if (success) {
+                            logMessage("DEBUG", "Successfully transformed isUsableByPlayer function in net.minecraft.tileentity.AbstractFurnaceTileEntity");
+
+                        } else
+                            logMessage("ERROR", "An error occurred while transforming isUsableByPlayer function in net.minecraft.tileentity.AbstractFurnaceTileEntity:\n    Unable to find injection point");
+
+                    } catch (exception) {
+                        logMessage("ERROR", "An error occurred while transforming isUsableByPlayer function in net.minecraft.tileentity.AbstractFurnaceTileEntity:\n    " + exception);
+                    }
+
+                } else
+                    logMessage("ERROR", "An error occurred while transforming isUsableByPlayer function in net.minecraft.tileentity.AbstractFurnaceTileEntity:\n    Unable to find function to transform");
 
                 return classNode;
             }

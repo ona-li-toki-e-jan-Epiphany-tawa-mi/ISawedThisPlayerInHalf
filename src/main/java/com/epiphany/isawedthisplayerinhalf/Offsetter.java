@@ -202,18 +202,18 @@ public class Offsetter {
     /**
      * Gets the corrected distance squared from a player to a point.
      *
-     * @param serverPlayerEntity The player to use for the first position.
+     * @param playerEntity The player to use for the first position.
      * @param x The x-position of the second position.
      * @param y The y-position of the second position.
      * @param z The z-position of the second position.
      *
      * @return The distance, squared, between the player and the point.
      */
-    public static double modifiedGetDistanceSq(ServerPlayerEntity serverPlayerEntity, double x, double y, double z) {
-        Vec3d offsets = getOffsets(serverPlayerEntity);
-        double dx = serverPlayerEntity.getPosX() + offsets.x - x;
-        double dy = serverPlayerEntity.getPosY() + offsets.y - y;
-        double dz = serverPlayerEntity.getPosZ() + offsets.z - z;
+    public static double modifiedGetDistanceSq(PlayerEntity playerEntity, double x, double y, double z) {
+        Vec3d offsets = getOffsets(playerEntity);
+        double dx = playerEntity.getPosX() + offsets.x - x;
+        double dy = playerEntity.getPosY() + offsets.y - y;
+        double dz = playerEntity.getPosZ() + offsets.z - z;
         return dx * dx + dy * dy + dz * dz;
     }
 
