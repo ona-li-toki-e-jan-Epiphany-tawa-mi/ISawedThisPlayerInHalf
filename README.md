@@ -9,7 +9,7 @@ Open a terminal in the project directory and run: **gradle build**
 ## How to Use
 These chat commands allow you to control offsets in-game.
 
-Set offsets: **::offsets set <x> <y> <z>**
+Set offsets: **::offsets set \<x\> \<y> \<z>**
   
 Reset offsets: **::offsets set 0 0 0**
 
