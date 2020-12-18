@@ -4,7 +4,7 @@ Your player... is ca- oh god, his torso is flying!
 This mod splits apart the player's mid-section, freeing the torso from the legs.
 
 ## How to Build
-Open a terminal in the project directory and run: **gradle build**
+Open a terminal in the project directory and run this: **gradle build**
   
 ## How to Use
 These chat commands allow you to control offsets in-game.
