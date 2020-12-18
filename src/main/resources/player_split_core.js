@@ -5,6 +5,7 @@ var InsnNode = Java.type("org.objectweb.asm.tree.InsnNode")
 var JumpInsnNode = Java.type("org.objectweb.asm.tree.JumpInsnNode")
 var LabelNode = Java.type("org.objectweb.asm.tree.LabelNode")
 var MethodInsnNode = Java.type("org.objectweb.asm.tree.MethodInsnNode")
+var TypeInsnNode = Java.type("org.objectweb.asm.tree.TypeInsnNode")
 var VarInsnNode = Java.type("org.objectweb.asm.tree.VarInsnNode")
 
 
@@ -2222,7 +2223,7 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
-                var lambda$isWithinUsableDistance$0 = findObfuscatedMethodWithSignature(classNode, "lambda$isWithinUsableDistance$0", "", "(Lnet/minecraft/block/Block;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)Ljava/lang/Boolean;")
+                var lambda$isWithinUsableDistance$0 = findObfuscatedMethodWithSignature(classNode, "lambda$isWithinUsableDistance$0", "lambda$func_216963_a$0", "(Lnet/minecraft/block/Block;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)Ljava/lang/Boolean;")
 
                 if (lambda$isWithinUsableDistance$0 !== null) {
                     try {
@@ -2260,6 +2261,95 @@ function initializeCoreMod() {
 
                 } else
                     logMessage("ERROR", "An error occurred while transforming lambda$isWithinUsableDistance$0 function in net.minecraft.inventory.container.Container:\n    Unable to find function to transform")
+
+                return classNode
+            }
+        },
+
+        /**
+         * Runs the frustum check twice so it can account for players' offsets, allowing the offset position to be rendered even when the original position is not in view.
+         */
+        "EntityRenderer": {
+            "target": {
+                "type": "CLASS",
+                "name": "net.minecraft.client.renderer.entity.EntityRenderer"
+            },
+
+            "transformer": function(classNode) {
+                var shouldRender = findObfuscatedMethodWithSignature(classNode, "shouldRender", "func_225626_a_", "(Lnet/minecraft/entity/Entity;Lnet/minecraft/client/renderer/culling/ClippingHelperImpl;DDD)Z")
+
+                if (shouldRender !== null) {
+                    try {
+                        var oldInstructions = shouldRender.instructions
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/client/renderer/culling/ClippingHelperImpl", "isBoundingBoxInFrustum", "func_228957_a_", "(Lnet/minecraft/util/math/AxisAlignedBB;)Z")) {
+                                var doubleCheckPlayer = new InsnList()
+                                var skipToReturn = new LabelNode()
+
+
+                                // Returns if the entity should be rendered.
+                                doubleCheckPlayer.add(new InsnNode(Opcodes.DUP))
+                                doubleCheckPlayer.add(new JumpInsnNode(Opcodes.IFNE, skipToReturn))
+                                // Returns if the entity is not a player.
+                                doubleCheckPlayer.add(new VarInsnNode(Opcodes.ALOAD, 1)) // livingEntityIn.
+                                doubleCheckPlayer.add(new TypeInsnNode(Opcodes.INSTANCEOF, "net/minecraft/entity/player/PlayerEntity"))
+                                doubleCheckPlayer.add(new JumpInsnNode(Opcodes.IFEQ, skipToReturn))
+
+                                // Discards result and runs second check, accounting for the player's offsets.
+                                doubleCheckPlayer.add(new InsnNode(Opcodes.POP))
+                                doubleCheckPlayer.add(new VarInsnNode(Opcodes.ALOAD, 2)) // camera.
+                                // Offsets bounding box with the player's offsets.
+                                doubleCheckPlayer.add(new VarInsnNode(Opcodes.ALOAD, 9)) // axisalignedbb.
+                                doubleCheckPlayer.add(new VarInsnNode(Opcodes.ALOAD, 1)) // livingEntityIn.
+                                doubleCheckPlayer.add(new TypeInsnNode(Opcodes.CHECKCAST, "net/minecraft/entity/player/PlayerEntity"))
+                                doubleCheckPlayer.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                    "getOffsets",
+                                    "(Lnet/minecraft/entity/player/PlayerEntity;)Lnet/minecraft/util/math/Vec3d;",
+                                    false
+                                ))
+                                doubleCheckPlayer.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "offsetAABB",
+                                    "(Lnet/minecraft/util/math/AxisAlignedBB;Lnet/minecraft/util/math/Vec3d;)Lnet/minecraft/util/math/AxisAlignedBB;"
+                                ))
+                                // Recalculates frustum collision.
+                                doubleCheckPlayer.add(new MethodInsnNode(
+                                    Opcodes.INVOKEVIRTUAL,
+                                    "net/minecraft/client/renderer/culling/ClippingHelperImpl",
+                                    "isBoundingBoxInFrustum",
+                                    "(Lnet/minecraft/util/math/AxisAlignedBB;)Z"
+                                ))
+
+                                doubleCheckPlayer.add(skipToReturn)
+
+
+                                // INVOKEVIRTUAL net/minecraft/client/renderer/culling/ClippingHelperImpl.isBoundingBoxInFrustum (Lnet/minecraft/util/math/AxisAlignedBB;)Z
+                                oldInstructions.insert(instruction, doubleCheckPlayer)
+
+                                success = true
+                                break
+                            }
+                        }
+
+                        if (success) {
+                            logMessage("DEBUG", "Successfully transformed shouldRender function in net.minecraft.client.renderer.entity.EntityRenderer")
+
+                        } else
+                            logMessage("ERROR", "An error occurred while transforming shouldRender function in net.minecraft.client.renderer.entity.EntityRenderer:\n    Unable to find injection point")
+
+                    } catch (exception) {
+                        logMessage("ERROR", "An error occurred while transforming shouldRender function in net.minecraft.client.renderer.entity.EntityRenderer:\n    " + exception)
+                    }
+
+                } else
+                    logMessage("ERROR", "An error occurred while transforming shouldRender function in net.minecraft.client.renderer.entity.EntityRenderer:\n    Unable to find function to transform")
 
                 return classNode
             }
