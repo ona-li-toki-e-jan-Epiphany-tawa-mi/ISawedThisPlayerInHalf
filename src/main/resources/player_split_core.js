@@ -2112,11 +2112,11 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
-                var isUsableByPlayer = findObfuscatedMethodWithSignature(classNode, "canBeUsed", "func_145971_a", "(Lnet/minecraft/entity/player/PlayerEntity;)Z")
+                var canBeUsed = findObfuscatedMethodWithSignature(classNode, "canBeUsed", "func_145971_a", "(Lnet/minecraft/entity/player/PlayerEntity;)Z")
 
-                if (isUsableByPlayer !== null) {
+                if (canBeUsed !== null) {
                     try {
-                        var oldInstructions = isUsableByPlayer.instructions
+                        var oldInstructions = canBeUsed.instructions
                         var success = false
 
                         for (var i = 0; i < oldInstructions.size(); i++) {
@@ -2139,17 +2139,17 @@ function initializeCoreMod() {
                         }
 
                         if (success) {
-                            logMessage("DEBUG", "Successfully transformed isUsableByPlayer function in net.minecraft.tileentity.EnderChestTileEntity")
+                            logMessage("DEBUG", "Successfully transformed canBeUsed function in net.minecraft.tileentity.EnderChestTileEntity")
 
                         } else
-                            logMessage("ERROR", "An error occurred while transforming isUsableByPlayer function in net.minecraft.tileentity.EnderChestTileEntity:\n    Unable to find injection point")
+                            logMessage("ERROR", "An error occurred while transforming canBeUsed function in net.minecraft.tileentity.EnderChestTileEntity:\n    Unable to find injection point")
 
                     } catch (exception) {
-                        logMessage("ERROR", "An error occurred while transforming isUsableByPlayer function in net.minecraft.tileentity.EnderChestTileEntity:\n    " + exception)
+                        logMessage("ERROR", "An error occurred while transforming canBeUsed function in net.minecraft.tileentity.EnderChestTileEntity:\n    " + exception)
                     }
 
                 } else
-                    logMessage("ERROR", "An error occurred while transforming isUsableByPlayer function in net.minecraft.tileentity.EnderChestTileEntity:\n    Unable to find function to transform")
+                    logMessage("ERROR", "An error occurred while transforming canBeUsed function in net.minecraft.tileentity.EnderChestTileEntity:\n    Unable to find function to transform")
 
                 return classNode
             }
@@ -2207,6 +2207,59 @@ function initializeCoreMod() {
 
                 } else
                     logMessage("ERROR", "An error occurred while transforming isUsableByPlayer function in net.minecraft.entity.item.minecart.ContainerMinecartEntity:\n    Unable to find function to transform")
+
+                return classNode
+            }
+        },
+
+        /**
+         * Allows players to keep using containers relative to their offsets.
+         */
+        "Container": {
+            "target": {
+                "type": "CLASS",
+                "name": "net.minecraft.inventory.container.Container"
+            },
+
+            "transformer": function(classNode) {
+                var lambda$isWithinUsableDistance$0 = findObfuscatedMethodWithSignature(classNode, "lambda$isWithinUsableDistance$0", "", "(Lnet/minecraft/block/Block;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)Ljava/lang/Boolean;")
+
+                if (lambda$isWithinUsableDistance$0 !== null) {
+                    try {
+                        var oldInstructions = lambda$isWithinUsableDistance$0.instructions
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getDistanceSq", "func_70092_e", "(DDD)D")) {
+                                oldInstructions.insert(instruction, new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                    "modifiedGetDistanceSq",
+                                    "(Lnet/minecraft/entity/player/PlayerEntity;DDD)D",
+                                    false
+                                ))
+
+                                oldInstructions.remove(instruction)
+
+                                success = true
+                                break
+                            }
+                        }
+
+                        if (success) {
+                            logMessage("DEBUG", "Successfully transformed lambda$isWithinUsableDistance$0 function in net.minecraft.inventory.container.Container")
+
+                        } else
+                            logMessage("ERROR", "An error occurred while transforming lambda$isWithinUsableDistance$0 function in net.minecraft.inventory.container.Container:\n    Unable to find injection point")
+
+                    } catch (exception) {
+                        logMessage("ERROR", "An error occurred while transforming lambda$isWithinUsableDistance$0 function in net.minecraft.inventory.container.Container:\n    " + exception)
+                    }
+
+                } else
+                    logMessage("ERROR", "An error occurred while transforming lambda$isWithinUsableDistance$0 function in net.minecraft.inventory.container.Container:\n    Unable to find function to transform")
 
                 return classNode
             }

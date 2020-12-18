@@ -80,12 +80,10 @@ public class SetOffsetPacket {
 
                     if (player != null) {
                         UUID playerUUID = player.getUniqueID();
-                        // Whether or send all players' offsets to the sender.
                         boolean informSender = !Offsetter.playerOffsetMap.containsKey(playerUUID);
+                        PlayerList playerList = player.getServer().getPlayerList();
 
                         Offsetter.setOffsets(playerUUID, offsets);
-
-                        PlayerList playerList = player.getServer().getPlayerList();
 
                         for (UUID otherPlayerID : Offsetter.playerOffsetMap.keySet()) {
                             ServerPlayerEntity otherPlayer = playerList.getPlayerByUUID(otherPlayerID);

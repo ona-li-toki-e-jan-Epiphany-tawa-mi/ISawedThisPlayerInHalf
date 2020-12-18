@@ -26,7 +26,7 @@ import java.util.List;
 @OnlyIn(Dist.CLIENT)
 public class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> {
     /**
-     * Conversion value for degrees to radians conversion.
+     * Conversion value for degrees to radians.
      */
     static final float degrees2Radians = (float) (Math.PI / 180.0);
     // Reflected methods grabbed from PlayerRenderer.

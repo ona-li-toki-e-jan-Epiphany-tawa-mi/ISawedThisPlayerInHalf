@@ -10,8 +10,6 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 // TODO Try and change rendering calculations so Minecraft will render the offset position, even if the original is not in view.
 
-// TODO Make inventories not close when the offset position is far away.
-
 @Mod("swdthsplyrnhlf")
 public class ISawedThisPlayerInHalf {
     public static final String MOD_ID = "swdthsplyrnhlf";
