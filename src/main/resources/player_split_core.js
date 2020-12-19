@@ -2289,6 +2289,7 @@ function initializeCoreMod() {
                             if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/client/renderer/culling/ClippingHelperImpl", "isBoundingBoxInFrustum", "func_228957_a_", "(Lnet/minecraft/util/math/AxisAlignedBB;)Z")) {
                                 var doubleCheckPlayer = new InsnList()
                                 var skipToReturn = new LabelNode()
+                                var noOffsetsReturn = new LabelNode()
 
 
                                 // Returns if the entity should be rendered.
@@ -2299,11 +2300,7 @@ function initializeCoreMod() {
                                 doubleCheckPlayer.add(new TypeInsnNode(Opcodes.INSTANCEOF, "net/minecraft/entity/player/PlayerEntity"))
                                 doubleCheckPlayer.add(new JumpInsnNode(Opcodes.IFEQ, skipToReturn))
 
-                                // Discards result and runs second check, accounting for the player's offsets.
-                                doubleCheckPlayer.add(new InsnNode(Opcodes.POP))
-                                doubleCheckPlayer.add(new VarInsnNode(Opcodes.ALOAD, 2)) // camera.
-                                // Offsets bounding box with the player's offsets.
-                                doubleCheckPlayer.add(new VarInsnNode(Opcodes.ALOAD, 9)) // axisalignedbb.
+                                // Gets the player's offset and stores it.
                                 doubleCheckPlayer.add(new VarInsnNode(Opcodes.ALOAD, 1)) // livingEntityIn.
                                 doubleCheckPlayer.add(new TypeInsnNode(Opcodes.CHECKCAST, "net/minecraft/entity/player/PlayerEntity"))
                                 doubleCheckPlayer.add(new MethodInsnNode(
@@ -2313,6 +2310,31 @@ function initializeCoreMod() {
                                     "(Lnet/minecraft/entity/player/PlayerEntity;)Lnet/minecraft/util/math/Vec3d;",
                                     false
                                 ))
+                                doubleCheckPlayer.add(new InsnNode(Opcodes.DUP))
+                                // Returns if the player has no offset.
+                                doubleCheckPlayer.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "getZeroVector",
+                                    "()Lnet/minecraft/util/math/Vec3d;"
+                                ))
+                                doubleCheckPlayer.add(new MethodInsnNode(
+                                    Opcodes.INVOKEVIRTUAL,
+                                    "net/minecraft/util/math/Vec3d",
+                                    "equals",
+                                    "(Ljava/lang/Object;)Z",
+                                    false
+                                ))
+                                doubleCheckPlayer.add(new JumpInsnNode(Opcodes.IFNE, noOffsetsReturn))
+
+                                // Discards result and runs second check, accounting for the player's offsets.
+                                doubleCheckPlayer.add(new InsnNode(Opcodes.SWAP))
+                                doubleCheckPlayer.add(new InsnNode(Opcodes.POP))
+                                doubleCheckPlayer.add(new VarInsnNode(Opcodes.ALOAD, 2)) // camera.
+                                doubleCheckPlayer.add(new InsnNode(Opcodes.SWAP))
+                                // Offsets bounding box with the player's offsets.
+                                doubleCheckPlayer.add(new VarInsnNode(Opcodes.ALOAD, 9)) // axisalignedbb.
+                                doubleCheckPlayer.add(new InsnNode(Opcodes.SWAP))
                                 doubleCheckPlayer.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
                                     "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
@@ -2326,12 +2348,18 @@ function initializeCoreMod() {
                                     "isBoundingBoxInFrustum",
                                     "(Lnet/minecraft/util/math/AxisAlignedBB;)Z"
                                 ))
+                                doubleCheckPlayer.add(new JumpInsnNode(Opcodes.GOTO, skipToReturn))
+
+                                doubleCheckPlayer.add(noOffsetsReturn)
+                                doubleCheckPlayer.add(new InsnNode(Opcodes.POP))
 
                                 doubleCheckPlayer.add(skipToReturn)
 
 
+                                //...
                                 // INVOKEVIRTUAL net/minecraft/client/renderer/culling/ClippingHelperImpl.isBoundingBoxInFrustum (Lnet/minecraft/util/math/AxisAlignedBB;)Z
                                 oldInstructions.insert(instruction, doubleCheckPlayer)
+                                //...
 
                                 success = true
                                 break

@@ -8,7 +8,8 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-// TODO Try and change rendering calculations so Minecraft will render the offset position, even if the original is not in view.
+// TODO Find a better way to replace player rendering.
+// TODO Perhaps change the range check in EntityRender.
 
 @Mod("swdthsplyrnhlf")
 public class ISawedThisPlayerInHalf {

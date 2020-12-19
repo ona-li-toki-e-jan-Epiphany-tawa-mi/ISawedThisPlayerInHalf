@@ -93,4 +93,13 @@ public class BytecodeHelper {
     public static AxisAlignedBB offsetAABB(AxisAlignedBB axisAlignedBB, Vec3d offset) {
         return axisAlignedBB.offset(offset);
     }
+
+    /**
+     * Gets the zero vector from the Vec3d class.
+     *
+     * @return The zero vector.
+     */
+    public static Vec3d getZeroVector() {
+        return Vec3d.ZERO;
+    }
 }
