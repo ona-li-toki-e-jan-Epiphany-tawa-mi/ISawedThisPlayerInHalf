@@ -1,5 +1,6 @@
 package com.epiphany.isawedthisplayerinhalf.helpers;
 
+import net.minecraft.client.renderer.culling.ClippingHelperImpl;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.goal.LookAtGoal;
 import net.minecraft.entity.player.PlayerEntity;
@@ -12,7 +13,7 @@ import net.minecraft.util.math.Vec3d;
 import java.lang.reflect.Field;
 
 /**
- * I can't account for the mappings in the bytecode itself, so I'm using these helper functions.
+ * I can't (don't want to) account for the mappings in the bytecode itself, so I'm using these helper functions.
  *  (a.k.a letting Forge and MCP do the work.)
  */
 public class BytecodeHelper {
@@ -101,5 +102,16 @@ public class BytecodeHelper {
      */
     public static Vec3d getZeroVector() {
         return Vec3d.ZERO;
+    }
+
+    /**
+     * Gets whether the axis aligned bounding box is in the frustum of the camera.
+     *
+     * @param camera The camera to get the frustum from.
+     * @param axisAlignedBB The axis aligned bounding box to check.
+     * @return Whether the axis aligned bounding box is in the frustum of the camera.
+     */
+    public static boolean isBoundingBoxInFrustum(ClippingHelperImpl camera, AxisAlignedBB axisAlignedBB) {
+        return camera.isBoundingBoxInFrustum(axisAlignedBB);
     }
 }

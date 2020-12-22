@@ -2343,10 +2343,10 @@ function initializeCoreMod() {
                                 ))
                                 // Recalculates frustum collision.
                                 doubleCheckPlayer.add(new MethodInsnNode(
-                                    Opcodes.INVOKEVIRTUAL,
-                                    "net/minecraft/client/renderer/culling/ClippingHelperImpl",
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
                                     "isBoundingBoxInFrustum",
-                                    "(Lnet/minecraft/util/math/AxisAlignedBB;)Z"
+                                    "(Lnet/minecraft/client/renderer/culling/ClippingHelperImpl;Lnet/minecraft/util/math/AxisAlignedBB;)Z"
                                 ))
                                 doubleCheckPlayer.add(new JumpInsnNode(Opcodes.GOTO, skipToReturn))
 
