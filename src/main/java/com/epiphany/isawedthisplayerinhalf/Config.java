@@ -21,6 +21,7 @@ public class Config {
     private static final ForgeConfigSpec clientConfig;
 
     static final ForgeConfigSpec.DoubleValue offsetX, offsetY, offsetZ;
+    private static Vec3d offsets;
     private static final ForgeConfigSpec.BooleanValue a;
     private static boolean b;
 
@@ -32,7 +33,7 @@ public class Config {
         offsetY = configBuilder.defineInRange("offset.y", 0, -Double.MAX_VALUE, Double.MAX_VALUE);
         offsetZ = configBuilder.defineInRange("offset.z", 0, -Double.MAX_VALUE, Double.MAX_VALUE);
 
-        a=configBuilder.define("what.renderGraphics", true);
+        a=configBuilder.define("what.what",true);
 
         clientConfig = configBuilder.build();
     }
@@ -44,6 +45,7 @@ public class Config {
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, clientConfig);
         loadConfig(FMLPaths.CONFIGDIR.get().resolve("swdthsplyrnhlf-client.toml").toString());
 
+        offsets = new Vec3d(offsetX.get(), offsetY.get(), offsetZ.get());
         b=a.get();
     }
 
@@ -65,7 +67,7 @@ public class Config {
      * @return The offsets.
      */
     public static Vec3d getOffsets() {
-        return new Vec3d(offsetX.get(), offsetY.get(), offsetZ.get());
+        return offsets;
     }
 
     /**
@@ -79,6 +81,8 @@ public class Config {
         offsetX.set(x);
         offsetY.set(y);
         offsetZ.set(z);
+
+        offsets = new Vec3d(offsetX.get(), offsetY.get(), offsetZ.get());
     }
 
     static void a() {boolean c=!a.get();a.set(c);b=c;}public static boolean b() {return b;}

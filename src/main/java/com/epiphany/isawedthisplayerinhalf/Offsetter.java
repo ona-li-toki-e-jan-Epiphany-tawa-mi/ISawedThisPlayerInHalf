@@ -10,7 +10,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.StringTextComponent;
@@ -250,7 +249,7 @@ public class Offsetter {
     public static void onPlayerChat(ClientChatEvent clientChatEvent) {
         String[] possibleCommand = clientChatEvent.getOriginalMessage().toLowerCase().split(" ");
 
-        if (possibleCommand[0].equals("::offsets")) {
+        if (possibleCommand[0].equals("::offsets") || possibleCommand[0].equals("::ofs")) {
             clientChatEvent.setCanceled(true);
 
         } else
@@ -268,7 +267,19 @@ public class Offsetter {
                     player.sendMessage(new StringTextComponent("Current offsets: " + Config.offsetX.get() + ", " + Config.offsetY.get() + ", " + Config.offsetZ.get()));
                     break;
 
-                // Sets the offsets for the player, and sends it to the server.
+                // Resets the offsets for the player and notifies the server.
+                case "reset":
+                    Config.setOffsets(0, 0, 0);
+                    setOffsets(player.getUniqueID(), Vec3d.ZERO);
+
+                    if (player.world.isRemote)
+                        Networker.modChannel.sendToServer(new SetOffsetPacket(player, 0, 0, 0));
+
+                    player.sendMessage(new StringTextComponent("Offsets set"));
+
+                    break;
+
+                // Sets the offsets for the player and sends it to the server.
                 case "set":
                     if (possibleCommand.length >= 5) {
                         try {
@@ -292,13 +303,18 @@ public class Offsetter {
 
                     break;
 
+                // Displays help information.
+                case "help":
+                    player.sendMessage(new StringTextComponent("Allows you to modify your offsets in-game"));
+                    player.sendMessage(new StringTextComponent("Alias: ::ofs"));
+
                 default:
-                    player.sendMessage(new StringTextComponent("Usage: ::offsets (help|get)"));
+                    player.sendMessage(new StringTextComponent("Usage: ::offsets (help|get|reset)"));
                     player.sendMessage(new StringTextComponent("Usage: ::offsets set <x> <y> <z>"));
             }
 
         } else {
-            player.sendMessage(new StringTextComponent("Usage: ::offsets (help|get)"));
+            player.sendMessage(new StringTextComponent("Usage: ::offsets (help|get|reset)"));
             player.sendMessage(new StringTextComponent("Usage: ::offsets set <x> <y> <z>"));
         }
     }
