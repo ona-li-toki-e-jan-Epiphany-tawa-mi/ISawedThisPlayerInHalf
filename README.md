@@ -8,7 +8,8 @@ Open a terminal in the project directory and run **gradle build**
   
 ## How to Use
 These chat commands allow you to control offsets in-game.
-::ofs is an alias for ::offsets.
+
+::ofs can be used in place of ::offsets.
 
 Help: **::offsets help**
 
