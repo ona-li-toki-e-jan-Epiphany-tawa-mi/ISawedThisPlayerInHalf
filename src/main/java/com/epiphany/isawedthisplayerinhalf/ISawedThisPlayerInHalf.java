@@ -9,7 +9,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 // TODO Find a better way to replace player rendering.
-// TODO Perhaps change the range check in EntityRender.
+// TODO Change the range check in EntityRender.
 
 @Mod("swdthsplyrnhlf")
 public class ISawedThisPlayerInHalf {
