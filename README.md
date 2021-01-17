@@ -8,12 +8,15 @@ Open a terminal in the project directory and run this: **gradle build**
   
 ## How to Use
 These chat commands allow you to control offsets in-game.
+::ofs is an alias for ::offsets.
+
+Help: **::offsets help**
 
 Set offsets: **::offsets set \<x> \<y> \<z>**
   
-Reset offsets: **::offsets set 0 0 0**
+Reset offsets: **::offsets reset**
 
-Get (print out) offsets: **::offsets get**
+Print out offsets: **::offsets get**
 
 ## Multiplayer
 The mod must also be on the server for multiplayer-compatibility.
