@@ -6,6 +6,7 @@ import com.epiphany.isawedthisplayerinhalf.rendering.PlayerRendererWrapper;
 import com.epiphany.isawedthisplayerinhalf.rendering.RenderingOffsetter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
@@ -264,7 +265,7 @@ public class Offsetter {
 
                 // Displays offsets.
                 case "get":
-                    player.sendMessage(new StringTextComponent("Current offsets: " + Config.offsetX.get() + ", " + Config.offsetY.get() + ", " + Config.offsetZ.get()));
+                    player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.get",Config.offsetX.get(), Config.offsetY.get(), Config.offsetZ.get())));
                     break;
 
                 // Resets the offsets for the player and notifies the server.
@@ -275,7 +276,7 @@ public class Offsetter {
                     if (player.world.isRemote)
                         Networker.modChannel.sendToServer(new SetOffsetPacket(player, 0, 0, 0));
 
-                    player.sendMessage(new StringTextComponent("Offsets set"));
+                    player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.reset")));
 
                     break;
 
@@ -292,30 +293,30 @@ public class Offsetter {
                             if (player.world.isRemote)
                                 Networker.modChannel.sendToServer(new SetOffsetPacket(player, x, y, z));
 
-                            player.sendMessage(new StringTextComponent("Offsets set"));
+                            player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.set.set")));
 
                         } catch (NumberFormatException exception) {
-                            player.sendMessage(new StringTextComponent("Usage: ::offsets set <x> <y> <z>"));
+                            player.sendMessage(new StringTextComponent(exception.getMessage()));
+                            player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.set.usage")));
                         }
 
                     } else
-                        player.sendMessage(new StringTextComponent("Usage: ::offsets set <x> <y> <z>"));
+                        player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.set.usage")));
 
                     break;
 
                 // Displays help information.
                 case "help":
-                    player.sendMessage(new StringTextComponent("Allows you to modify your offsets in-game"));
-                    player.sendMessage(new StringTextComponent("Alias: ::ofs"));
+                    player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.help")));
 
                 default:
-                    player.sendMessage(new StringTextComponent("Usage: ::offsets (help|get|reset)"));
-                    player.sendMessage(new StringTextComponent("Usage: ::offsets set <x> <y> <z>"));
+                    player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.usage")));
+                    player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.set.usage")));
             }
 
         } else {
-            player.sendMessage(new StringTextComponent("Usage: ::offsets (help|get|reset)"));
-            player.sendMessage(new StringTextComponent("Usage: ::offsets set <x> <y> <z>"));
+            player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.usage")));
+            player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.set.usage")));
         }
     }
 }

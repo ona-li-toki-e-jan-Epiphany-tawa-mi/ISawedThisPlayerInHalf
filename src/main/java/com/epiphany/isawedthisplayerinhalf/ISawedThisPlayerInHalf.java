@@ -10,7 +10,6 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 // TODO Find a better way to replace player rendering.
 // TODO Perhaps change the range check in EntityRender.
-// TODO Localize all strings.
 
 @Mod("swdthsplyrnhlf")
 public class ISawedThisPlayerInHalf {

@@ -1,0 +1,8 @@
+{
+  "commands.swdthsplyrnhlf.offsets.get": "Current offsets: %f, %f, %f",
+  "commands.swdthsplyrnhlf.offsets.reset": "Offsets reset",
+  "commands.swdthsplyrnhlf.offsets.set.usage": "::offsets set <x> <y> <z>",
+  "commands.swdthsplyrnhlf.offsets.set.set": "Offsets set",
+  "commands.swdthsplyrnhlf.offsets.help": "Modifies your offsets in-game\nAlias: ::ofs",
+  "commands.swdthsplyrnhlf.offsets.usage": "::offsets (help|get|reset)>"
+}

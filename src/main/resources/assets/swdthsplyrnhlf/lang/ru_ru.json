@@ -1,0 +1,8 @@
+{
+  "commands.swdthsplyrnhlf.offsets.get": "Текущие смещения: %f, %f, %f",
+  "commands.swdthsplyrnhlf.offsets.reset": "Смешения сброшены",
+  "commands.swdthsplyrnhlf.offsets.set.usage": "::offsets set <x> <y> <z>",
+  "commands.swdthsplyrnhlf.offsets.set.set": "Смещения установлены",
+  "commands.swdthsplyrnhlf.offsets.help": "Изменить ваши смещения в игре\nПсевдоним: ::ofs",
+  "commands.swdthsplyrnhlf.offsets.usage": "::offsets (help|get|reset)>"
+}
