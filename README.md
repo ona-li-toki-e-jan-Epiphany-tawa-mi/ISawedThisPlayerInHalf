@@ -25,4 +25,4 @@ These chat commands allow you to control offsets in-game.
 ## Multiplayer
 The mod must also be on the server for multiplayer-compatibility.
 
-I would **not** recommend using this on a server that does not have the mod.
+I would **_not_** recommend using this on a server that does not have the mod.
