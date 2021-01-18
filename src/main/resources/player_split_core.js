@@ -638,8 +638,8 @@ function initializeCoreMod() {
                                 for (var k = 1; k < 9; k++)
                                     instructions.push(oldInstructions.get(i + k))
 
-                                if (checkFieldInsn(instructions[1], Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/FishRenderer", "renderManager", "Lnet/minecraft/client/renderer/entity/EntityRendererManager;") && checkObfuscatedFieldInsn(instructions[2], Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/EntityRendererManager", "options", "field_78733_k", "Lnet/minecraft/client/GameSettings;") && checkInsn(instructions[3], Opcodes.IFNULL) &&
-                                        checkVarInsn(instructions[4], Opcodes.ALOAD, 0) && checkFieldInsn(instructions[5], Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/FishRenderer", "renderManager", "Lnet/minecraft/client/renderer/entity/EntityRendererManager;") && checkObfuscatedFieldInsn(instructions[6], Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/EntityRendererManager", "options", "field_78733_k", "Lnet/minecraft/client/GameSettings;") && checkObfuscatedFieldInsn(instructions[7], Opcodes.GETFIELD, "net/minecraft/client/GameSettings", "thirdPersonView", "field_74320_O", "I") && checkInsn(instructions[8], Opcodes.IFGT)) {
+                                if (checkObfuscatedFieldInsn(instructions[1], Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/FishRenderer", "renderManager", "field_76990_c", "Lnet/minecraft/client/renderer/entity/EntityRendererManager;") && checkObfuscatedFieldInsn(instructions[2], Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/EntityRendererManager", "options", "field_78733_k", "Lnet/minecraft/client/GameSettings;") && checkInsn(instructions[3], Opcodes.IFNULL) &&
+                                        checkVarInsn(instructions[4], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[5], Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/FishRenderer", "renderManager", "field_76990_c", "Lnet/minecraft/client/renderer/entity/EntityRendererManager;") && checkObfuscatedFieldInsn(instructions[6], Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/EntityRendererManager", "options", "field_78733_k", "Lnet/minecraft/client/GameSettings;") && checkObfuscatedFieldInsn(instructions[7], Opcodes.GETFIELD, "net/minecraft/client/GameSettings", "thirdPersonView", "field_74320_O", "I") && checkInsn(instructions[8], Opcodes.IFGT)) {
                                         oldInstructions.insertBefore(instructions[0], new JumpInsnNode(Opcodes.GOTO, instructions[8].label))
 
                                     for (var k = 0; k < instructions.length; k++)
@@ -1220,7 +1220,8 @@ function initializeCoreMod() {
         },
 
         /**
-         * Modifies the logic of leashes.
+         * Modifies the home position and the position they are pulled to for leashed animals to account for offsets.
+         * Modifies the distance calculations for when to change the movement type and to break the leash.
          */
         "CreatureEntity": {
             "target": {
