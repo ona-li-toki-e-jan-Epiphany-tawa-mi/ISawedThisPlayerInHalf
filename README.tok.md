@@ -1,4 +1,4 @@
-lukin lon toki ante: [English](../master/README.md), [Русский](../master/README.ru_ru.md)
+lukin kepeken toki ante: [English](../master/README.md), [Русский](../master/README.ru_ru.md)
 
 
 # ISawedThisPlayerInHalf
