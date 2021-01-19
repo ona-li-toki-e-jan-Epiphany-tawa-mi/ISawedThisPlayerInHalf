@@ -4,7 +4,7 @@ View in a different language: [Русский](../master/README.ru_ru.md), [toki
 # ISawedThisPlayerInHalf
 Your player... is ca- oh my god, his torso is flying!
 
-This mod splits apart the player's mid-section, freeing the torso from the legs.
+This mod splits apart the player, freeing the torso from the legs.
 
 
 ## How to Build
