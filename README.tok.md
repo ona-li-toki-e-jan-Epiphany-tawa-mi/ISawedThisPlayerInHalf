@@ -28,5 +28,5 @@ ante li wile lon ma pi jan mute tawa ni: kepeken e ona lon ona.
 kin la kepeken e ni lon ma pi jan mute pi ante ni ala li **_ike_**
 
 
-## lupa
+## lupa tawa lipu ante
 [lipu pali CurseForge](https://www.curseforge.com/minecraft/mc-mods/i-sawed-this-player-in-half "lipu pali pi ante I Sawed This Player In Half! lon lipu CurseForge")
