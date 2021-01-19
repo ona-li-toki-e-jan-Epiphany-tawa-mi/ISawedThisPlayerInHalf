@@ -1,4 +1,4 @@
-View in a different language: [Русский](../master/README.ru_ru.md), [toki pona](../master/README.tok.md)
+View in a different language: [Русский](../master/README.ru_ru.md "Смотреть на русском"), [toki pona](../master/README.tok.md "lukin kepeken toki pona")
 
 
 # ISawedThisPlayerInHalf
