@@ -1,7 +1,7 @@
 lukin kepeken toki ante: [English](../master/README.md "View in English"), [Русский](../master/README.ru_ru.md "Смотреть на русском")
 
 
-# ISawedThisPlayerInHalf (MiTuEJanNi)
+# MiTuEJanNi (ISawedThisPlayerInHalf)
 jan sina... li moku sike su- jan sewi o, sijelo sewi ona li waso a!
 
 ante musi ni li tu e sijelo jan li pana e sijelo sewi lon ma ante.
