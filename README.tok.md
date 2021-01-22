@@ -1,4 +1,4 @@
-lukin kepeken toki ante: [English](../master/README.md "View in English"), [Русский](../master/README.ru_ru.md "Смотреть на русском")
+lukin kepeken toki ante: [English](../master/README.md "View in English"), [Русский](../master/README.ru-RU.md "Смотреть на русском")
 
 
 # MiTuEJanNi (ISawedThisPlayerInHalf)
