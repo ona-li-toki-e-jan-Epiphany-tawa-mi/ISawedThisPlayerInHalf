@@ -29,4 +29,4 @@
 
 
 ## Ссылки
-[Страница Проекта CurseForge](https://www.curseforge.com/minecraft/mc-mods/i-sawed-this-player-in-half "Страница Проекта Я Росколол Этого Игроки Пополам! на CurseForge")
+[Страница Проекта на CurseForge](https://www.curseforge.com/minecraft/mc-mods/i-sawed-this-player-in-half "Страница Проекта Я Росколол Этого Игроки Пополам! на CurseForge")
