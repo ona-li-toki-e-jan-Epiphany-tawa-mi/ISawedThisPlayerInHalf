@@ -8,7 +8,7 @@ ante musi ni li tu e sijelo jan li pana e sijelo sewi lon ma ante.
 
 
 ## nasin pali
-o open e ilo Terminal lon poki pi pali ni o sitelen e **gradle build**.
+o open e ilo Terminal lon poki pi pali ni o sitelen e **gradle build**
 
   
 ## nasin kepeken
