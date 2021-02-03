@@ -1,6 +1,9 @@
 Смотреть на другом языке: [English](../master/README.md), [toki pona](../master/README.tok.md)
 
 
+![mi tu e jan ni](../master/src/main/resources/modicon.png)
+
+
 # ЯРоскололЭтогоИгрокиПополам (ISawedThisPlayerInHalf)
 Ваш персонаж... это тор- о боже мой, летает его торс!
 
