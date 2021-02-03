@@ -1,6 +1,9 @@
 lukin kepeken toki ante: [English](../master/README.md "View in English"), [Русский](../master/README.ru-RU.md "Смотреть на русском")
 
 
+![mi tu e jan ni](../master/src/main/resources/modicon.png)
+
+
 # MiTuEJanNi (ISawedThisPlayerInHalf)
 jan sina... li moku sike su- jan sewi o, sijelo sewi ona li waso a!
 
