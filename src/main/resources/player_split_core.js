@@ -2281,7 +2281,29 @@ function initializeCoreMod() {
                 if (shouldRender !== null) {
                     try {
                         var oldInstructions = shouldRender.instructions
-                        var success = false
+                        var successes = 0
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "isInRangeToRender3d", "func_145770_h", "(DDD)Z")) {
+                                oldInstructions.insert(instruction, new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "isInRangeToRender3d",
+                                    "(Lnet/minecraft/entity/Entity;DDD)Z",
+                                    false
+                                ))
+
+                                oldInstructions.remove(instruction)
+
+                                successes |= 1
+                                break
+                            }
+                        }
+
+                        if (successes & 1 === 0)
+                            logMessage("ERROR", "An error occurred while transforming shouldRender function in net.minecraft.client.renderer.entity.EntityRenderer:\n    Unable to find primary injection point")
 
                         for (var i = 0; i < oldInstructions.size(); i++) {
                             var instruction = oldInstructions.get(i)
@@ -2361,16 +2383,16 @@ function initializeCoreMod() {
                                 oldInstructions.insert(instruction, doubleCheckPlayer)
                                 //...
 
-                                success = true
+                                successes |= 2
                                 break
                             }
                         }
 
-                        if (success) {
-                            logMessage("DEBUG", "Successfully transformed shouldRender function in net.minecraft.client.renderer.entity.EntityRenderer")
+                        if (successes & 2 === 0) {
+                            logMessage("ERROR", "An error occurred while transforming shouldRender function in net.minecraft.client.renderer.entity.EntityRenderer:\n    Unable to find secondary injection point")
 
-                        } else
-                            logMessage("ERROR", "An error occurred while transforming shouldRender function in net.minecraft.client.renderer.entity.EntityRenderer:\n    Unable to find injection point")
+                        } else if (successes & 3 === 3)
+                            logMessage("DEBUG", "Successfully transformed shouldRender function in net.minecraft.client.renderer.entity.EntityRenderer")
 
                     } catch (exception) {
                         logMessage("ERROR", "An error occurred while transforming shouldRender function in net.minecraft.client.renderer.entity.EntityRenderer:\n    " + exception)
