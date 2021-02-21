@@ -1,0 +1,8 @@
+{
+  "commands.swdthsplyrnhlf.offsets.get": "nanpa pi ma ante: %f, %f, %f",
+  "commands.swdthsplyrnhlf.offsets.reset": "nanpa pi ma ante li 0",
+  "commands.swdthsplyrnhlf.offsets.set.usage": "::offsets set <x> <y> <z>",
+  "commands.swdthsplyrnhlf.offsets.set.set": "ma ante li ante",
+  "commands.swdthsplyrnhlf.offsets.help": "ante e ma ante sina lon musi\nnimi ante: ::ofs",
+  "commands.swdthsplyrnhlf.offsets.usage": "::offsets (help|get|reset)>"
+}
