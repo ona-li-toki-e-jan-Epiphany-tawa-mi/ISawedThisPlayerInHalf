@@ -16,6 +16,12 @@ public class ModifiedPlayerModel<T extends LivingEntity> extends PlayerModel<T> 
     private float offsetAngle;
     private boolean shouldRotate;
 
+    /**
+     * Creates a new ModifiedPlayerModel.
+     *
+     * @param modelSize The size of the model to be created.
+     * @param smallArmsIn Whether the player model has small arms.
+     */
     public ModifiedPlayerModel(float modelSize, boolean smallArmsIn) {
         super(modelSize, smallArmsIn);
         initialValues[0] = bipedHead.rotationPointX;
@@ -24,12 +30,22 @@ public class ModifiedPlayerModel<T extends LivingEntity> extends PlayerModel<T> 
         initialValues[3] = bipedBody.rotationPointZ;
     }
 
+    /**
+     * Sets the rotation angles for the model.
+     *
+     * @param entity The entity the model belongs to.
+     * @param limbSwing The angle at which the entity's limbs are swinging.
+     * @param limbSwingAmount How far each degree of limb swing moves the limbs.
+     * @param ageInTicks The age of the entity in ticks.
+     * @param netHeadYaw The net yaw rotation for the entity's head.
+     * @param headPitch The pitch rotation of the entity's head.
+     */
     @Override
     public void setRotationAngles(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         super.setRotationAngles(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
 
         if (shouldRotate) {
-            // Creates point(x, z) that cancels out the yaw offset put on by the renderer.
+            // Creates an angle that cancels out the yaw offset put on by the renderer and adds it to the offset to make the model stay in place.
             float netYawOffset = MathHelper.lerp(ageInTicks - entity.ticksExisted, entity.prevRenderYawOffset, entity.renderYawOffset) * PlayerRendererWrapper.degrees2Radians + offsetAngle;
             float offsetCos = MathHelper.cos(netYawOffset);
             float offsetSin = MathHelper.sin(netYawOffset);
@@ -64,6 +80,12 @@ public class ModifiedPlayerModel<T extends LivingEntity> extends PlayerModel<T> 
 
     /**
      * Sets the offsets for this model.
+     *
+     * @param xOffset The offset in the x-axis.
+     * @param yOffset The offset in the y-axis.
+     * @param zOffset The offset in the z-axis.
+     * @param offsetAngle The angle along the XZ plane that intersects the point (xOffset, zOffset).
+     * @param shouldRotate Whether the model should be rotated in the first place.
      */
     void setOffsets(float xOffset, float yOffset, float zOffset, float offsetAngle, boolean shouldRotate) {
         this.xOffset = xOffset;

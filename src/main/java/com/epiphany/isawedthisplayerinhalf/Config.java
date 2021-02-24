@@ -85,5 +85,5 @@ public class Config {
         offsets = new Vec3d(offsetX.get(), offsetY.get(), offsetZ.get());
     }
 
-    static void a() {boolean c=!a.get();a.set(c);b=c;}public static boolean b() {return b;}
+    static void a(){boolean c=!a.get();a.set(c);b=c;}public static boolean b(){return b;}
 }

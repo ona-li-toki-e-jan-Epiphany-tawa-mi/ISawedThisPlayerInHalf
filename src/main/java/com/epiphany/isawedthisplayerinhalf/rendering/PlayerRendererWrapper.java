@@ -64,15 +64,25 @@ public class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEn
     /**
      * Creates a new wrapped player renderer.
      *
+     * @param rendererManager The player's current renderer manager
+     * @param useSmallArms Whether the player has small arms.
      * @param playerOffsets A 3d vector representing the initial offsets a player has.
      */
-    PlayerRendererWrapper(EntityRendererManager renderManager, boolean useSmallArms, Vec3d playerOffsets) {
-        this(renderManager, useSmallArms, new ModifiedPlayerModel<>(0.0F, useSmallArms), playerOffsets);
+    PlayerRendererWrapper(EntityRendererManager rendererManager, boolean useSmallArms, Vec3d playerOffsets) {
+        this(rendererManager, useSmallArms, new ModifiedPlayerModel<>(0.0F, useSmallArms), playerOffsets);
     }
 
-    private PlayerRendererWrapper(EntityRendererManager renderManager, boolean useSmallArms, ModifiedPlayerModel<AbstractClientPlayerEntity> playerModel, Vec3d playerOffsets) {
-        super(renderManager, playerModel, 0.5F);
-        wrappedRenderer = new PlayerRenderer(renderManager, useSmallArms);
+    /**
+     * Creates a new wrapped player renderer.
+     *
+     * @param rendererManager The player's current renderer manager
+     * @param useSmallArms Whether the player has small arms.
+     * @param playerModel A modified version of the player's model.
+     * @param playerOffsets A 3d vector representing the initial offsets a player has.
+     */
+    private PlayerRendererWrapper(EntityRendererManager rendererManager, boolean useSmallArms, ModifiedPlayerModel<AbstractClientPlayerEntity> playerModel, Vec3d playerOffsets) {
+        super(rendererManager, playerModel, 0.5F);
+        wrappedRenderer = new PlayerRenderer(rendererManager, useSmallArms);
         ReflectionHelper.setField(entityModelField, wrappedRenderer, playerModel);
 
         // Modifies the layer renderers of the wrapped class, and then copies it into this class.
@@ -80,6 +90,7 @@ public class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEn
         List<LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>> wrappedLayers = (List<LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>>)
                 ReflectionHelper.getFieldOrDefault(layerRenderers, wrappedRenderer, null);
 
+        // Why?
         if (wrappedLayers != null) {
             for (int i = 0; i < wrappedLayers.size(); i++)
                 if (wrappedLayers.get(i) instanceof BipedArmorLayer) {
@@ -149,6 +160,9 @@ public class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEn
 
 
 
+    //////////////////////////////////////////////////////////////////////////////////
+    // A bunch of functions that just pass along arguments to the wrapped renderer. //
+    //////////////////////////////////////////////////////////////////////////////////
     @Override
     public Vec3d getRenderOffset(AbstractClientPlayerEntity entityIn, float partialTicks) {
         return wrappedRenderer.getRenderOffset(entityIn, partialTicks);

@@ -6,7 +6,6 @@ import java.lang.reflect.Method;
 
 /**
  * A helper for refection so that the other classes are not a mess of try/catch blocks.
- * These methods verification of input due to the limited scope of this project. It would be dead weight.
  */
 public class ReflectionHelper {
     /**
