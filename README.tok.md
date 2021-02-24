@@ -9,10 +9,6 @@ jan sina... li moku sike su- jan sewi o, sijelo sewi ona li waso a!
 
 ante musi ni li tu e sijelo jan li pana e sijelo sewi lon ma ante.
 
-
-## nasin pali
-o open e ilo Terminal lon poki pi pali ni o sitelen e **gradle build**
-
   
 ## nasin kepeken
 nimi wawa ni pi tomo toki li ken e ni: sina ante e ma ante pi sijelo sina lon musi.
