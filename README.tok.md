@@ -24,8 +24,8 @@ nimi wawa ni pi tomo toki li ken e ni: sina ante e ma ante pi sijelo sina lon mu
 ## musi pi jan mute
 ante li wile lon ma pi jan mute tawa ni: kepeken e ona lon ona.
 
-kin la kepeken e ni lon ma pi jan mute pi ante ni ala li **_ike_**
+kin la kepeken e ni lon ma pi jan mute pi ante ni ala li **_ike._**
 
 
 ## lupa tawa lipu ante
-[lipu pali CurseForge](https://www.curseforge.com/minecraft/mc-mods/i-sawed-this-player-in-half "lipu pali pi ante I Sawed This Player In Half! lon lipu CurseForge")
+[lipu pali CurseForge](https://www.curseforge.com/minecraft/mc-mods/i-sawed-this-player-in-half "lipu pali pi ante Mi Tu E Jan Ni! lon lipu CurseForge")

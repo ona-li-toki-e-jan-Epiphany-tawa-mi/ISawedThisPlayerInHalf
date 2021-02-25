@@ -4,7 +4,7 @@
 ![mi tu e jan ni](../master/src/main/resources/modicon.png)
 
 
-# ЯРоскололЭтогоИгрокиПополам (ISawedThisPlayerInHalf)
+# ЯРаскололЭтогоИгрокиПополам (ISawedThisPlayerInHalf)
 Ваш персонаж... это тор- о боже мой, летает его торс!
 
 Этот мод раскалывает персонажа пополам, освободить торс от ног.
@@ -15,7 +15,7 @@
 
 * Помощь: **::offsets help**
 * Устанавливать смещения: **::offsets set \<x> \<y> \<z>**
-* Сбразывать смещения: **::offsets reset**
+* Сбрасывать смещения: **::offsets reset**
 * Печатать смещения: **::offsets get**
 
 ::ofs может пользоваться против ::offsets.
