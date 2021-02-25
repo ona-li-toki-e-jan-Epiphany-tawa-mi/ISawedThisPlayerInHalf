@@ -10,6 +10,8 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 // TODO Find a better way to replace player rendering.
 // TODO Make class transformers more compatible.
+// TODO Add unit tests wherever possible.
+// TODO Adjust knockback angles and position.
 
 @Mod("swdthsplyrnhlf")
 public class ISawedThisPlayerInHalf {
@@ -22,6 +24,9 @@ public class ISawedThisPlayerInHalf {
         Networker.registerPackets();
     }
 
+    /**
+     * Runs on client startup.
+     */
     @SubscribeEvent
     public static void doClientStuff(final FMLClientSetupEvent fmlClientSetupEvent) {
         MinecraftForge.EVENT_BUS.register(RenderingOffsetter.class);

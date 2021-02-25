@@ -2,14 +2,11 @@ View in a different language: [Русский](../master/README.ru-RU.md "Смо
 
 ![mi tu e jan ni](../master/src/main/resources/modicon.png)
 
+
 # ISawedThisPlayerInHalf
 Your player... is ca- oh my god, his torso is flying!
 
 This mod splits apart the player, freeing the torso from the legs.
-
-
-## How to Build
-Open a terminal in the project directory and run **gradle build**
 
   
 ## How to Use
@@ -31,3 +28,7 @@ I would **_not_** recommend using this on a server that does not have the mod.
 
 ## Links
 [CurseForge Project Page](https://www.curseforge.com/minecraft/mc-mods/i-sawed-this-player-in-half "I Sawed This Player In Half! Project Page on CurseForge")
+
+
+## Credits
+Thanks to [PhoenixSC](https://www.youtube.com/c/PhnixhamstaSC "PhoenixSC's YouTube channel") for the [mod idea.](https://www.youtube.com/watch?v=QS2GsxZ3d1M "I Separated the Player's Body in Half in Minecraft - PhoenixSC")
