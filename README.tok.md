@@ -29,3 +29,7 @@ kin la kepeken e ni lon ma pi jan mute pi ante ni ala li **_ike._**
 
 ## lupa tawa lipu ante
 [lipu pali CurseForge](https://www.curseforge.com/minecraft/mc-mods/i-sawed-this-player-in-half "lipu pali pi ante Mi Tu E Jan Ni! lon lipu CurseForge")
+
+
+## jan suli
+[jan PhoenixSC](https://www.youtube.com/c/PhnixhamstaSC "lipu YouTube PhoenixSC") o, pona tawa [sona pi pali pi ante ni.](https://www.youtube.com/watch?v=QS2GsxZ3d1M "I Separated the Player's Body in Half in Minecraft - PhoenixSC")

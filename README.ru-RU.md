@@ -28,4 +28,8 @@
 
 
 ## Ссылки
-[Страница Проекта на CurseForge](https://www.curseforge.com/minecraft/mc-mods/i-sawed-this-player-in-half "Страница Проекта Я Росколол Этого Игроки Пополам! на CurseForge")
+[Страница Проекта на CurseForge](https://www.curseforge.com/minecraft/mc-mods/i-sawed-this-player-in-half "Страница Проекта Я Расколол Этого Игроки Пополам! на CurseForge")
+
+
+## Благодарности
+Спасибо [PhoenixSC](https://www.youtube.com/c/PhnixhamstaSC "Канал PhoenixSC на Ютубе") за [идею для мода.](https://www.youtube.com/watch?v=QS2GsxZ3d1M "I Separated the Player's Body in Half in Minecraft - PhoenixSC")

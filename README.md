@@ -28,3 +28,7 @@ I would **_not_** recommend using this on a server that does not have the mod.
 
 ## Links
 [CurseForge Project Page](https://www.curseforge.com/minecraft/mc-mods/i-sawed-this-player-in-half "I Sawed This Player In Half! Project Page on CurseForge")
+
+
+## Credits
+Thanks to [PhoenixSC](https://www.youtube.com/c/PhnixhamstaSC "PhoenixSC's YouTube channel") for the [mod idea.](https://www.youtube.com/watch?v=QS2GsxZ3d1M "I Separated the Player's Body in Half in Minecraft - PhoenixSC")
