@@ -5,7 +5,7 @@ issueTrackerURL="https://github.com/ona-li-toki-e-jan-Epiphany-tawa-mi/ISawedThi
 # A list of mods - how many allowed here is determined by the individual mod loader
 [[mods]] #mandatory
 modId="swdthsplyrnhlf"
-version="1.15.2-0.1-A"
+version="1.15.2-0.1.1-A"
 displayName="I Sawed This Player In Half!"
 # A URL to query for updates for this mod. See the JSON update specification <here>
 # updateJSONURL="http://myurl.me/" #optional
