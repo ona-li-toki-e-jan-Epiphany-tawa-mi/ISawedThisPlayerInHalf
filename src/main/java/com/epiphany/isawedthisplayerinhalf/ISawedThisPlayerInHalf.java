@@ -8,10 +8,10 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
+// TODO Hitbox detection with punching seems off; punches don't always land when the player hits something.
+
 // TODO Find a better way to replace player rendering.
 // TODO Make class transformers more compatible.
-// TODO Add unit tests wherever possible.
-// TODO Adjust knockback angles and position.
 
 @Mod("swdthsplyrnhlf")
 public class ISawedThisPlayerInHalf {
