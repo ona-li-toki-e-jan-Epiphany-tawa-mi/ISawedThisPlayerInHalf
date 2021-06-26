@@ -2403,6 +2403,143 @@ function initializeCoreMod() {
 
                 return classNode
             }
-        }
+        },
+
+        /**
+         * Alters knockback to account for offsets.
+         */
+        "LivingEntity": {
+            "target": {
+                "type": "CLASS",
+                "name": "net.minecraft.entity.LivingEntity"
+            },
+
+            "transformer": function(classNode) {
+                var attackEntityFrom = findObfuscatedMethodWithSignature(classNode, "attackEntityFrom", "func_70097_a", "(Lnet/minecraft/util/DamageSource;F)Z")
+
+                if (attackEntityFrom !== null) {
+                    try {
+                        var oldInstructions = attackEntityFrom.instructions
+                        var successes = 0
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/LivingEntity", "knockBack", "func_70653_a", "(Lnet/minecraft/entity/Entity;FDD)V")) {
+                                // Offsets the x-position of knockback.
+                                changeX: for (; i >= 0; i--) {
+                                    instruction = oldInstructions.get(i)
+
+                                    if (checkVarInsn(instruction, Opcodes.ALOAD, 7) && checkObfuscatedMethodInsn(oldInstructions.get(i + 1), Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosX", "func_226277_ct_", "()D")) {
+                                        var newInstructions = new InsnList()
+
+                                        // ...
+                                        // ALOAD 7
+                                        // INVOKEVIRTUAL net/minecraft/entity/Entity.getPosX ()D
+                                        oldInstructions.insert(oldInstructions.get(i + 1), new InsnNode(Opcodes.DADD))
+                                        // ...
+
+                                        newInstructions.add(new InsnNode(Opcodes.DUP))
+                                        newInstructions.add(new MethodInsnNode(
+                                            Opcodes.INVOKESTATIC,
+                                            "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                            "getOffsets",
+                                            "(Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/math/Vec3d;",
+                                            false
+                                        ))
+                                        newInstructions.add(new MethodInsnNode(
+                                            Opcodes.INVOKESTATIC,
+                                            "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                            "getVectorX",
+                                            "(Lnet/minecraft/util/math/Vec3d;)D",
+                                            false
+                                        ))
+                                        newInstructions.add(new InsnNode(Opcodes.DUP2_X1))
+                                        newInstructions.add(new InsnNode(Opcodes.POP2))
+
+                                        // ...
+                                        // ALOAD 7
+                                        oldInstructions.insert(instruction, newInstructions)
+                                        // INVOKEVIRTUAL net/minecraft/entity/Entity.getPosX ()D
+                                        // DADD
+                                        // ...
+
+                                        successes |= 2
+                                        break changeX
+                                    }
+                                }
+
+                                if (successes & 2 === 0) {
+                                    logMessage("ERROR", "An error occurred while transforming attackEntityFrom function in net.minecraft.entity.LivingEntity:\n    Unable to find primary injection point")
+
+                                } else {
+                                    // Offsets the z-position of knockback.
+                                    changeZ: for (; i < oldInstructions.size(); i++) {
+                                        instruction = oldInstructions.get(i)
+
+                                        if (checkVarInsn(instruction, Opcodes.ALOAD, 7) && checkObfuscatedMethodInsn(oldInstructions.get(i + 1), Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosZ", "func_226281_cx_", "()D")) {
+                                            var newInstructions = new InsnList()
+
+                                            // ...
+                                            // ALOAD 7
+                                            // INVOKEVIRTUAL net/minecraft/entity/Entity.getPosZ ()D
+                                            oldInstructions.insert(oldInstructions.get(i + 1), new InsnNode(Opcodes.DADD))
+                                            // ...
+
+                                            newInstructions.add(new InsnNode(Opcodes.DUP))
+                                            newInstructions.add(new MethodInsnNode(
+                                                Opcodes.INVOKESTATIC,
+                                                "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                                "getOffsets",
+                                                "(Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/math/Vec3d;",
+                                                false
+                                            ))
+                                            newInstructions.add(new MethodInsnNode(
+                                                Opcodes.INVOKESTATIC,
+                                                "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                                "getVectorZ",
+                                                "(Lnet/minecraft/util/math/Vec3d;)D",
+                                                false
+                                            ))
+                                            newInstructions.add(new InsnNode(Opcodes.DUP2_X1))
+                                            newInstructions.add(new InsnNode(Opcodes.POP2))
+
+                                            // ...
+                                            // ALOAD 7
+                                            oldInstructions.insert(instruction, newInstructions)
+                                            // INVOKEVIRTUAL net/minecraft/entity/Entity.getPosZ ()D
+                                            // DADD
+                                            // ...
+
+                                            successes |= 4
+                                            break changeZ
+                                        }
+                                    }
+
+                                    if (successes & 4 === 0)
+                                        logMessage("ERROR", "An error occurred while transforming attackEntityFrom function in net.minecraft.entity.LivingEntity:\n    Unable to find secondary injection point")
+                                }
+
+                                successes |= 1
+                                break
+                            }
+                        }
+
+                        if (successes & 1 === 0) {
+                            logMessage("ERROR", "An error occurred while transforming attackEntityFrom function in net.minecraft.entity.LivingEntity:\n    Unable to find injection area")
+
+                        } else if (successes & 7 === 7)
+                            logMessage("DEBUG", "Successfully transformed attackEntityFrom function in net.minecraft.entity.LivingEntity")
+
+                    } catch (exception) {
+                        logMessage("ERROR", "An error occurred while transforming attackEntityFrom function in net.minecraft.entity.LivingEntity:\n    " + exception)
+                    }
+
+                } else
+                    logMessage("ERROR", "An error occurred while transforming attackEntityFrom function in net.minecraft.entity.LivingEntity:\n    Unable to find function to transform")
+
+                return classNode
+            }
+        },
     }
 }

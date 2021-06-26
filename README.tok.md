@@ -9,7 +9,7 @@ jan sina... li suwi sike suli pa- jan sewi o, sijelo sewi ona li waso a!
 
 ante musi ni li tu e sijelo jan li pana e sijelo sewi lon ma ante.
 
-  
+
 ## nasin kepeken
 nimi wawa ni pi tomo toki li ken e ni: sina ante e ma ante pi sijelo sina lon musi.
 
