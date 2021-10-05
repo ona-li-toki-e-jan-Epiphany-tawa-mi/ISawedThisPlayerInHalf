@@ -8,10 +8,8 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-// TODO Hitbox detection with punching seems off; punches don't always land when the player hits something.
-
-// TODO Find a better way to replace player rendering.
 // TODO Make class transformers more compatible.
+// TODO Have [::ofs set] command show what the new offset is.
 
 @Mod("swdthsplyrnhlf")
 public class ISawedThisPlayerInHalf {
@@ -20,7 +18,6 @@ public class ISawedThisPlayerInHalf {
     public ISawedThisPlayerInHalf() {
         FMLJavaModLoadingContext.get().getModEventBus().register(ISawedThisPlayerInHalf.class);
         MinecraftForge.EVENT_BUS.register(Offsetter.class);
-
         Networker.registerPackets();
     }
 

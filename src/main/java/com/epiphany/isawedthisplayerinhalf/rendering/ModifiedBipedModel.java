@@ -45,7 +45,7 @@ public class ModifiedBipedModel<T extends LivingEntity> extends BipedModel<T> {
 
         if (shouldRotate) {
             // Creates an angle that cancels out the yaw offset put on by the renderer and adds it to the offset to make the model stay in place.
-            float netYawOffset = MathHelper.lerp(ageInTicks - entity.ticksExisted, entity.prevRenderYawOffset, entity.renderYawOffset) * PlayerRendererWrapper.degrees2Radians + offsetAngle;
+            float netYawOffset = MathHelper.lerp(ageInTicks - entity.ticksExisted, entity.prevRenderYawOffset, entity.renderYawOffset) * PlayerRendererWrapper.degreesToRadians + offsetAngle;
             float offsetCos = MathHelper.cos(netYawOffset);
             float offsetSin = MathHelper.sin(netYawOffset);
 

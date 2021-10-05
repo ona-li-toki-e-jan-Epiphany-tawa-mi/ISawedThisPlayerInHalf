@@ -78,17 +78,18 @@ public class RenderingOffsetter {
                 // Gets the renderer to be used instead of the normal one.
                 if (!wrappedRendererMap.containsKey(playerUUID)) {
                     PlayerRenderer playerRenderer = renderPlayerEvent.getRenderer();
-                    PlayerModel<AbstractClientPlayerEntity> playerModel = playerRenderer.getEntityModel();
-                    boolean useSmallArms = (boolean) ReflectionHelper.getFieldOrDefault(smallArms, playerModel, false);
+                    boolean hasSmallArms = (boolean) ReflectionHelper.getFieldOrDefault(smallArms, playerRenderer.getEntityModel(),
+                            false);
 
-                    wrappedRenderer = new PlayerRendererWrapper(playerRenderer.getRenderManager(), useSmallArms, Offsetter.getOffsets(player));
+                    wrappedRenderer = new PlayerRendererWrapper(playerRenderer, new ModifiedPlayerModel<>(0.0f, hasSmallArms),
+                            Offsetter.getOffsets(player));
                     wrappedRendererMap.put(playerUUID, wrappedRenderer);
 
                 } else
                     wrappedRenderer = wrappedRendererMap.get(playerUUID);
 
                 // Swaps out renderers, renders modified player model.
-                wrappedRenderer.render((AbstractClientPlayerEntity) renderPlayerEvent.getPlayer(), renderPlayerEvent.getEntity().rotationYaw, renderPlayerEvent.getPartialRenderTick(), renderPlayerEvent.getMatrixStack(), renderPlayerEvent.getBuffers(), renderPlayerEvent.getLight());
+                wrappedRenderer.render((AbstractClientPlayerEntity) player, player.rotationYaw, renderPlayerEvent.getPartialRenderTick(), renderPlayerEvent.getMatrixStack(), renderPlayerEvent.getBuffers(), renderPlayerEvent.getLight());
                 ReflectionHelper.setField(renderer, renderPlayerEvent, wrappedRenderer.wrappedRenderer);
 
                 renderPlayerEvent.setCanceled(true);
