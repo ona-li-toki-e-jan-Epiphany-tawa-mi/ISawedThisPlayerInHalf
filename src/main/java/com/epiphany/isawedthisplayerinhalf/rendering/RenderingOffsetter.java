@@ -25,15 +25,15 @@ import java.util.UUID;
 @OnlyIn(Dist.CLIENT)
 public class RenderingOffsetter {
     public static final HashMap<UUID, PlayerRendererWrapper> wrappedRendererMap = new HashMap<>();
-    private static final Field renderer;
-    private static final Field smallArms;
+    private static final Field rendererField;
+    private static final Field smallArmsField;
 
     static {
-        renderer = ReflectionHelper.getFieldOrNull(RenderPlayerEvent.class, "renderer");
-        ReflectionHelper.makeAccessible(renderer);
+        rendererField = ReflectionHelper.getFieldOrNull(RenderPlayerEvent.class, "renderer");
+        ReflectionHelper.makeAccessible(rendererField);
 
-        smallArms = ReflectionHelper.getFieldOrNull(PlayerModel.class, "smallArms", "field_178735_y");
-        ReflectionHelper.makeAccessible(renderer);
+        smallArmsField = ReflectionHelper.getFieldOrNull(PlayerModel.class, "smallArms", "field_178735_y");
+        ReflectionHelper.makeAccessible(rendererField);
     }
 
 
@@ -78,7 +78,7 @@ public class RenderingOffsetter {
                 // Gets the renderer to be used instead of the normal one.
                 if (!wrappedRendererMap.containsKey(playerUUID)) {
                     PlayerRenderer playerRenderer = renderPlayerEvent.getRenderer();
-                    boolean hasSmallArms = (boolean) ReflectionHelper.getFieldOrDefault(smallArms, playerRenderer.getEntityModel(),
+                    boolean hasSmallArms = (boolean) ReflectionHelper.getFieldOrDefault(smallArmsField, playerRenderer.getEntityModel(),
                             false);
 
                     wrappedRenderer = new PlayerRendererWrapper(playerRenderer, new ModifiedPlayerModel<>(0.0f, hasSmallArms),
@@ -90,7 +90,7 @@ public class RenderingOffsetter {
 
                 // Swaps out renderers, renders modified player model.
                 wrappedRenderer.render((AbstractClientPlayerEntity) player, player.rotationYaw, renderPlayerEvent.getPartialRenderTick(), renderPlayerEvent.getMatrixStack(), renderPlayerEvent.getBuffers(), renderPlayerEvent.getLight());
-                ReflectionHelper.setField(renderer, renderPlayerEvent, wrappedRenderer.wrappedRenderer);
+                ReflectionHelper.setField(rendererField, renderPlayerEvent, wrappedRenderer.wrappedRenderer);
 
                 renderPlayerEvent.setCanceled(true);
             }
@@ -105,6 +105,6 @@ public class RenderingOffsetter {
         UUID playerUUID = renderPlayerEvent.getPlayer().getUniqueID();
 
         if (wrappedRendererMap.containsKey(playerUUID))
-            ReflectionHelper.setField(renderer, renderPlayerEvent, wrappedRendererMap.get(playerUUID).wrappedRenderer);
+            ReflectionHelper.setField(rendererField, renderPlayerEvent, wrappedRendererMap.get(playerUUID).wrappedRenderer);
     }
 }

@@ -23,10 +23,10 @@ public class ModifiedBipedModel<T extends LivingEntity> extends BipedModel<T> {
      */
     public ModifiedBipedModel(float modelSize) {
         super(modelSize);
-        initialValues[0] = bipedHead.rotationPointX;
-        initialValues[1] = bipedHead.rotationPointZ;
-        initialValues[2] = bipedBody.rotationPointX;
-        initialValues[3] = bipedBody.rotationPointZ;
+        this.initialValues[0] = bipedHead.rotationPointX;
+        this.initialValues[1] = bipedHead.rotationPointZ;
+        this.initialValues[2] = bipedBody.rotationPointX;
+        this.initialValues[3] = bipedBody.rotationPointZ;
     }
 
     /**
@@ -43,31 +43,32 @@ public class ModifiedBipedModel<T extends LivingEntity> extends BipedModel<T> {
     public void setRotationAngles(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         super.setRotationAngles(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
 
-        if (shouldRotate) {
+        if (this.shouldRotate) {
             // Creates an angle that cancels out the yaw offset put on by the renderer and adds it to the offset to make the model stay in place.
-            float netYawOffset = MathHelper.lerp(ageInTicks - entity.ticksExisted, entity.prevRenderYawOffset, entity.renderYawOffset) * PlayerRendererWrapper.degreesToRadians + offsetAngle;
+            float netYawOffset = MathHelper.lerp(ageInTicks - entity.ticksExisted, entity.prevRenderYawOffset, entity.renderYawOffset)
+                    * PlayerRendererWrapper.degreesToRadians + this.offsetAngle;
             float offsetCos = MathHelper.cos(netYawOffset);
             float offsetSin = MathHelper.sin(netYawOffset);
 
-            float pointX = xOffset * offsetCos - zOffset * offsetSin;
-            float pointZ = xOffset * offsetSin + zOffset * offsetCos;
+            float pointX = this.xOffset * offsetCos - this.zOffset * offsetSin;
+            float pointZ = this.xOffset * offsetSin + this.zOffset * offsetCos;
 
             // Applies offsets.
-            bipedHead.rotationPointX = pointX + initialValues[0];
-            bipedHead.rotationPointY += yOffset;
-            bipedHead.rotationPointZ = pointZ + initialValues[1];
+            bipedHead.rotationPointX = pointX + this.initialValues[0];
+            bipedHead.rotationPointY += this.yOffset;
+            bipedHead.rotationPointZ = pointZ + this.initialValues[1];
             bipedHeadwear.copyModelAngles(bipedHead);
 
-            bipedBody.rotationPointX = pointX + initialValues[2];
-            bipedBody.rotationPointY += yOffset;
-            bipedBody.rotationPointZ = pointZ + initialValues[3];
+            bipedBody.rotationPointX = pointX + this.initialValues[2];
+            bipedBody.rotationPointY += this.yOffset;
+            bipedBody.rotationPointZ = pointZ + this.initialValues[3];
 
             bipedLeftArm.rotationPointX += pointX;
-            bipedLeftArm.rotationPointY += yOffset;
+            bipedLeftArm.rotationPointY += this.yOffset;
             bipedLeftArm.rotationPointZ += pointZ;
 
             bipedRightArm.rotationPointX += pointX;
-            bipedRightArm.rotationPointY += yOffset;
+            bipedRightArm.rotationPointY += this.yOffset;
             bipedRightArm.rotationPointZ += pointZ;
         }
     }
@@ -95,9 +96,9 @@ public class ModifiedBipedModel<T extends LivingEntity> extends BipedModel<T> {
      * Resets certain parts of the biped model.
      */
     void reset() {
-        bipedHead.rotationPointX = initialValues[0];
-        bipedHead.rotationPointZ = initialValues[1];
-        bipedBody.rotationPointX = initialValues[2];
-        bipedBody.rotationPointZ = initialValues[3];
+        bipedHead.rotationPointX = this.initialValues[0];
+        bipedHead.rotationPointZ = this.initialValues[1];
+        bipedBody.rotationPointX = this.initialValues[2];
+        bipedBody.rotationPointZ = this.initialValues[3];
     }
 }

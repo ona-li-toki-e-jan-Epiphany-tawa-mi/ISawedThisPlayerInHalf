@@ -8,8 +8,11 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-// TODO Make class transformers more compatible.
 // TODO Have [::ofs set] command show what the new offset is.
+
+// TODO Possibly have the server store offsets in a database, leaving client storage as it is in memory.
+// TODO Make class transformers more compatible.
+
 
 @Mod("swdthsplyrnhlf")
 public class ISawedThisPlayerInHalf {
@@ -21,9 +24,6 @@ public class ISawedThisPlayerInHalf {
         Networker.registerPackets();
     }
 
-    /**
-     * Runs on client startup.
-     */
     @SubscribeEvent
     public static void doClientStuff(final FMLClientSetupEvent fmlClientSetupEvent) {
         MinecraftForge.EVENT_BUS.register(RenderingOffsetter.class);

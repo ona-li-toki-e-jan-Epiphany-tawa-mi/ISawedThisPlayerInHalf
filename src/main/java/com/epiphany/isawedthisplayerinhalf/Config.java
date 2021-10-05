@@ -9,7 +9,6 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
-
 import java.io.File;
 
 /**
@@ -17,7 +16,6 @@ import java.io.File;
  */
 @OnlyIn(Dist.CLIENT)
 public class Config {
-    private static final ForgeConfigSpec.Builder configBuilder = new ForgeConfigSpec.Builder();
     private static final ForgeConfigSpec clientConfig;
 
     static final ForgeConfigSpec.DoubleValue offsetX, offsetY, offsetZ;
@@ -27,6 +25,8 @@ public class Config {
 
     // Builds config file.
     static {
+        ForgeConfigSpec.Builder configBuilder = new ForgeConfigSpec.Builder();
+
         configBuilder.comment(" The following coordinates offset the player's upper-half.");
 
         offsetX = configBuilder.defineInRange("offset.x", 0, -Double.MAX_VALUE, Double.MAX_VALUE);
