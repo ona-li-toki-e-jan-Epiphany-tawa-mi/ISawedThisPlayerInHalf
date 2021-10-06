@@ -4,7 +4,7 @@
 ![mi tu e jan ni](../master/src/main/resources/modicon.png)
 
 
-# ЯРаскололЭтогоИгрокиПополам (ISawedThisPlayerInHalf)
+# ЯРаскололЭтогоИгрокаПополам (ISawedThisPlayerInHalf)
 Ваш персонаж... это тор- о боже мой, летает его торс!
 
 Этот мод раскалывает персонажа пополам, освободив торс от ног.
@@ -14,9 +14,9 @@
 Эти команды позволяют вам контролировать смещения в игре.
 
 * Помощь: **::offsets help**
-* Устанавливать смещения: **::offsets set \<x> \<y> \<z>**
-* Сбрасывать смещения: **::offsets reset**
-* Печатать смещения: **::offsets get**
+* Установит смещения: **::offsets set \<x> \<y> \<z>**
+* Сбросить смещения: **::offsets reset**
+* Напечатать смещения: **::offsets get**
 
 ::ofs может пользоваться против ::offsets.
 
@@ -28,7 +28,7 @@
 
 
 ## Ссылки
-[Страница Проекта на CurseForge](https://www.curseforge.com/minecraft/mc-mods/i-sawed-this-player-in-half "Страница Проекта Я Расколол Этого Игроки Пополам! на CurseForge")
+[Страница Проекта на CurseForge](https://www.curseforge.com/minecraft/mc-mods/i-sawed-this-player-in-half "Страница Проекта Я Расколол Этого Игрока Пополам! на CurseForge")
 
 
 ## Благодарности

@@ -265,7 +265,7 @@ public class Offsetter {
 
                 // Displays offsets.
                 case "get":
-                    player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.get",Config.offsetX.get(), Config.offsetY.get(), Config.offsetZ.get())));
+                    player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.get", Config.offsetX.get(), Config.offsetY.get(), Config.offsetZ.get())));
                     break;
 
                 // Resets the offsets for the player and notifies the server.
@@ -293,10 +293,9 @@ public class Offsetter {
                             if (player.world.isRemote)
                                 Networker.modChannel.sendToServer(new SetOffsetPacket(player, x, y, z));
 
-                            player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.set.set")));
+                            player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.set", x, y, z)));
 
                         } catch (NumberFormatException exception) {
-                            player.sendMessage(new StringTextComponent(exception.getMessage()));
                             player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.set.usage")));
                         }
 
@@ -310,12 +309,16 @@ public class Offsetter {
                     player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.help")));
 
                 default:
-                    player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.usage")));
+                    player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.help.usage")));
+                    player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.get.usage")));
+                    player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.reset.usage")));
                     player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.set.usage")));
             }
 
         } else {
-            player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.usage")));
+            player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.help.usage")));
+            player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.get.usage")));
+            player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.reset.usage")));
             player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.set.usage")));
         }
     }

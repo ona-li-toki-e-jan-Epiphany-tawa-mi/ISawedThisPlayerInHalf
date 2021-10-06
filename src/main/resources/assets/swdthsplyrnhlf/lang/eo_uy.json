@@ -1,8 +1,11 @@
 {
-  "commands.swdthsplyrnhlf.offsets.get": "nanpa pi ma ante: %f, %f, %f",
-  "commands.swdthsplyrnhlf.offsets.reset": "nanpa pi ma ante: 0, 0, 0",
-  "commands.swdthsplyrnhlf.offsets.set.usage": "::offsets set <nanpa X> <nanpa Y> <nanpa Z>",
-  "commands.swdthsplyrnhlf.offsets.set.set": "ma ante li ante",
-  "commands.swdthsplyrnhlf.offsets.help": "li ante e ma ante sina lon musi\nnimi ante: ::ofs",
-  "commands.swdthsplyrnhlf.offsets.usage": "::offsets (help|get|reset)>"
+  "commands.swdthsplyrnhlf.offsets.get": "nanpa pi ma ante li %f en %f en %f",
+  "commands.swdthsplyrnhlf.offsets.reset": "tenpo ni la nanpa pi ma ante li 0 en 0 en 0",
+  "commands.swdthsplyrnhlf.offsets.set": "tenpo pini la ma ante li ante (li %f en %f en %f)",
+
+  "commands.swdthsplyrnhlf.offsets.help": "li pana e sijelo sewi sina lon ma ante\nnimi ante: ::ofs",
+  "commands.swdthsplyrnhlf.offsets.help.usage": "sona kepeken: ::offsets help",
+  "commands.swdthsplyrnhlf.offsets.get.usage": "pana e nanpa pi ma ante tawa sina: ::offsets get",
+  "commands.swdthsplyrnhlf.offsets.reset.usage": "pana e sijelo sewi lon ma pi ante ala: ::offsets reset",
+  "commands.swdthsplyrnhlf.offsets.set.usage": "ante e ma ante: ::offsets set <nanpa X> <nanpa Y> <nanpa Z>"
 }

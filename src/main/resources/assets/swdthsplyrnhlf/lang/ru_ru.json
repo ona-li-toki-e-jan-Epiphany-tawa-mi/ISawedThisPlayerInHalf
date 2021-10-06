@@ -1,8 +1,11 @@
 {
   "commands.swdthsplyrnhlf.offsets.get": "Текущие смещения: %f, %f, %f",
   "commands.swdthsplyrnhlf.offsets.reset": "Смешения сброшены",
-  "commands.swdthsplyrnhlf.offsets.set.usage": "::offsets set <x> <y> <z>",
-  "commands.swdthsplyrnhlf.offsets.set.set": "Смещения установлены",
-  "commands.swdthsplyrnhlf.offsets.help": "Изменить ваши смещения в игре\nПсевдоним: ::ofs",
-  "commands.swdthsplyrnhlf.offsets.usage": "::offsets (help|get|reset)>"
+  "commands.swdthsplyrnhlf.offsets.set": "Смещения установлены (%f, %f, %f)",
+
+  "commands.swdthsplyrnhlf.offsets.help": "Раскалывает ваше тело пополам и ставит верхнюю часть где-нибудь другое\nПсевдоним: ::ofs",
+  "commands.swdthsplyrnhlf.offsets.help.usage": "Помощь: ::offsets help",
+  "commands.swdthsplyrnhlf.offsets.get.usage": "Отобразить текущие смещения: ::offsets get",
+  "commands.swdthsplyrnhlf.offsets.reset.usage": "Сбросить смещения: ::offsets reset",
+  "commands.swdthsplyrnhlf.offsets.set.usage": "Установить смещения: ::offsets set <x> <y> <z>"
 }

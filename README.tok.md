@@ -13,18 +13,18 @@ ante musi ni li tu e sijelo jan li pana e sijelo sewi lon ma ante.
 ## nasin kepeken
 nimi wawa ni pi tomo toki li ken e ni: sina ante e ma ante pi sijelo sina lon musi.
 
-* sona kepeken pi nimi wawa: **::offsets help**
+* sona kepeken: **::offsets help**
 * ante e ma ante: **::offsets set \<x> \<y> \<z>**
-* pana e sijelo sewi lon sijelo: **::offsets reset**
-* pana e nanpa pi ma ante: **::offsets get**
+* pana e sijelo sewi lon ma pi ante ala: **::offsets reset**
+* pana e nanpa pi ma ante tawa sina: **::offsets get**
 
 ::ofs li ken kepeken tawa ::offsets.
 
 
 ## musi pi jan mute
-ante li wile lon ma pi jan mute tawa ni: kepeken e ona lon ona.
+ante musi li wile lon ma pi jan mute tawa ni: kepeken e ona lon ona.
 
-kin la kepeken e ni lon ma pi jan mute pi ante ni ala li **_ike._**
+kin la kepeken e ni lon ma pi jan mute pi ante musi ni ala li **_ike._**
 
 
 ## lupa tawa lipu ante

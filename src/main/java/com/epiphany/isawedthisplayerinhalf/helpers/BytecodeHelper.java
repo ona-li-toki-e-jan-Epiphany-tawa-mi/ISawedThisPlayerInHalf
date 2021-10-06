@@ -14,15 +14,15 @@ import net.minecraft.util.math.Vec3d;
 import java.lang.reflect.Field;
 
 /**
- * I can't (don't want to) account for the mappings in the bytecode itself, so I'm using these helper functions.
+ * I can't (don't want to) account for name mappings in the bytecode itself, so I'm using these helper functions.
  *  (a.k.a letting Forge and MCP do the work.)
  */
 public class BytecodeHelper {
-    private static final Field closestEntity;
+    private static final Field closestEntityField;
 
     static {
-        closestEntity = ReflectionHelper.getFieldOrNull(LookAtGoal.class, "closestEntity", "field_75334_a");
-        ReflectionHelper.makeAccessible(closestEntity);
+        closestEntityField = ReflectionHelper.getFieldOrNull(LookAtGoal.class, "closestEntity", "field_75334_a");
+        ReflectionHelper.makeAccessible(closestEntityField);
     }
 
     /**
@@ -82,7 +82,7 @@ public class BytecodeHelper {
      * @return The closest entity that the look at goal is focused on.
      */
     public static Entity getClosestEntity(LookAtGoal lookAtGoal) {
-        return (Entity) ReflectionHelper.getFieldOrDefault(closestEntity, lookAtGoal, null);
+        return (Entity) ReflectionHelper.getFieldOrDefault(closestEntityField, lookAtGoal, null);
     }
 
     /**

@@ -8,7 +8,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-// TODO Have [::ofs set] command show what the new offset is.
+// TODO Added more error checking.
 
 // TODO Possibly have the server store offsets in a database, leaving client storage as it is in memory.
 // TODO Make class transformers more compatible.
