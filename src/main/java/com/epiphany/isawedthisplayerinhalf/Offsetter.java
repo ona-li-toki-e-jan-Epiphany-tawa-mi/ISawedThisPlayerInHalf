@@ -225,7 +225,8 @@ public class Offsetter {
      * @return The distance between the first entity and second entity.
      */
     public static float modifiedGetDistance(Entity entity1, Entity entity2) {
-        return entity2 instanceof PlayerEntity ? (float) Math.sqrt(modifiedGetDistanceSq(entity1, (PlayerEntity) entity2)) : entity1.getDistance(entity2);
+        return entity2 instanceof PlayerEntity ? (float) Math.sqrt(modifiedGetDistanceSq(entity1, (PlayerEntity) entity2)) :
+                entity1.getDistance(entity2);
     }
 
     /**
@@ -250,11 +251,10 @@ public class Offsetter {
     public static void onPlayerChat(ClientChatEvent clientChatEvent) {
         String[] possibleCommand = clientChatEvent.getOriginalMessage().toLowerCase().split(" ");
 
-        if (possibleCommand[0].equals("::offsets") || possibleCommand[0].equals("::ofs")) {
-            clientChatEvent.setCanceled(true);
-
-        } else
+        if (!possibleCommand[0].equals("::offsets") && !possibleCommand[0].equals("::ofs"))
             return;
+
+        clientChatEvent.setCanceled(true);
 
         ClientPlayerEntity player = Minecraft.getInstance().player;
 
@@ -265,7 +265,8 @@ public class Offsetter {
 
                 // Displays offsets.
                 case "get":
-                    player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.get", Config.offsetX.get(), Config.offsetY.get(), Config.offsetZ.get())));
+                    player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.get",
+                            Config.offsetX.get(), Config.offsetY.get(), Config.offsetZ.get())));
                     break;
 
                 // Resets the offsets for the player and notifies the server.
@@ -284,16 +285,17 @@ public class Offsetter {
                 case "set":
                     if (possibleCommand.length >= 5) {
                         try {
-                            double x = Double.parseDouble(possibleCommand[2]), y = Double.parseDouble(possibleCommand[3]), z = Double.parseDouble(possibleCommand[4]);
+                            double x = Double.parseDouble(possibleCommand[2]), y = Double.parseDouble(possibleCommand[3]),
+                                    z = Double.parseDouble(possibleCommand[4]);
 
                             Config.setOffsets(x, y, z);
-
                             setOffsets(player.getUniqueID(), new Vec3d(x, y, z));
 
                             if (player.world.isRemote)
                                 Networker.modChannel.sendToServer(new SetOffsetPacket(player, x, y, z));
 
-                            player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.set", x, y, z)));
+                            player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.set", x,
+                                    y, z)));
 
                         } catch (NumberFormatException exception) {
                             player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.set.usage")));

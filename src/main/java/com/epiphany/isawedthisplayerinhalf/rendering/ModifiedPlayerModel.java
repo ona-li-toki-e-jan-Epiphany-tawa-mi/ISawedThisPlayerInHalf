@@ -24,6 +24,7 @@ public class ModifiedPlayerModel<T extends LivingEntity> extends PlayerModel<T> 
      */
     public ModifiedPlayerModel(float modelSize, boolean smallArmsIn) {
         super(modelSize, smallArmsIn);
+
         this.initialValues[0] = bipedHead.rotationPointX;
         this.initialValues[1] = bipedHead.rotationPointZ;
         this.initialValues[2] = bipedBody.rotationPointX;

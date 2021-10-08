@@ -40,19 +40,46 @@ public class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEn
 
 
     static {
-        setModelVisibilitiesMethod = ReflectionHelper.getMethodOrNull(PlayerRenderer.class, "setModelVisibilities", "func_177137_d", AbstractClientPlayerEntity.class);
+        setModelVisibilitiesMethod = ReflectionHelper.getMethodOrNull(
+                PlayerRenderer.class, "setModelVisibilities", "func_177137_d",
+                AbstractClientPlayerEntity.class
+        );
         ReflectionHelper.makeAccessible(setModelVisibilitiesMethod);
-        applyRotationsMethod = ReflectionHelper.getMethodOrNull(PlayerRenderer.class, "applyRotations", "func_225621_a_", AbstractClientPlayerEntity.class, MatrixStack.class, float.class, float.class, float.class);
+        applyRotationsMethod = ReflectionHelper.getMethodOrNull(
+                PlayerRenderer.class, "applyRotations", "func_225621_a_",
+                AbstractClientPlayerEntity.class, MatrixStack.class, float.class, float.class, float.class
+        );
         ReflectionHelper.makeAccessible(applyRotationsMethod);
-        preRenderCallbackMethod = ReflectionHelper.getMethodOrNull(PlayerRenderer.class, "preRenderCallback", "func_225620_a_", AbstractClientPlayerEntity.class, MatrixStack.class, float.class);
+        preRenderCallbackMethod = ReflectionHelper.getMethodOrNull(
+                PlayerRenderer.class, "preRenderCallback", "func_225620_a_",
+                AbstractClientPlayerEntity.class, MatrixStack.class, float.class
+        );
         ReflectionHelper.makeAccessible(preRenderCallbackMethod);
-        renderNameMethod = ReflectionHelper.getMethodOrNull(PlayerRenderer.class, "renderName", "func_225629_a_", AbstractClientPlayerEntity.class, String.class, MatrixStack.class, IRenderTypeBuffer.class, int.class);
+        renderNameMethod = ReflectionHelper.getMethodOrNull(
+                PlayerRenderer.class, "renderName", "func_225629_a_",
+                AbstractClientPlayerEntity.class, String.class, MatrixStack.class, IRenderTypeBuffer.class, int.class
+        );
         ReflectionHelper.makeAccessible(renderNameMethod);
 
         entityModelField = ReflectionHelper.getFieldOrNull(LivingRenderer.class, "entityModel", "field_77045_g");
         ReflectionHelper.makeAccessible(entityModelField);
-        layerRenderersField = ReflectionHelper.getFieldOrNull(LivingRenderer.class, "layerRenderers", "field_177097_h");
+        layerRenderersField = ReflectionHelper.getFieldOrNull(LivingRenderer.class, "layerRenderers",
+                "field_177097_h");
         ReflectionHelper.makeAccessible(layerRenderersField);
+
+        if (setModelVisibilitiesMethod == null)
+            throw new NullPointerException("Unable to find method 'setModelVisibilitiesMethod' under names 'setModelVisibilities' and 'func_177137_d'");
+        if (applyRotationsMethod == null)
+            throw new NullPointerException("Unable to find method 'applyRotationsMethod' under names 'applyRotations' and 'func_225621_a_'");
+        if (preRenderCallbackMethod == null)
+            throw new NullPointerException("Unable to find method 'preRenderCallbackMethod' under names 'preRenderCallback' and 'func_225620_a_'");
+        if (renderNameMethod == null)
+            throw new NullPointerException("Unable to find method 'renderNameMethod' under names 'renderName' and 'func_225629_a_'");
+
+        if (entityModelField == null)
+            throw new NullPointerException("Unable to find field 'entityModelField' under names 'entityModel' and 'field_77045_g'");
+        if (layerRenderersField == null)
+            throw new NullPointerException("Unable to find field 'layerRenderersField' under names 'layerRenderers' and 'field_177097_h'");
     }
 
 
@@ -71,21 +98,24 @@ public class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEn
 
 
         // Modifies the layer renderers of the wrapped class, and then copies it into this class.
-        this.upperArmorModel = new ModifiedBipedModel(1.0F);
-        List<LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>> wrappedLayers = (List<LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>>)
-                ReflectionHelper.getFieldOrDefault(layerRenderersField, this.wrappedRenderer, null);
+        this.upperArmorModel = new ModifiedBipedModel<>(1.0F);
+        List<LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>> wrappedLayers =
+                (List<LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>>)
+                        ReflectionHelper.getFieldOrDefault(layerRenderersField, this.wrappedRenderer, null);
 
         if (wrappedLayers != null) {
             for (int i = 0; i < wrappedLayers.size(); i++)
                 if (wrappedLayers.get(i) instanceof BipedArmorLayer) {
                     wrappedLayers.remove(i);
-                    wrappedLayers.add(i, new BipedArmorLayer(this, new BipedModel(0.5F), this.upperArmorModel));
+                    wrappedLayers.add(i, new BipedArmorLayer<>(this, new BipedModel<>(0.5F), this.upperArmorModel));
 
                     break;
                 }
 
             ReflectionHelper.setField(layerRenderersField, this, wrappedLayers);
-        }
+
+        } else
+            throw new NullPointerException("Failed to get layer renderers from wrapper PlayerRenderer");
 
 
         setOffsets(playerOffsets);
@@ -108,9 +138,7 @@ public class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEn
      * @param offsets A 3d vector containing the offsets.
      */
     public void setOffsets(Vec3d offsets) {
-        float xOffset;
-        float yOffset;
-        float zOffset;
+        float xOffset, yOffset, zOffset;
         float offsetAngle;
         boolean shouldRotate;
 
@@ -130,8 +158,8 @@ public class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEn
             shouldRotate = false;
         }
 
-        if (entityModel instanceof ModifiedPlayerModel<?>)
-            ((ModifiedPlayerModel<?>) entityModel).setOffsets(xOffset, yOffset, zOffset, offsetAngle, shouldRotate);
+
+        ((ModifiedPlayerModel<?>) this.entityModel).setOffsets(xOffset, yOffset, zOffset, offsetAngle, shouldRotate);
         this.upperArmorModel.setOffsets(xOffset, yOffset, zOffset, offsetAngle, shouldRotate);
     }
 
@@ -150,7 +178,7 @@ public class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEn
     //////////////////////////////////////////////////////////////////////////////////
     @Override
     public Vec3d getRenderOffset(AbstractClientPlayerEntity entityIn, float partialTicks) {
-        return this.getRenderOffset(entityIn, partialTicks);
+        return this.wrappedRenderer.getRenderOffset(entityIn, partialTicks);
     }
 
     @Override

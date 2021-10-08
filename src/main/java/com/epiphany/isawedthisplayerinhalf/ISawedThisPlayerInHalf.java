@@ -8,11 +8,13 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-// TODO Added more error checking.
+// TODO Add proper error messages to the command.
+// TODO Possibly move resetting player and biped models into the setting function.
+// TODO Proofread JavaScript god file.
 
-// TODO Possibly have the server store offsets in a database, leaving client storage as it is in memory.
+// TODO Possibly have offsets stored in a database.
 // TODO Make class transformers more compatible.
-
+// TODO Mod may be incompatible with other mods using player render event; investigate.
 
 @Mod("swdthsplyrnhlf")
 public class ISawedThisPlayerInHalf {

@@ -74,16 +74,14 @@ public class ReflectionHelper {
             Object returnValue;
 
             try {
-                boolean wasNotAccessible = false;
+                boolean wasAccessible = field.isAccessible();
 
-                if (!field.isAccessible()) {
+                if (!wasAccessible)
                     field.setAccessible(true);
-                    wasNotAccessible = true;
-                }
 
                 returnValue = field.get(object);
 
-                if (wasNotAccessible)
+                if (!wasAccessible)
                     field.setAccessible(false);
 
             } catch (IllegalAccessException e) {
@@ -107,16 +105,14 @@ public class ReflectionHelper {
     public static void setField(Field field, Object object, Object value) {
         if (field != null)
             try {
-                boolean wasNotAccessible = false;
+                boolean wasAccessible = field.isAccessible();
 
-                if (!field.isAccessible()) {
+                if (!wasAccessible)
                     field.setAccessible(true);
-                    wasNotAccessible = true;
-                }
 
                 field.set(object, value);
 
-                if (wasNotAccessible)
+                if (!wasAccessible)
                     field.setAccessible(false);
 
             } catch (IllegalAccessException e) {
@@ -168,16 +164,14 @@ public class ReflectionHelper {
     public static void invokeMethod(Method method, Object object, Object... methodArguments) {
         if (method != null)
             try {
-                boolean notAccessible = false;
+                boolean wasAccessible = method.isAccessible();
 
-                if (!method.isAccessible()) {
-                    notAccessible = true;
+                if (!wasAccessible)
                     method.setAccessible(true);
-                }
 
                 method.invoke(object, methodArguments);
 
-                if (notAccessible)
+                if (!wasAccessible)
                     method.setAccessible(false);
 
             } catch (IllegalAccessException | InvocationTargetException exception) {

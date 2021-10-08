@@ -23,6 +23,9 @@ public class BytecodeHelper {
     static {
         closestEntityField = ReflectionHelper.getFieldOrNull(LookAtGoal.class, "closestEntity", "field_75334_a");
         ReflectionHelper.makeAccessible(closestEntityField);
+
+        if (closestEntityField == null)
+            throw new NullPointerException("Unable to find field 'closestEntityField' under names 'closestEntity' and 'field_75334_a'");
     }
 
     /**
@@ -116,6 +119,7 @@ public class BytecodeHelper {
         return camera.isBoundingBoxInFrustum(axisAlignedBB);
     }
 
+    // TODO Possibly move this one to RenderingOffsetter.
     /**
      * Gets whether the entity is within range to render.
      *

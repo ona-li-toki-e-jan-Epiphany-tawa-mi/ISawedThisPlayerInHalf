@@ -23,6 +23,7 @@ public class ModifiedBipedModel<T extends LivingEntity> extends BipedModel<T> {
      */
     public ModifiedBipedModel(float modelSize) {
         super(modelSize);
+
         this.initialValues[0] = bipedHead.rotationPointX;
         this.initialValues[1] = bipedHead.rotationPointZ;
         this.initialValues[2] = bipedBody.rotationPointX;

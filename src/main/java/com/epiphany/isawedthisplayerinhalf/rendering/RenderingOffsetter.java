@@ -34,6 +34,11 @@ public class RenderingOffsetter {
 
         smallArmsField = ReflectionHelper.getFieldOrNull(PlayerModel.class, "smallArms", "field_178735_y");
         ReflectionHelper.makeAccessible(rendererField);
+
+        if (rendererField == null)
+            throw new NullPointerException("Unable to find field 'rendererField' under name 'renderer'");
+        if (smallArmsField == null)
+            throw new NullPointerException("Unable to find field 'smallArmsField' under names 'smallArms' and 'field_178735_y'");
     }
 
 
@@ -57,7 +62,7 @@ public class RenderingOffsetter {
      * @return Whether or not the game is in third-person.
      */
     public static boolean modifiedIsThirdPerson(ActiveRenderInfo activeRenderInfo) {
-        return !Offsetter.getOffsets(Minecraft.getInstance().player).equals(Vec3d.ZERO) || activeRenderInfo.isThirdPerson();
+        return activeRenderInfo.isThirdPerson() || !Offsetter.getOffsets(Minecraft.getInstance().player).equals(Vec3d.ZERO);
     }
 
 
@@ -89,7 +94,8 @@ public class RenderingOffsetter {
                     wrappedRenderer = wrappedRendererMap.get(playerUUID);
 
                 // Swaps out renderers, renders modified player model.
-                wrappedRenderer.render((AbstractClientPlayerEntity) player, player.rotationYaw, renderPlayerEvent.getPartialRenderTick(), renderPlayerEvent.getMatrixStack(), renderPlayerEvent.getBuffers(), renderPlayerEvent.getLight());
+                wrappedRenderer.render((AbstractClientPlayerEntity) player, player.rotationYaw, renderPlayerEvent.getPartialRenderTick(),
+                        renderPlayerEvent.getMatrixStack(), renderPlayerEvent.getBuffers(), renderPlayerEvent.getLight());
                 ReflectionHelper.setField(rendererField, renderPlayerEvent, wrappedRenderer.wrappedRenderer);
 
                 renderPlayerEvent.setCanceled(true);

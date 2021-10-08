@@ -25,7 +25,7 @@ public class SetOffsetPacket {
      * Creates a new set offset packet.
      *
      * @param player The player who's offset is being set.
-     * @param offsets The offset to be set to the player.
+     * @param offsets The offsets to be set to the player.
      */
     public SetOffsetPacket(PlayerEntity player, Vec3d offsets) {
         this.playerName = player.getGameProfile().getName();
@@ -36,9 +36,9 @@ public class SetOffsetPacket {
      * Creates a new SetOffset packet.
      *
      * @param player The player who's offset is being set.
-     * @param x The x offset.
-     * @param y The y offset.
-     * @param z The z offset.
+     * @param x The x offset to be set to the player.
+     * @param y The y offset to be set to the player.
+     * @param z The z offset to be set to the player.
      */
     public SetOffsetPacket(PlayerEntity player, double x, double y, double z) {
         this(player, new Vec3d(x, y, z));
