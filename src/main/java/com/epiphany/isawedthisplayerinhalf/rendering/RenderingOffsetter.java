@@ -7,6 +7,7 @@ import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.api.distmarker.Dist;
@@ -63,6 +64,20 @@ public class RenderingOffsetter {
      */
     public static boolean modifiedIsThirdPerson(ActiveRenderInfo activeRenderInfo) {
         return activeRenderInfo.isThirdPerson() || !Offsetter.getOffsets(Minecraft.getInstance().player).equals(Vec3d.ZERO);
+    }
+
+    /**
+     * Gets whether the entity is within range to render.
+     *
+     * @param entity The entity to test.
+     * @param x The x-coordinate of the camera.
+     * @param y The y-coordinate of the camera.
+     * @param z The z-coordinate of the camera.
+     * @return Whether the entity is within range to render.
+     */
+    public static boolean modifiedIsInRangeToRender3d(Entity entity, double x, double y, double z) {
+        Vec3d entityOffsets = Offsetter.getOffsets(entity);
+        return entity.isInRangeToRender3d(x, y, z) || (!entityOffsets.equals(Vec3d.ZERO) && entity.isInRangeToRender3d(x - entityOffsets.x, y - entityOffsets.y, z - entityOffsets.z));
     }
 
 

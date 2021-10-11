@@ -1,6 +1,5 @@
 package com.epiphany.isawedthisplayerinhalf.helpers;
 
-import com.epiphany.isawedthisplayerinhalf.Offsetter;
 import net.minecraft.client.renderer.culling.ClippingHelperImpl;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.goal.LookAtGoal;
@@ -117,20 +116,5 @@ public class BytecodeHelper {
      */
     public static boolean isBoundingBoxInFrustum(ClippingHelperImpl camera, AxisAlignedBB axisAlignedBB) {
         return camera.isBoundingBoxInFrustum(axisAlignedBB);
-    }
-
-    // TODO Possibly move this one to RenderingOffsetter.
-    /**
-     * Gets whether the entity is within range to render.
-     *
-     * @param entity The entity to test.
-     * @param x The x-coordinate of the camera.
-     * @param y The y-coordinate of the camera.
-     * @param z The z-coordinate of the camera.
-     * @return Whether the entity is within range to render.
-     */
-    public static boolean isInRangeToRender3d(Entity entity, double x, double y, double z) {
-        Vec3d entityOffsets = Offsetter.getOffsets(entity);
-        return entity.isInRangeToRender3d(x, y, z) || (!entityOffsets.equals(Vec3d.ZERO) && entity.isInRangeToRender3d(x - entityOffsets.x, y - entityOffsets.y, z - entityOffsets.z));
     }
 }

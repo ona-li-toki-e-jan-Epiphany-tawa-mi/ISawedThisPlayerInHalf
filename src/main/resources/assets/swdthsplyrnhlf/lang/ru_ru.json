@@ -1,11 +1,19 @@
 {
   "commands.swdthsplyrnhlf.offsets.get": "Текущие смещения: %f, %f, %f",
-  "commands.swdthsplyrnhlf.offsets.reset": "Смешения сброшены",
+
+  "commands.swdthsplyrnhlf.offsets.reset": "Смещения сброшены",
+  "commands.swdthsplyrnhlf.offsets.reset.already_reset": "Смещения уже сброшены",
+
   "commands.swdthsplyrnhlf.offsets.set": "Смещения установлены (%f, %f, %f)",
+  "commands.swdthsplyrnhlf.offsets.set.already_set": "Смещения уже установлены на %f, %f, %f",
 
   "commands.swdthsplyrnhlf.offsets.help": "Раскалывает ваше тело пополам и ставит верхнюю часть где-нибудь другое\nПсевдоним: ::ofs",
   "commands.swdthsplyrnhlf.offsets.help.usage": "Помощь: ::offsets help",
   "commands.swdthsplyrnhlf.offsets.get.usage": "Отобразить текущие смещения: ::offsets get",
   "commands.swdthsplyrnhlf.offsets.reset.usage": "Сбросить смещения: ::offsets reset",
-  "commands.swdthsplyrnhlf.offsets.set.usage": "Установить смещения: ::offsets set <x> <y> <z>"
+  "commands.swdthsplyrnhlf.offsets.set.usage": "Установить смещения: ::offsets set <x> <y> <z>",
+
+
+  "commands.swdthsplyrnhlf.errors.number_expected": "Ожидалось число",
+  "commands.swdthsplyrnhlf.errors.error_position_pointer": "<--[ЗДЕСЬ]"
 }

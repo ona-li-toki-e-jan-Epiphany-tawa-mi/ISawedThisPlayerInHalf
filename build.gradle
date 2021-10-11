@@ -82,11 +82,11 @@ jar {
     manifest {
         attributes([
             "Specification-Title": "isawedthisplayerinhalf",
-            "Specification-Vendor": "Epiphany",
+            "Specification-Vendor": "ona li toki e jan Epiphany tawa mi",
             "Specification-Version": "1", // We are version 1 of ourselves
             "Implementation-Title": project.name,
             "Implementation-Version": "${version}",
-            "Implementation-Vendor": "Epiphany",
+            "Implementation-Vendor": "ona li toki e jan Epiphany tawa mi",
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }

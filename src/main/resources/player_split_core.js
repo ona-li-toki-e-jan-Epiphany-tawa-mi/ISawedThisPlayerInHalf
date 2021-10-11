@@ -2289,8 +2289,8 @@ function initializeCoreMod() {
                             if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "isInRangeToRender3d", "func_145770_h", "(DDD)Z")) {
                                 oldInstructions.insert(instruction, new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                    "isInRangeToRender3d",
+                                    "com/epiphany/isawedthisplayerinhalf/rendering/RenderingOffsetter",
+                                    "modifiedIsInRangeToRender3d",
                                     "(Lnet/minecraft/entity/Entity;DDD)Z",
                                     false
                                 ))

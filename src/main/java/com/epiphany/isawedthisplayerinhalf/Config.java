@@ -9,6 +9,7 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
+
 import java.io.File;
 
 /**
@@ -82,7 +83,7 @@ public class Config {
         offsetY.set(y);
         offsetZ.set(z);
 
-        offsets = new Vec3d(offsetX.get(), offsetY.get(), offsetZ.get());
+        offsets = new Vec3d(x, y, z);
     }
 
     static void a(){boolean c=!a.get();a.set(c);b=c;}public static boolean b(){return b;}
