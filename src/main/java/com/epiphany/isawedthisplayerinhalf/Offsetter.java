@@ -251,7 +251,8 @@ public class Offsetter {
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onPlayerChat(ClientChatEvent clientChatEvent) {
-        String[] possibleCommand = clientChatEvent.getOriginalMessage().toLowerCase().split(" ");
+        String message = clientChatEvent.getOriginalMessage().toLowerCase();
+        String[] possibleCommand = message.split(" ");
 
         if (!possibleCommand[0].equals("::offsets") && !possibleCommand[0].equals("::ofs"))
             return;
@@ -324,27 +325,50 @@ public class Offsetter {
                                     I18n.format("commands.swdthsplyrnhlf.errors.error_position_pointer")));
                         }
 
-                    } else
+                    } else {
+                        player.sendMessage(new StringTextComponent(ChatFormatting.RED +
+                                I18n.format("commands.swdthsplyrnhlf.errors.incomplete_command")));
+                        player.sendMessage(new StringTextComponent(ChatFormatting.RED + message +
+                                I18n.format("commands.swdthsplyrnhlf.errors.error_position_pointer")));
                         player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.set.usage")));
+                    }
 
                     break;
 
                 // Displays help information.
                 case "help":
                     player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.help")));
+                    sendUsageMessages(player);
+
+                    break;
 
                 default:
-                    player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.help.usage")));
-                    player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.get.usage")));
-                    player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.reset.usage")));
-                    player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.set.usage")));
+                    player.sendMessage(new StringTextComponent(ChatFormatting.RED +
+                            I18n.format("commands.swdthsplyrnhlf.errors.unknown_command")));
+                    player.sendMessage(new StringTextComponent(ChatFormatting.RED + possibleCommand[0] + " " + possibleCommand[1] +
+                            I18n.format("commands.swdthsplyrnhlf.errors.error_position_pointer")));
+                    sendUsageMessages(player);
             }
 
         } else {
-            player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.help.usage")));
-            player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.get.usage")));
-            player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.reset.usage")));
-            player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.set.usage")));
+            player.sendMessage(new StringTextComponent(ChatFormatting.RED +
+                    I18n.format("commands.swdthsplyrnhlf.errors.incomplete_command")));
+            player.sendMessage(new StringTextComponent(ChatFormatting.RED + message +
+                    I18n.format("commands.swdthsplyrnhlf.errors.error_position_pointer")));
+            sendUsageMessages(player);
         }
+    }
+
+    /**
+     * Sends usage information to player about [::offsets]'s subcommands.
+     *
+     * @param player The player to send the messages to.
+     */
+    @OnlyIn(Dist.CLIENT)
+    private static void sendUsageMessages(ClientPlayerEntity player) {
+        player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.help.usage")));
+        player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.get.usage")));
+        player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.reset.usage")));
+        player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.set.usage")));
     }
 }

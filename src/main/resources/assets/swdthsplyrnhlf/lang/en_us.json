@@ -15,5 +15,7 @@
 
 
   "commands.swdthsplyrnhlf.errors.number_expected": "Expected number",
+  "commands.swdthsplyrnhlf.errors.incomplete_command": "Incomplete command",
+  "commands.swdthsplyrnhlf.errors.unknown_command": "Unknown command",
   "commands.swdthsplyrnhlf.errors.error_position_pointer": "<--[HERE]"
 }

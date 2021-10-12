@@ -146,7 +146,7 @@ public class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEn
             xOffset = (float) (offsets.x * 16);
             yOffset = (float) (offsets.y * -16);
             zOffset = (float) (offsets.z * 16);
-            // Angle Needs to be multiplied by two for whatever reason.
+            // Angle needs to be multiplied by two for whatever reason.
             offsetAngle = (float) (Math.atan2(-offsets.z, offsets.x) * 2);
             shouldRotate = true;
 

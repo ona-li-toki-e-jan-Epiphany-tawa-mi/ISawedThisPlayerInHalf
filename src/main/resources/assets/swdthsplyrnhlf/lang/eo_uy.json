@@ -15,5 +15,7 @@
 
 
   "commands.swdthsplyrnhlf.errors.number_expected": "nanpa li wile",
+  "commands.swdthsplyrnhlf.errors.incomplete_command": "nimi wawa li pini ala",
+  "commands.swdthsplyrnhlf.errors.unknown_command": "nimi wawa li lon ala",
   "commands.swdthsplyrnhlf.errors.error_position_pointer": "<--[lon ni]"
 }

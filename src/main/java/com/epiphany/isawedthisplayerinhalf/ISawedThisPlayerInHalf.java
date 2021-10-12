@@ -8,7 +8,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-// TODO Add incomplete command error messages to the command.
 // TODO Proofread JavaScript god file.
 
 // TODO Possibly have offsets stored in a database.
