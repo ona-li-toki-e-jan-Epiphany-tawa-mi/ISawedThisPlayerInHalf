@@ -159,15 +159,25 @@ function checkVarInsn(instructionNode, opCode, varIndex) {
  */
 function logMessage(level, message) {
     var currentDate = new Date()
-
     print("[" + currentDate.getHours() + ":" + currentDate.getMinutes() + ":" + currentDate.getSeconds() + "] [PlayerSplitCore/" + level + "]: " + message)
+}
+
+/**
+ * Logs that a transform was successful, showing the transformed function and the host class's name.
+ *
+ * @param {string} functionName The name of the function that was transformed.
+ * @param {string} fullClassName The full name of the class that the function resides in.
+ */
+function logTransformSuccess(functionName, fullClassName) {
+    logMessage("DEBUG", "Successfully transformed " + functionName + " in " + fullClassName)
+}
+
+function logTransformError(functionName, fullClassName, errorMessage) {
+    logMessage("ERROR", "An error occurred while transforming " + functionName + " function in " + fullClassName + ":\n    " + errorMessage)
 }
 
 
 
-/**
- * Gets this CoreMod's list of transformers.
- */
 function initializeCoreMod() {
     return {
         /**
@@ -207,7 +217,7 @@ function initializeCoreMod() {
                                 oldInstructions.insert(instruction, newInstructions)
                                 // ...
 
-                                logMessage("DEBUG", "Successfully transformed pick function in net.minecraft.entity.Entity")
+                                logTransformSuccess("function pick", "net.minecraft.entity.Entity")
                                 success = true
 
                                 break
@@ -265,7 +275,7 @@ function initializeCoreMod() {
                                 oldInstructions.insert(instruction, newInstructions)
                                 // ...
 
-                                logMessage("DEBUG", "Successfully transformed getMouseOver function in net.minecraft.client.renderer.GameRenderer")
+                                logTransformSuccess("function getMouseOver", "net.minecraft.client.renderer.GameRenderer")
                                 success = true
 
                                 break
@@ -319,7 +329,7 @@ function initializeCoreMod() {
 
 
                         renderItemInFirstPerson.instructions.insert(newInstructions)
-                        logMessage("DEBUG", "Successfully transformed renderItemInFirstPerson function in net.minecraft.client.renderer.FirstPersonRenderer")
+                        logTransformSuccess("function renderItemInFirstPerson", "net.minecraft.client.renderer.FirstPersonRenderer")
 
                     } catch (exception) {
                         logMessage("ERROR", "An error occurred while transforming renderItemInFirstPerson function in net.minecraft.client.renderer.FirstPersonRenderer:\n    " + exception)
@@ -363,7 +373,7 @@ function initializeCoreMod() {
                                 oldInstructions.remove(instruction)
 
                                 success = true
-                                logMessage("DEBUG", "Successfully transformed updateCameraAndRender function in net.minecraft.client.renderer.WorldRenderer")
+                                logTransformSuccess("function updateCameraAndRender", "net.minecraft.client.renderer.WorldRenderer")
 
                                 break
                             }
@@ -421,7 +431,7 @@ function initializeCoreMod() {
                             // ...
 
                             success = true
-                            logMessage("DEBUG", "Successfully transformed constructor in net.minecraft.entity.projectile.AbstractArrowEntity")
+                            logTransformSuccess("constructor", "net.minecraft.entity.projectile.AbstractArrowEntity")
 
                             break
                         }
@@ -476,7 +486,7 @@ function initializeCoreMod() {
                             // ...
 
                             success = true
-                            logMessage("DEBUG", "Successfully transformed constructor in net.minecraft.entity.projectile.ThrowableEntity")
+                            logTransformSuccess("constructor", "net.minecraft.entity.projectile.ThrowableEntity")
 
                             break
                         }
@@ -532,7 +542,7 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logMessage("DEBUG", "Successfully transformed onItemRightClick function in net.minecraft.item.EnderEyeItem")
+                                logTransformSuccess("function onItemRightClick", "net.minecraft.item.EnderEyeItem")
 
                                 break
                             }
@@ -591,7 +601,7 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logMessage("DEBUG", "Successfully transformed onItemRightClick function in net.minecraft.item.FishingRodItem")
+                                logTransformSuccess("function onItemRightClick", "net.minecraft.item.FishingRodItem")
 
                                 break
                             }
@@ -756,7 +766,7 @@ function initializeCoreMod() {
                             logMessage("ERROR", "An error occurred while transforming render function in net.minecraft.client.renderer.FishRenderer:\n    Unable to find secondary injection points")
 
                         } else if (successes & 1 === 1)
-                            logMessage("DEBUG", "Successfully transformed render function in net.minecraft.client.renderer.FishRenderer")
+                            logTransformSuccess("function render", "net.minecraft.client.renderer.FishRenderer")
 
                     } catch (exception) {
                         logMessage("ERROR", "An error occurred while transforming render function in net.minecraft.client.renderer.FishRenderer:\n    " + exception)
@@ -802,7 +812,7 @@ function initializeCoreMod() {
                                 oldInstructions.remove(instruction)
 
                                 success = true
-                                logMessage("DEBUG", "Successfully transformed shouldStopFishing function in net.minecraft.entity.projectile.FishingBobberEntity")
+                                logTransformSuccess("function shouldStopFishing", "net.minecraft.entity.projectile.FishingBobberEntity")
 
                                 break
                             }
@@ -929,7 +939,7 @@ function initializeCoreMod() {
                                     // DSTORE 14
                                     // ...
 
-                                    logMessage("DEBUG", "Successfully transformed handleHookRetraction function in net.minecraft.entity.projectile.FishingBobberEntity")
+                                    logTransformSuccess("function handleHookRetraction", "net.minecraft.entity.projectile.FishingBobberEntity")
                                     success = true
 
                                     break
@@ -1048,7 +1058,7 @@ function initializeCoreMod() {
                                     oldInstructions.insert(instructions[17], addZList)
                                     // ...
 
-                                    logMessage("DEBUG", "Successfully transformed bringInHookedEntity function in net.minecraft.entity.projectile.FishingBobberEntity")
+                                    logTransformSuccess("function bringInHookedEntity", "net.minecraft.entity.projectile.FishingBobberEntity")
                                     success = true
 
                                     break
@@ -1200,7 +1210,7 @@ function initializeCoreMod() {
                                 // DSTORE 9
                                 // ...
 
-                                logMessage("DEBUG", "Successfully transformed func_225416_a function in net.minecraft.server.management.PlayerInteractionManager")
+                                logTransformSuccess("function func_225416_a", "net.minecraft.server.management.PlayerInteractionManager")
                                 success = true
 
                                 break
@@ -1516,7 +1526,7 @@ function initializeCoreMod() {
                             logMessage("ERROR", "An error occurred while transforming updateLeashedState function in net.minecraft.entity.CreatureEntity:\n    Unable to find the fourth set of injection points")
 
                         } else if (successes ^ 15 === 0)
-                            logMessage("DEBUG", "Successfully transformed updateLeashedState function in net.minecraft.entity.CreatureEntity")
+                            logTransformSuccess("function updateLeashedState", "net.minecraft.entity.CreatureEntity")
 
                     } catch (exception) {
                         logMessage("ERROR", "An error occurred while transforming updateLeashedState function in net.minecraft.entity.CreatureEntity:\n    " + exception)
@@ -1702,7 +1712,7 @@ function initializeCoreMod() {
                                 logMessage("ERROR", "An error occurred while transforming renderLeash function in net.minecraft.client.renderer.entity.MobRenderer:\n    Unable to find tertiary injection points")
 
                             } else if (successes ^ 7 === 0)
-                                logMessage("DEBUG", "Successfully transformed renderLeash function in net.minecraft.client.renderer.entity.MobRenderer")
+                                logTransformSuccess("function renderLeash", "net.minecraft.client.renderer.entity.MobRenderer")
                         }
 
                     } catch (exception) {
@@ -1822,7 +1832,7 @@ function initializeCoreMod() {
                         }
 
                         if (success) {
-                            logMessage("DEBUG", "Successfully transformed tick function in net.minecraft.entity.ai.goal.LookAtGoal")
+                            logTransformSuccess("function tick", "net.minecraft.entity.ai.goal.LookAtGoal")
 
                         } else
                             logMessage("ERROR", "An error occurred while transforming tick function in net.minecraft.entity.ai.goal.LookAtGoal:\n    Unable to find injection points")
@@ -1875,7 +1885,7 @@ function initializeCoreMod() {
                         }
 
                         if (success) {
-                            logMessage("DEBUG", "Successfully transformed processTryUseItemOnBlock function in net.minecraft.network.play.ServerPlayNetHandler")
+                            logTransformSuccess("function processTryUseItemOnBlock", "net.minecraft.network.play.ServerPlayNetHandler")
 
                         } else
                             logMessage("ERROR", "An error occurred while transforming processTryUseItemOnBlock function in net.minecraft.network.play.ServerPlayNetHandler:\n    Unable to find injection point")
@@ -1928,7 +1938,7 @@ function initializeCoreMod() {
                         }
 
                         if (success) {
-                            logMessage("DEBUG", "Successfully transformed isUsableByPlayer function in net.minecraft.tileentity.AbstractFurnaceTileEntity")
+                            logTransformSuccess("function isUsableByPlayer", "net.minecraft.tileentity.AbstractFurnaceTileEntity")
 
                         } else
                             logMessage("ERROR", "An error occurred while transforming isUsableByPlayer function in net.minecraft.tileentity.AbstractFurnaceTileEntity:\n    Unable to find injection point")
@@ -1981,7 +1991,7 @@ function initializeCoreMod() {
                         }
 
                         if (success) {
-                            logMessage("DEBUG", "Successfully transformed isUsableByPlayer function in net.minecraft.tileentity.BrewingStandTileEntity")
+                            logTransformSuccess("function isUsableByPlayer", "net.minecraft.tileentity.BrewingStandTileEntity")
 
                         } else
                             logMessage("ERROR", "An error occurred while transforming isUsableByPlayer function in net.minecraft.tileentity.BrewingStandTileEntity:\n    Unable to find injection point")
@@ -2034,7 +2044,7 @@ function initializeCoreMod() {
                         }
 
                         if (success) {
-                            logMessage("DEBUG", "Successfully transformed isUsableByPlayer function in net.minecraft.tileentity.LockableLootTileEntity")
+                            logTransformSuccess("function isUsableByPlayer", "net.minecraft.tileentity.LockableLootTileEntity")
 
                         } else
                             logMessage("ERROR", "An error occurred while transforming isUsableByPlayer function in net.minecraft.tileentity.LockableLootTileEntity:\n    Unable to find injection point")
@@ -2087,7 +2097,7 @@ function initializeCoreMod() {
                         }
 
                         if (success) {
-                            logMessage("DEBUG", "Successfully transformed isUsableByPlayer function in net.minecraft.tileentity.LecternTileEntity")
+                            logTransformSuccess("function isUsableByPlayer", "net.minecraft.tileentity.LecternTileEntity")
 
                         } else
                             logMessage("ERROR", "An error occurred while transforming isUsableByPlayer function in net.minecraft.tileentity.LecternTileEntity:\n    Unable to find injection point")
@@ -2140,7 +2150,7 @@ function initializeCoreMod() {
                         }
 
                         if (success) {
-                            logMessage("DEBUG", "Successfully transformed canBeUsed function in net.minecraft.tileentity.EnderChestTileEntity")
+                            logTransformSuccess("function canBeUsed", "net.minecraft.tileentity.EnderChestTileEntity")
 
                         } else
                             logMessage("ERROR", "An error occurred while transforming canBeUsed function in net.minecraft.tileentity.EnderChestTileEntity:\n    Unable to find injection point")
@@ -2197,7 +2207,7 @@ function initializeCoreMod() {
                         }
 
                         if (success) {
-                            logMessage("DEBUG", "Successfully transformed isUsableByPlayer function in net.minecraft.entity.item.minecart.ContainerMinecartEntity")
+                            logTransformSuccess("function isUsableByPlayer", "net.minecraft.entity.item.minecart.ContainerMinecartEntity")
 
                         } else
                             logMessage("ERROR", "An error occurred while transforming isUsableByPlayer function in net.minecraft.entity.item.minecart.ContainerMinecartEntity:\n    Unable to find injection point")
@@ -2250,7 +2260,7 @@ function initializeCoreMod() {
                         }
 
                         if (success) {
-                            logMessage("DEBUG", "Successfully transformed lambda$isWithinUsableDistance$0 function in net.minecraft.inventory.container.Container")
+                            logTransformSuccess("function lambda$isWithinUsableDistance$0", "net.minecraft.inventory.container.Container")
 
                         } else
                             logMessage("ERROR", "An error occurred while transforming lambda$isWithinUsableDistance$0 function in net.minecraft.inventory.container.Container:\n    Unable to find injection point")
@@ -2392,7 +2402,7 @@ function initializeCoreMod() {
                             logMessage("ERROR", "An error occurred while transforming shouldRender function in net.minecraft.client.renderer.entity.EntityRenderer:\n    Unable to find secondary injection point")
 
                         } else if (successes & 3 === 3)
-                            logMessage("DEBUG", "Successfully transformed shouldRender function in net.minecraft.client.renderer.entity.EntityRenderer")
+                            logTransformSuccess("function shouldRender", "net.minecraft.client.renderer.entity.EntityRenderer")
 
                     } catch (exception) {
                         logMessage("ERROR", "An error occurred while transforming shouldRender function in net.minecraft.client.renderer.entity.EntityRenderer:\n    " + exception)
@@ -2529,7 +2539,7 @@ function initializeCoreMod() {
                             logMessage("ERROR", "An error occurred while transforming attackEntityFrom function in net.minecraft.entity.LivingEntity:\n    Unable to find injection area")
 
                         } else if (successes & 7 === 7)
-                            logMessage("DEBUG", "Successfully transformed attackEntityFrom function in net.minecraft.entity.LivingEntity")
+                            logTransformSuccess("function attackEntityFrom", "net.minecraft.entity.LivingEntity")
 
                     } catch (exception) {
                         logMessage("ERROR", "An error occurred while transforming attackEntityFrom function in net.minecraft.entity.LivingEntity:\n    " + exception)
