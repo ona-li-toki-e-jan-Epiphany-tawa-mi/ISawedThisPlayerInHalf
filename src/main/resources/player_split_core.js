@@ -10,10 +10,6 @@ var VarInsnNode = Java.type("org.objectweb.asm.tree.VarInsnNode")
 
 
 
-// TODO Add control over which level of logging should be used.
-
-
-
 /**
  * Tries to find a method within the given class.
  * Returns null if nothing is found.
@@ -154,16 +150,25 @@ function checkVarInsn(instructionNode, opCode, varIndex) {
 }
 
 
+var LoggingLevel = {
+    DEBUG: {numericLevel: 0, name: "DEBUG"},
+    ERROR: {numericLevel: 1, name: "ERROR"}
+}
+// The minimum logging level required for a message to be logged.
+var minimumLoggingLevel = LoggingLevel.DEBUG
 
 /**
  * Logs a message to the console, showing the time and severity level with it.
  *
- * @param {string} level The severity level of the message (e.x. INFO, WARN, DEBUG.)
+ * @param {enum/LoggingLevel} loggingLevel The severity level of the message (e.x. LoggingLevel.INFO, LoggingLevel.ERROR, LoggingLevel.DEBUG.)
  * @param {string} message The message to log to the console.
  */
-function logMessage(level, message) {
+function logMessage(loggingLevel, message) {
+    if (loggingLevel.numericLevel < minimumLoggingLevel.numericLevel)
+        return
+
     var currentDate = new Date()
-    print("[" + currentDate.getHours() + ":" + currentDate.getMinutes() + ":" + currentDate.getSeconds() + "] [PlayerSplitCore/" + level + "]: " + message)
+    print("[" + currentDate.getHours() + ":" + currentDate.getMinutes() + ":" + currentDate.getSeconds() + "] [PlayerSplitCore/" + loggingLevel.numericLevel + "]: " + message)
 }
 
 /**
@@ -173,11 +178,11 @@ function logMessage(level, message) {
  * @param {string} fullClassName The full name of the class that the function resides in.
  */
 function logTransformSuccess(functionName, fullClassName) {
-    logMessage("DEBUG", "Successfully transformed " + functionName + " in " + fullClassName)
+    logMessage(LoggingLevel.DEBUG, "Successfully transformed " + functionName + " in " + fullClassName)
 }
 
 function logTransformError(functionName, fullClassName, errorMessage) {
-    logMessage("ERROR", "An error occurred while transforming " + functionName + " in " + fullClassName + ":\n    " + errorMessage)
+    logMessage(LoggingLevel.ERROR, "An error occurred while transforming " + functionName + " in " + fullClassName + ":\n    " + errorMessage)
 }
 
 
