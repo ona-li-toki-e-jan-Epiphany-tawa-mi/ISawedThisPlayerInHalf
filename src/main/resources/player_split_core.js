@@ -14,11 +14,11 @@ var VarInsnNode = Java.type("org.objectweb.asm.tree.VarInsnNode")
  * Tries to find a method within the given class.
  * Returns null if nothing is found.
  *
- * @param {object} classNode The class node to search through.
+ * @param {object/ClassNode} classNode The class node to search through.
  * @param {string} methodName The name of the method to find.
  * @param {string} descriptor The descriptor of the method to find.
  *
- * @returns {object/null} The found method. Or null, if nothing is found.
+ * @returns null} The found method. Or null, if nothing is found.
  */
 function findMethodWithSignature(classNode, methodName, descriptor) {
     for (var i in classNode.methods) {
@@ -35,12 +35,12 @@ function findMethodWithSignature(classNode, methodName, descriptor) {
  * Tries to find a method within the given class.
  * Returns null if nothing is found.
  *
- * @param {object} classNode The class node to search through.
+ * @param {object/ClassNode} classNode The class node to search through.
  * @param {string} methodName The name of the method to find.
  * @param {string} methodName The obfuscated name of the method to find.
  * @param {string} descriptor The descriptor of the method to find.
  *
- * @returns {object/null} The found method. Or null, if nothing is found.
+ * @returns {null} The found method. Or null, if nothing is found.
  */
 function findObfuscatedMethodWithSignature(classNode, methodName, obfuscatedName, descriptor) {
     for (var i in classNode.methods) {
@@ -56,20 +56,21 @@ function findObfuscatedMethodWithSignature(classNode, methodName, obfuscatedName
 /**
  * Checks if a field instruction node has the given opcode, owner, name, and descriptor.
  *
- * @param {object} instructionNode The instruction node to check.
+ * @param {object/FieldNode} instructionNode The instruction node to check.
  * @param {number} opCode The opcode the instruction should have.
  * @param {string} name The owner the instruction should have.
  * @param {string} name The name the instruction should have.
  * @param {string} descriptor The descriptor the instruction should have.
  */
 function checkFieldInsn(instructionNode, opCode, owner, name, descriptor) {
-    return instructionNode.getOpcode() === opCode && instructionNode.owner === owner && instructionNode.name === name && instructionNode.desc === descriptor
+    return instructionNode.getOpcode() === opCode && instructionNode.owner === owner && instructionNode.name === name &&
+        instructionNode.desc === descriptor
 }
 
 /**
  * Checks if a field instruction node has the given opcode, owner, name, and descriptor.
  *
- * @param {object} instructionNode The instruction node to check.
+ * @param {object/FieldNode} instructionNode The instruction node to check.
  * @param {number} opCode The opcode the instruction should have.
  * @param {string} name The owner the instruction should have.
  * @param {string} name The name the instruction should have.
@@ -77,13 +78,14 @@ function checkFieldInsn(instructionNode, opCode, owner, name, descriptor) {
  * @param {string} descriptor The descriptor the instruction should have.
  */
 function checkObfuscatedFieldInsn(instructionNode, opCode, owner, name, obfuscatedName, descriptor) {
-    return instructionNode.getOpcode() === opCode && instructionNode.owner === owner && (instructionNode.name === name || instructionNode.name === obfuscatedName) && instructionNode.desc === descriptor
+    return instructionNode.getOpcode() === opCode && instructionNode.owner === owner && (instructionNode.name === name ||
+        instructionNode.name === obfuscatedName) && instructionNode.desc === descriptor
 }
 
 /**
  * Checks if a instruction node has the given opcode.
  *
- * @param {object} instructionNode The instruction node to check.
+ * @param {object/InsnNode} instructionNode The instruction node to check.
  * @param {number} opCode The opcode the instruction should have.
  */
 function checkInsn(instructionNode, opCode) {
@@ -91,10 +93,10 @@ function checkInsn(instructionNode, opCode) {
 }
 
 /**
- * Checks if a instruction node has the given opcode and constant.
+ * Checks if a load constant instruction node has the given opcode and constant.
  *
- * @param {object} instructionNode The instruction node to check.
- * @param {number/string/object} constant The constant the instruction should have.
+ * @param {object/LdcInsnNode} instructionNode The instruction node to check.
+ * @param constant The constant the instruction should have.
  */
 function checkLdcInsn(instructionNode, constant) {
     return instructionNode.getOpcode() === Opcodes.LDC && instructionNode.cst === constant
@@ -103,20 +105,21 @@ function checkLdcInsn(instructionNode, constant) {
 /**
  * Checks if a method instruction node has the given opcode, name, and descriptor.
  *
- * @param {object} instructionNode The instruction node to check.
+ * @param {object/MethodNode} instructionNode The instruction node to check.
  * @param {number} opCode The opcode the instruction should have.
  * @param {string} name The name of the owning class the instruction should have.
  * @param {string} name The name the instruction should have.
  * @param {string} descriptor The descriptor the instruction should have.
  */
 function checkMethodInsn(instructionNode, opCode, owner, name, descriptor) {
-    return instructionNode.getOpcode() === opCode && instructionNode.owner === owner && instructionNode.name === name && instructionNode.desc === descriptor
+    return instructionNode.getOpcode() === opCode && instructionNode.owner === owner && instructionNode.name === name &&
+        instructionNode.desc === descriptor
 }
 
 /**
  * Checks if a method instruction node has the given opcode, name, and descriptor.
  *
- * @param {object} instructionNode The instruction node to check.
+ * @param {object/MethodNode} instructionNode The instruction node to check.
  * @param {number} opCode The opcode the instruction should have.
  * @param {string} owner The name of the owning class the instruction should have.
  * @param {string} name The name the instruction should have.
@@ -124,13 +127,14 @@ function checkMethodInsn(instructionNode, opCode, owner, name, descriptor) {
  * @param {string} descriptor The descriptor the instruction should have.
  */
 function checkObfuscatedMethodInsn(instructionNode, opCode, owner, name, obfuscatedName, descriptor) {
-    return instructionNode.getOpcode() === opCode && instructionNode.owner === owner && (instructionNode.name === name || instructionNode.name === obfuscatedName) && instructionNode.desc === descriptor
+    return instructionNode.getOpcode() === opCode && instructionNode.owner === owner && (instructionNode.name === name ||
+        instructionNode.name === obfuscatedName) && instructionNode.desc === descriptor
 }
 
 /**
- * Checks if a instruction node has the given opcode and index.
+ * Checks if a type instruction node has the given opcode and index.
  *
- * @param {object} instructionNode The instruction node to check.
+ * @param {object/TypeInsnNode} instructionNode The instruction node to check.
  * @param {number} opCode The opcode the instruction should have.
  * @param {string} descriptor The descriptor that the instruction should have.
  */
@@ -139,9 +143,9 @@ function checkTypeInsn(instructionNode, opCode, descriptor) {
 }
 
 /**
- * Checks if a instruction node has the given opcode and index.
+ * Checks if a var instruction node has the given opcode and index.
  *
- * @param {object} instructionNode The instruction node to check.
+ * @param {object/VarInsnNode} instructionNode The instruction node to check.
  * @param {number} opCode The opcode the instruction should have.
  * @param {number} varIndex The index of the constant pool that the instruction should have.
  */
@@ -160,7 +164,7 @@ var minimumLoggingLevel = LoggingLevel.DEBUG
 /**
  * Logs a message to the console, showing the time and severity level with it.
  *
- * @param {enum/LoggingLevel} loggingLevel The severity level of the message (e.x. LoggingLevel.INFO, LoggingLevel.ERROR, LoggingLevel.DEBUG.)
+ * @param {enum/LoggingLevel} loggingLevel The severity level of the message (e.x. LoggingLevel.ERROR, LoggingLevel.INFO, LoggingLevel.DEBUG.)
  * @param {string} message The message to log to the console.
  */
 function logMessage(loggingLevel, message) {
@@ -168,7 +172,8 @@ function logMessage(loggingLevel, message) {
         return
 
     var currentDate = new Date()
-    print("[" + currentDate.getHours() + ":" + currentDate.getMinutes() + ":" + currentDate.getSeconds() + "] [PlayerSplitCore/" + loggingLevel.numericLevel + "]: " + message)
+    print("[" + currentDate.getHours() + ":" + currentDate.getMinutes() + ":" + currentDate.getSeconds() + "] [PlayerSplitCore/" +
+        loggingLevel.numericLevel + "]: " + message)
 }
 
 /**
@@ -181,6 +186,12 @@ function logTransformSuccess(functionName, fullClassName) {
     logMessage(LoggingLevel.DEBUG, "Successfully transformed " + functionName + " in " + fullClassName)
 }
 
+/**
+ * Logs that a transform was not successful, showing the function that was being transformed, the host class's name, and what went wrong.
+ *
+ * @param {string} functionName The name of the function that was transformed.
+ * @param {string} fullClassName The full name of the class that the function resides in.
+ */
 function logTransformError(functionName, fullClassName, errorMessage) {
     logMessage(LoggingLevel.ERROR, "An error occurred while transforming " + functionName + " in " + fullClassName + ":\n    " + errorMessage)
 }
@@ -209,7 +220,8 @@ function initializeCoreMod() {
                         for (var i = 0; i < oldInstructions.size(); i++) {
                             var instruction = oldInstructions.get(i)
 
-                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getEyePosition", "func_174824_e", "(F)Lnet/minecraft/util/math/Vec3d;")) {
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getEyePosition", "func_174824_e",
+                                    "(F)Lnet/minecraft/util/math/Vec3d;")) {
                                 var newInstructions = new InsnList()
 
                                 newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 0))
@@ -267,7 +279,8 @@ function initializeCoreMod() {
                         for (var i = 0; i < oldInstructions.size(); i++) {
                             var instruction = oldInstructions.get(i)
 
-                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getEyePosition", "func_174824_e", "(F)Lnet/minecraft/util/math/Vec3d;")) {
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getEyePosition", "func_174824_e",
+                                    "(F)Lnet/minecraft/util/math/Vec3d;")) {
                                 var newInstructions = new InsnList()
 
                                 newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 2))
@@ -315,7 +328,8 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
-                var renderItemInFirstPerson = findObfuscatedMethodWithSignature(classNode, "renderItemInFirstPerson", "func_228396_a_", "(FLcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer$Impl;Lnet/minecraft/client/entity/player/ClientPlayerEntity;I)V")
+                var renderItemInFirstPerson = findObfuscatedMethodWithSignature(classNode, "renderItemInFirstPerson", "func_228396_a_",
+                    "(FLcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer$Impl;Lnet/minecraft/client/entity/player/ClientPlayerEntity;I)V")
 
                 if (renderItemInFirstPerson !== null) {
                     try {
@@ -361,7 +375,8 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
-                var updateCameraAndRender = findObfuscatedMethodWithSignature(classNode, "updateCameraAndRender", "func_228426_a_", "(Lcom/mojang/blaze3d/matrix/MatrixStack;FJZLnet/minecraft/client/renderer/ActiveRenderInfo;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/renderer/Matrix4f;)V")
+                var updateCameraAndRender = findObfuscatedMethodWithSignature(classNode, "updateCameraAndRender", "func_228426_a_",
+                    "(Lcom/mojang/blaze3d/matrix/MatrixStack;FJZLnet/minecraft/client/renderer/ActiveRenderInfo;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/renderer/Matrix4f;)V")
 
                 if (updateCameraAndRender !== null) {
                     try {
@@ -371,7 +386,8 @@ function initializeCoreMod() {
                         for (var i = 0; i < oldInstructions.size(); i++) {
                             var instruction = oldInstructions.get(i)
 
-                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/client/renderer/ActiveRenderInfo", "isThirdPerson", "func_216770_i", "()Z")) {
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/client/renderer/ActiveRenderInfo", "isThirdPerson",
+                                    "func_216770_i", "()Z")) {
                                 oldInstructions.insert(instruction, new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
                                     "com/epiphany/isawedthisplayerinhalf/rendering/RenderingOffsetter",
@@ -421,7 +437,8 @@ function initializeCoreMod() {
                     for (var i = 0; i < oldInstructions.size(); i++) {
                         var instruction = oldInstructions.get(i)
 
-                        if (checkMethodInsn(instruction, Opcodes.INVOKESPECIAL, "net/minecraft/entity/projectile/AbstractArrowEntity", "<init>", "(Lnet/minecraft/entity/EntityType;DDDLnet/minecraft/world/World;)V")) {
+                        if (checkMethodInsn(instruction, Opcodes.INVOKESPECIAL, "net/minecraft/entity/projectile/AbstractArrowEntity", "<init>",
+                                "(Lnet/minecraft/entity/EntityType;DDDLnet/minecraft/world/World;)V")) {
                             var newInstructions = new InsnList()
 
                             newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 0))
@@ -476,7 +493,8 @@ function initializeCoreMod() {
                     for (var i = 0; i < oldInstructions.size(); i++) {
                         var instruction = oldInstructions.get(i)
 
-                        if (checkMethodInsn(instruction, Opcodes.INVOKESPECIAL, "net/minecraft/entity/projectile/ThrowableEntity", "<init>", "(Lnet/minecraft/entity/EntityType;DDDLnet/minecraft/world/World;)V")) {
+                        if (checkMethodInsn(instruction, Opcodes.INVOKESPECIAL, "net/minecraft/entity/projectile/ThrowableEntity", "<init>",
+                                "(Lnet/minecraft/entity/EntityType;DDDLnet/minecraft/world/World;)V")) {
                             var newInstructions = new InsnList()
 
                             newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 0))
@@ -522,7 +540,8 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
-                var onItemRightClick = findObfuscatedMethodWithSignature(classNode, "onItemRightClick", "func_77659_a", "(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResult;")
+                var onItemRightClick = findObfuscatedMethodWithSignature(classNode, "onItemRightClick", "func_77659_a",
+                    "(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResult;")
 
                 if (onItemRightClick !== null) {
                     try {
@@ -532,7 +551,8 @@ function initializeCoreMod() {
                         for (var i = 0; i < oldInstructions.size(); i++) {
                             var instruction = oldInstructions.get(i)
 
-                            if (checkMethodInsn(instruction, Opcodes.INVOKESPECIAL, "net/minecraft/entity/item/EyeOfEnderEntity", "<init>", "(Lnet/minecraft/world/World;DDD)V")) {
+                            if (checkMethodInsn(instruction, Opcodes.INVOKESPECIAL, "net/minecraft/entity/item/EyeOfEnderEntity", "<init>",
+                                    "(Lnet/minecraft/world/World;DDD)V")) {
                                 var newInstructions = new InsnList()
 
                                 newInstructions.add(new InsnNode(Opcodes.DUP))
@@ -581,7 +601,8 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
-                var onItemRightClick = findObfuscatedMethodWithSignature(classNode, "onItemRightClick", "func_77659_a", "(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResult;")
+                var onItemRightClick = findObfuscatedMethodWithSignature(classNode, "onItemRightClick", "func_77659_a",
+                    "(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResult;")
 
                 if (onItemRightClick !== null) {
                     try {
@@ -591,7 +612,8 @@ function initializeCoreMod() {
                         for (var i = 0; i < oldInstructions.size(); i++) {
                             var instruction = oldInstructions.get(i)
 
-                            if (checkMethodInsn(instruction, Opcodes.INVOKESPECIAL, "net/minecraft/entity/projectile/FishingBobberEntity", "<init>", "(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/world/World;II)V")) {
+                            if (checkMethodInsn(instruction, Opcodes.INVOKESPECIAL, "net/minecraft/entity/projectile/FishingBobberEntity", "<init>",
+                                    "(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/world/World;II)V")) {
                                 var newInstructions = new InsnList()
 
                                 newInstructions.add(new InsnNode(Opcodes.DUP))
@@ -640,7 +662,8 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
-                var render = findObfuscatedMethodWithSignature(classNode, "render", "func_225623_a_", "(Lnet/minecraft/entity/projectile/FishingBobberEntity;FFLcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;I)V")
+                var render = findObfuscatedMethodWithSignature(classNode, "render", "func_225623_a_",
+                    "(Lnet/minecraft/entity/projectile/FishingBobberEntity;FFLcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;I)V")
 
                 if (render !== null) {
                     try {
@@ -657,9 +680,14 @@ function initializeCoreMod() {
                                 for (var k = 1; k < 9; k++)
                                     instructions.push(oldInstructions.get(i + k))
 
-                                if (checkObfuscatedFieldInsn(instructions[1], Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/FishRenderer", "renderManager", "field_76990_c", "Lnet/minecraft/client/renderer/entity/EntityRendererManager;") && checkObfuscatedFieldInsn(instructions[2], Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/EntityRendererManager", "options", "field_78733_k", "Lnet/minecraft/client/GameSettings;") && checkInsn(instructions[3], Opcodes.IFNULL) &&
-                                        checkVarInsn(instructions[4], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[5], Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/FishRenderer", "renderManager", "field_76990_c", "Lnet/minecraft/client/renderer/entity/EntityRendererManager;") && checkObfuscatedFieldInsn(instructions[6], Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/EntityRendererManager", "options", "field_78733_k", "Lnet/minecraft/client/GameSettings;") && checkObfuscatedFieldInsn(instructions[7], Opcodes.GETFIELD, "net/minecraft/client/GameSettings", "thirdPersonView", "field_74320_O", "I") && checkInsn(instructions[8], Opcodes.IFGT)) {
-                                        oldInstructions.insertBefore(instructions[0], new JumpInsnNode(Opcodes.GOTO, instructions[8].label))
+                                if (checkObfuscatedFieldInsn(instructions[1], Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/FishRenderer", "renderManager", "field_76990_c", "Lnet/minecraft/client/renderer/entity/EntityRendererManager;")
+                                        && checkObfuscatedFieldInsn(instructions[2], Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/EntityRendererManager", "options", "field_78733_k", "Lnet/minecraft/client/GameSettings;")
+                                        && checkInsn(instructions[3], Opcodes.IFNULL)
+
+                                        && checkVarInsn(instructions[4], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[5], Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/FishRenderer", "renderManager", "field_76990_c", "Lnet/minecraft/client/renderer/entity/EntityRendererManager;")
+                                        && checkObfuscatedFieldInsn(instructions[6], Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/EntityRendererManager", "options", "field_78733_k", "Lnet/minecraft/client/GameSettings;")
+                                        && checkObfuscatedFieldInsn(instructions[7], Opcodes.GETFIELD, "net/minecraft/client/GameSettings", "thirdPersonView", "field_74320_O", "I") && checkInsn(instructions[8], Opcodes.IFGT)) {
+                                    oldInstructions.insertBefore(instructions[0], new JumpInsnNode(Opcodes.GOTO, instructions[8].label))
 
                                     for (var k = 0; k < instructions.length; k++)
                                         oldInstructions.remove(instructions[k])
@@ -687,9 +715,14 @@ function initializeCoreMod() {
                                         instructions.push(potentialInstruction)
                                 }
 
-                                if (checkVarInsn(instructions[1], Opcodes.DLOAD, 32) && checkInsn(instructions[2], Opcodes.DSUB) && checkInsn(instructions[3], Opcodes.D2F) && checkVarInsn(instructions[4], Opcodes.FSTORE, 38) &&
-                                        checkVarInsn(instructions[5], Opcodes.DLOAD, 27) && checkVarInsn(instructions[6], Opcodes.DLOAD, 34) && checkInsn(instructions[7], Opcodes.DSUB) && checkInsn(instructions[8], Opcodes.D2F) && checkVarInsn(instructions[9], Opcodes.FLOAD, 31) && checkInsn(instructions[10], Opcodes.FADD) && checkVarInsn(instructions[11], Opcodes.FSTORE, 39) &&
-                                        checkVarInsn(instructions[12], Opcodes.DLOAD, 29) && checkVarInsn(instructions[13], Opcodes.DLOAD, 36) && checkInsn(instructions[14], Opcodes.DSUB) && checkInsn(instructions[15], Opcodes.D2F) && checkVarInsn(instructions[16], Opcodes.FSTORE, 40)) {
+                                if (checkVarInsn(instructions[1], Opcodes.DLOAD, 32) && checkInsn(instructions[2], Opcodes.DSUB) && checkInsn(instructions[3], Opcodes.D2F)
+                                        && checkVarInsn(instructions[4], Opcodes.FSTORE, 38)
+
+                                        && checkVarInsn(instructions[5], Opcodes.DLOAD, 27) && checkVarInsn(instructions[6], Opcodes.DLOAD, 34) && checkInsn(instructions[7], Opcodes.DSUB) && checkInsn(instructions[8], Opcodes.D2F)
+                                        && checkVarInsn(instructions[9], Opcodes.FLOAD, 31) && checkInsn(instructions[10], Opcodes.FADD) && checkVarInsn(instructions[11], Opcodes.FSTORE, 39)
+
+                                        && checkVarInsn(instructions[12], Opcodes.DLOAD, 29) && checkVarInsn(instructions[13], Opcodes.DLOAD, 36) && checkInsn(instructions[14], Opcodes.DSUB) && checkInsn(instructions[15], Opcodes.D2F)
+                                        && checkVarInsn(instructions[16], Opcodes.FSTORE, 40)) {
                                     var getVectorList = new InsnList()
                                     var addXList = new InsnList()
                                     var addYList = new InsnList()
@@ -810,7 +843,8 @@ function initializeCoreMod() {
                         for (var i = 0; i < oldInstructions.size(); i++) {
                             var instruction = oldInstructions.get(i)
 
-                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/projectile/FishingBobberEntity", "getDistanceSq", "func_70068_e", "(Lnet/minecraft/entity/Entity;)D")) {
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/projectile/FishingBobberEntity", "getDistanceSq",
+                                    "func_70068_e", "(Lnet/minecraft/entity/Entity;)D")) {
                                 oldInstructions.insert(instruction, new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
                                     "com/epiphany/isawedthisplayerinhalf/Offsetter",
@@ -839,7 +873,8 @@ function initializeCoreMod() {
 
 
                 // Offsets the destination of reeled-in items.
-                var handleHookRetraction = findObfuscatedMethodWithSignature(classNode, "handleHookRetraction", "func_146034_e", "(Lnet/minecraft/item/ItemStack;)I")
+                var handleHookRetraction = findObfuscatedMethodWithSignature(classNode, "handleHookRetraction", "func_146034_e",
+                    "(Lnet/minecraft/item/ItemStack;)I")
 
                 if (handleHookRetraction !== null) {
                     try {
@@ -859,9 +894,20 @@ function initializeCoreMod() {
                                         instructions.push(potentialInstruction)
                                 }
 
-                                if (checkObfuscatedFieldInsn(instructions[1], Opcodes.GETFIELD, "net/minecraft/entity/projectile/FishingBobberEntity", "angler", "field_146042_b", "Lnet/minecraft/entity/player/PlayerEntity;") && checkObfuscatedMethodInsn(instructions[2], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getPosX", "func_226277_ct_", "()D") && checkVarInsn(instructions[3], Opcodes.ALOAD, 0) && checkObfuscatedMethodInsn(instructions[4], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/projectile/FishingBobberEntity", "getPosX", "func_226277_ct_", "()D") && checkInsn(instructions[5], Opcodes.DSUB) && checkVarInsn(instructions[6], Opcodes.DSTORE, 10) &&
-                                        checkVarInsn(instructions[7], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[8], Opcodes.GETFIELD, "net/minecraft/entity/projectile/FishingBobberEntity", "angler", "field_146042_b", "Lnet/minecraft/entity/player/PlayerEntity;") && checkObfuscatedMethodInsn(instructions[9], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getPosY", "func_226278_cu_", "()D") && checkVarInsn(instructions[10], Opcodes.ALOAD, 0) && checkObfuscatedMethodInsn(instructions[11], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/projectile/FishingBobberEntity", "getPosY", "func_226278_cu_", "()D") && checkInsn(instructions[12], Opcodes.DSUB) && checkVarInsn(instructions[13], Opcodes.DSTORE, 12) &&
-                                        checkVarInsn(instructions[14], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[15], Opcodes.GETFIELD, "net/minecraft/entity/projectile/FishingBobberEntity", "angler", "field_146042_b", "Lnet/minecraft/entity/player/PlayerEntity;") && checkObfuscatedMethodInsn(instructions[16], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getPosZ", "func_226281_cx_", "()D") && checkVarInsn(instructions[17], Opcodes.ALOAD, 0) && checkObfuscatedMethodInsn(instructions[18], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/projectile/FishingBobberEntity", "getPosZ", "func_226281_cx_", "()D") && checkInsn(instructions[19], Opcodes.DSUB) && checkVarInsn(instructions[20], Opcodes.DSTORE, 14)) {
+                                if (checkObfuscatedFieldInsn(instructions[1], Opcodes.GETFIELD, "net/minecraft/entity/projectile/FishingBobberEntity", "angler", "field_146042_b", "Lnet/minecraft/entity/player/PlayerEntity;")
+                                        && checkObfuscatedMethodInsn(instructions[2], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getPosX", "func_226277_ct_", "()D")
+                                        && checkVarInsn(instructions[3], Opcodes.ALOAD, 0) && checkObfuscatedMethodInsn(instructions[4], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/projectile/FishingBobberEntity", "getPosX", "func_226277_ct_", "()D")
+                                        && checkInsn(instructions[5], Opcodes.DSUB) && checkVarInsn(instructions[6], Opcodes.DSTORE, 10)
+
+                                        && checkVarInsn(instructions[7], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[8], Opcodes.GETFIELD, "net/minecraft/entity/projectile/FishingBobberEntity", "angler", "field_146042_b", "Lnet/minecraft/entity/player/PlayerEntity;")
+                                        && checkObfuscatedMethodInsn(instructions[9], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getPosY", "func_226278_cu_", "()D")
+                                        && checkVarInsn(instructions[10], Opcodes.ALOAD, 0) && checkObfuscatedMethodInsn(instructions[11], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/projectile/FishingBobberEntity", "getPosY", "func_226278_cu_", "()D")
+                                        && checkInsn(instructions[12], Opcodes.DSUB) && checkVarInsn(instructions[13], Opcodes.DSTORE, 12)
+
+                                        && checkVarInsn(instructions[14], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[15], Opcodes.GETFIELD, "net/minecraft/entity/projectile/FishingBobberEntity", "angler", "field_146042_b", "Lnet/minecraft/entity/player/PlayerEntity;")
+                                        && checkObfuscatedMethodInsn(instructions[16], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getPosZ", "func_226281_cx_", "()D")
+                                        && checkVarInsn(instructions[17], Opcodes.ALOAD, 0) && checkObfuscatedMethodInsn(instructions[18], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/projectile/FishingBobberEntity", "getPosZ", "func_226281_cx_", "()D")
+                                        && checkInsn(instructions[19], Opcodes.DSUB) && checkVarInsn(instructions[20], Opcodes.DSTORE, 14)) {
                                     var getVectorList = new InsnList()
                                     var addXList = new InsnList()
                                     var addYList = new InsnList()
@@ -984,9 +1030,20 @@ function initializeCoreMod() {
                                 for (var k = 1; k < 18; k++)
                                     instructions.push(oldInstructions.get(i + k))
 
-                                if (checkObfuscatedFieldInsn(instructions[1], Opcodes.GETFIELD, "net/minecraft/entity/projectile/FishingBobberEntity", "angler", "field_146042_b", "Lnet/minecraft/entity/player/PlayerEntity;") && checkObfuscatedMethodInsn(instructions[2], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getPosX", "func_226277_ct_", "()D") && checkVarInsn(instructions[3], Opcodes.ALOAD, 0) && checkObfuscatedMethodInsn(instructions[4], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/projectile/FishingBobberEntity", "getPosX", "func_226277_ct_", "()D") && checkInsn(instructions[5], Opcodes.DSUB) &&
-                                        checkVarInsn(instructions[6], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[7], Opcodes.GETFIELD, "net/minecraft/entity/projectile/FishingBobberEntity", "angler", "field_146042_b", "Lnet/minecraft/entity/player/PlayerEntity;") && checkObfuscatedMethodInsn(instructions[8], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getPosY", "func_226278_cu_", "()D") && checkVarInsn(instructions[9], Opcodes.ALOAD, 0) && checkObfuscatedMethodInsn(instructions[10], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/projectile/FishingBobberEntity", "getPosY", "func_226278_cu_", "()D") && checkInsn(instructions[11], Opcodes.DSUB) &&
-                                        checkVarInsn(instructions[12], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[13], Opcodes.GETFIELD, "net/minecraft/entity/projectile/FishingBobberEntity", "angler", "field_146042_b", "Lnet/minecraft/entity/player/PlayerEntity;") && checkObfuscatedMethodInsn(instructions[14], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getPosZ", "func_226281_cx_", "()D") && checkVarInsn(instructions[15], Opcodes.ALOAD, 0) && checkObfuscatedMethodInsn(instructions[16], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/projectile/FishingBobberEntity", "getPosZ", "func_226281_cx_", "()D") && checkInsn(instructions[17], Opcodes.DSUB)) {
+                                if (checkObfuscatedFieldInsn(instructions[1], Opcodes.GETFIELD, "net/minecraft/entity/projectile/FishingBobberEntity", "angler", "field_146042_b", "Lnet/minecraft/entity/player/PlayerEntity;")
+                                        && checkObfuscatedMethodInsn(instructions[2], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getPosX", "func_226277_ct_", "()D")
+                                        && checkVarInsn(instructions[3], Opcodes.ALOAD, 0) && checkObfuscatedMethodInsn(instructions[4], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/projectile/FishingBobberEntity", "getPosX", "func_226277_ct_", "()D")
+                                        && checkInsn(instructions[5], Opcodes.DSUB)
+
+                                        && checkVarInsn(instructions[6], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[7], Opcodes.GETFIELD, "net/minecraft/entity/projectile/FishingBobberEntity", "angler", "field_146042_b", "Lnet/minecraft/entity/player/PlayerEntity;")
+                                        && checkObfuscatedMethodInsn(instructions[8], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getPosY", "func_226278_cu_", "()D")
+                                        && checkVarInsn(instructions[9], Opcodes.ALOAD, 0) && checkObfuscatedMethodInsn(instructions[10], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/projectile/FishingBobberEntity", "getPosY", "func_226278_cu_", "()D")
+                                        && checkInsn(instructions[11], Opcodes.DSUB)
+
+                                        && checkVarInsn(instructions[12], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[13], Opcodes.GETFIELD, "net/minecraft/entity/projectile/FishingBobberEntity", "angler", "field_146042_b", "Lnet/minecraft/entity/player/PlayerEntity;")
+                                        && checkObfuscatedMethodInsn(instructions[14], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getPosZ", "func_226281_cx_", "()D")
+                                        && checkVarInsn(instructions[15], Opcodes.ALOAD, 0) && checkObfuscatedMethodInsn(instructions[16], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/projectile/FishingBobberEntity", "getPosZ", "func_226281_cx_", "()D")
+                                        && checkInsn(instructions[17], Opcodes.DSUB)) {
                                     var getVectorList = new InsnList()
                                     var vectorIndex = bringInHookedEntity.maxLocals
                                     var addXList = new InsnList()
@@ -1119,9 +1176,24 @@ function initializeCoreMod() {
                                     instructions.push(potentialInstruction)
                             }
 
-                            if (checkObfuscatedFieldInsn(instructions[1], Opcodes.GETFIELD, "net/minecraft/server/management/PlayerInteractionManager", "player", "field_73090_b", "Lnet/minecraft/entity/player/ServerPlayerEntity;") && checkObfuscatedMethodInsn(instructions[2], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/ServerPlayerEntity", "getPosX", "func_226277_ct_", "()D") && checkVarInsn(instructions[3], Opcodes.ALOAD, 1) && checkObfuscatedMethodInsn(instructions[4], Opcodes.INVOKEVIRTUAL, "net/minecraft/util/math/BlockPos", "getX", "func_177958_n", "()I") && checkInsn(instructions[5], Opcodes.I2D) && checkLdcInsn(instructions[6], 0.5) && checkInsn(instructions[7], Opcodes.DADD) && checkInsn(instructions[8], Opcodes.DSUB) && checkVarInsn(instructions[9], Opcodes.DSTORE, 5) &&
-                                    checkVarInsn(instructions[10], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[11], Opcodes.GETFIELD, "net/minecraft/server/management/PlayerInteractionManager", "player", "field_73090_b", "Lnet/minecraft/entity/player/ServerPlayerEntity;") && checkObfuscatedMethodInsn(instructions[12], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/ServerPlayerEntity", "getPosY", "func_226278_cu_", "()D") && checkVarInsn(instructions[13], Opcodes.ALOAD, 1) && checkObfuscatedMethodInsn(instructions[14], Opcodes.INVOKEVIRTUAL, "net/minecraft/util/math/BlockPos", "getY", "func_177956_o", "()I") && checkInsn(instructions[15], Opcodes.I2D) && checkLdcInsn(instructions[16], 0.5) && checkInsn(instructions[17], Opcodes.DADD) && checkInsn(instructions[18], Opcodes.DSUB) && checkLdcInsn(instructions[19], 1.5) && checkInsn(instructions[20], Opcodes.DADD) && checkVarInsn(instructions[21], Opcodes.DSTORE, 7) &&
-                                    checkVarInsn(instructions[22], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[23], Opcodes.GETFIELD, "net/minecraft/server/management/PlayerInteractionManager", "player", "field_73090_b", "Lnet/minecraft/entity/player/ServerPlayerEntity;") && checkObfuscatedMethodInsn(instructions[24], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/ServerPlayerEntity", "getPosZ", "func_226281_cx_", "()D") && checkVarInsn(instructions[25], Opcodes.ALOAD, 1) && checkObfuscatedMethodInsn(instructions[26], Opcodes.INVOKEVIRTUAL, "net/minecraft/util/math/BlockPos", "getZ", "func_177952_p", "()I") && checkInsn(instructions[27], Opcodes.I2D) && checkLdcInsn(instructions[28], 0.5) && checkInsn(instructions[29], Opcodes.DADD) && checkInsn(instructions[30], Opcodes.DSUB) && checkVarInsn(instructions[31], Opcodes.DSTORE, 9)) {
+                            if (checkObfuscatedFieldInsn(instructions[1], Opcodes.GETFIELD, "net/minecraft/server/management/PlayerInteractionManager", "player", "field_73090_b", "Lnet/minecraft/entity/player/ServerPlayerEntity;")
+                                    && checkObfuscatedMethodInsn(instructions[2], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/ServerPlayerEntity", "getPosX", "func_226277_ct_", "()D")
+                                    && checkVarInsn(instructions[3], Opcodes.ALOAD, 1) && checkObfuscatedMethodInsn(instructions[4], Opcodes.INVOKEVIRTUAL, "net/minecraft/util/math/BlockPos", "getX", "func_177958_n", "()I")
+                                    && checkInsn(instructions[5], Opcodes.I2D) && checkLdcInsn(instructions[6], 0.5) && checkInsn(instructions[7], Opcodes.DADD)
+                                    && checkInsn(instructions[8], Opcodes.DSUB) && checkVarInsn(instructions[9], Opcodes.DSTORE, 5)
+
+                                    && checkVarInsn(instructions[10], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[11], Opcodes.GETFIELD, "net/minecraft/server/management/PlayerInteractionManager", "player", "field_73090_b", "Lnet/minecraft/entity/player/ServerPlayerEntity;")
+                                    && checkObfuscatedMethodInsn(instructions[12], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/ServerPlayerEntity", "getPosY", "func_226278_cu_", "()D")
+                                    && checkVarInsn(instructions[13], Opcodes.ALOAD, 1) && checkObfuscatedMethodInsn(instructions[14], Opcodes.INVOKEVIRTUAL, "net/minecraft/util/math/BlockPos", "getY", "func_177956_o", "()I")
+                                    && checkInsn(instructions[15], Opcodes.I2D) && checkLdcInsn(instructions[16], 0.5) && checkInsn(instructions[17], Opcodes.DADD)
+                                    && checkInsn(instructions[18], Opcodes.DSUB) && checkLdcInsn(instructions[19], 1.5) && checkInsn(instructions[20], Opcodes.DADD)
+                                    && checkVarInsn(instructions[21], Opcodes.DSTORE, 7)
+
+                                    && checkVarInsn(instructions[22], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[23], Opcodes.GETFIELD, "net/minecraft/server/management/PlayerInteractionManager", "player", "field_73090_b", "Lnet/minecraft/entity/player/ServerPlayerEntity;")
+                                    && checkObfuscatedMethodInsn(instructions[24], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/ServerPlayerEntity", "getPosZ", "func_226281_cx_", "()D")
+                                    && checkVarInsn(instructions[25], Opcodes.ALOAD, 1) && checkObfuscatedMethodInsn(instructions[26], Opcodes.INVOKEVIRTUAL, "net/minecraft/util/math/BlockPos", "getZ", "func_177952_p", "()I")
+                                    && checkInsn(instructions[27], Opcodes.I2D) && checkLdcInsn(instructions[28], 0.5) && checkInsn(instructions[29], Opcodes.DADD)
+                                    && checkInsn(instructions[30], Opcodes.DSUB) && checkVarInsn(instructions[31], Opcodes.DSTORE, 9)) {
                                 var getVectorList = new InsnList()
                                 var addXList = new InsnList()
                                 var addYList = new InsnList()
@@ -1266,7 +1338,8 @@ function initializeCoreMod() {
                                 for (var k = 1; k < 4; k++)
                                     instructions.push(oldInstructions.get(i + k))
 
-                                if (checkInsn(instructions[1], Opcodes.DUP) && checkVarInsn(instructions[2], Opcodes.ALOAD, 1) && checkMethodInsn(instructions[3], Opcodes.INVOKESPECIAL, "net/minecraft/util/math/BlockPos", "<init>", "(Lnet/minecraft/entity/Entity;)V")) {
+                                if (checkInsn(instructions[1], Opcodes.DUP) && checkVarInsn(instructions[2], Opcodes.ALOAD, 1)
+                                        && checkMethodInsn(instructions[3], Opcodes.INVOKESPECIAL, "net/minecraft/util/math/BlockPos", "<init>", "(Lnet/minecraft/entity/Entity;)V")) {
                                     var newInstructions = new InsnList()
 
                                     newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 1))
@@ -1297,7 +1370,8 @@ function initializeCoreMod() {
                         for (var i = 0; i < oldInstructions.size(); i++) {
                             var instruction = oldInstructions.get(i)
 
-                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/CreatureEntity", "getDistance", "func_70032_d", "(Lnet/minecraft/entity/Entity;)F")) {
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/CreatureEntity", "getDistance", "func_70032_d",
+                                    "(Lnet/minecraft/entity/Entity;)F")) {
                                 oldInstructions.insert(instruction, new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
                                     "com/epiphany/isawedthisplayerinhalf/Offsetter",
@@ -1330,9 +1404,20 @@ function initializeCoreMod() {
                                         instructions.push(potentialInstruction)
                                 }
 
-                                if (checkObfuscatedMethodInsn(instructions[1], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosX", "func_226277_ct_", "()D") && checkVarInsn(instructions[2], Opcodes.ALOAD, 0) && checkObfuscatedMethodInsn(instructions[3], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/CreatureEntity", "getPosX", "func_226277_ct_", "()D") && checkInsn(instructions[4], Opcodes.DSUB) && checkVarInsn(instructions[5], Opcodes.FLOAD, 2) && checkInsn(instructions[6], Opcodes.F2D) && checkInsn(instructions[7], Opcodes.DDIV) && checkVarInsn(instructions[8], Opcodes.DSTORE, 3) &&
-                                        checkVarInsn(instructions[9], Opcodes.ALOAD, 1) && checkObfuscatedMethodInsn(instructions[10], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosY", "func_226278_cu_", "()D") && checkVarInsn(instructions[11], Opcodes.ALOAD, 0) && checkObfuscatedMethodInsn(instructions[12], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/CreatureEntity", "getPosY", "func_226278_cu_", "()D") && checkInsn(instructions[13], Opcodes.DSUB) && checkVarInsn(instructions[14], Opcodes.FLOAD, 2) && checkInsn(instructions[15], Opcodes.F2D) && checkInsn(instructions[16], Opcodes.DDIV) && checkVarInsn(instructions[17], Opcodes.DSTORE, 5) &&
-                                        checkVarInsn(instructions[18], Opcodes.ALOAD, 1) && checkObfuscatedMethodInsn(instructions[19], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosZ", "func_226281_cx_", "()D") && checkVarInsn(instructions[20], Opcodes.ALOAD, 0) && checkObfuscatedMethodInsn(instructions[21], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/CreatureEntity", "getPosZ", "func_226281_cx_", "()D") && checkInsn(instructions[22], Opcodes.DSUB) && checkVarInsn(instructions[23], Opcodes.FLOAD, 2) && checkInsn(instructions[24], Opcodes.F2D) && checkInsn(instructions[25], Opcodes.DDIV) && checkVarInsn(instructions[26], Opcodes.DSTORE, 7)) {
+                                if (checkObfuscatedMethodInsn(instructions[1], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosX", "func_226277_ct_", "()D")
+                                        && checkVarInsn(instructions[2], Opcodes.ALOAD, 0) && checkObfuscatedMethodInsn(instructions[3], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/CreatureEntity", "getPosX", "func_226277_ct_", "()D")
+                                        && checkInsn(instructions[4], Opcodes.DSUB) && checkVarInsn(instructions[5], Opcodes.FLOAD, 2) && checkInsn(instructions[6], Opcodes.F2D)
+                                        && checkInsn(instructions[7], Opcodes.DDIV) && checkVarInsn(instructions[8], Opcodes.DSTORE, 3)
+
+                                        && checkVarInsn(instructions[9], Opcodes.ALOAD, 1) && checkObfuscatedMethodInsn(instructions[10], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosY", "func_226278_cu_", "()D")
+                                        && checkVarInsn(instructions[11], Opcodes.ALOAD, 0) && checkObfuscatedMethodInsn(instructions[12], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/CreatureEntity", "getPosY", "func_226278_cu_", "()D")
+                                        && checkInsn(instructions[13], Opcodes.DSUB) && checkVarInsn(instructions[14], Opcodes.FLOAD, 2) && checkInsn(instructions[15], Opcodes.F2D) && checkInsn(instructions[16], Opcodes.DDIV)
+                                        && checkVarInsn(instructions[17], Opcodes.DSTORE, 5)
+
+                                        && checkVarInsn(instructions[18], Opcodes.ALOAD, 1) && checkObfuscatedMethodInsn(instructions[19], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosZ", "func_226281_cx_", "()D")
+                                        && checkVarInsn(instructions[20], Opcodes.ALOAD, 0) && checkObfuscatedMethodInsn(instructions[21], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/CreatureEntity", "getPosZ", "func_226281_cx_", "()D")
+                                        && checkInsn(instructions[22], Opcodes.DSUB) && checkVarInsn(instructions[23], Opcodes.FLOAD, 2) && checkInsn(instructions[24], Opcodes.F2D) && checkInsn(instructions[25], Opcodes.DDIV) &&
+                                        checkVarInsn(instructions[26], Opcodes.DSTORE, 7)) {
                                     var getVectorList = new InsnList()
                                     var addXList = new InsnList()
                                     var addYList = new InsnList()
@@ -1558,7 +1643,8 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
-                var renderLeash = findObfuscatedMethodWithSignature(classNode, "renderLeash", "func_229118_a_", "(Lnet/minecraft/entity/MobEntity;FLcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;Lnet/minecraft/entity/Entity;)V")
+                var renderLeash = findObfuscatedMethodWithSignature(classNode, "renderLeash", "func_229118_a_",
+                    "(Lnet/minecraft/entity/MobEntity;FLcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;Lnet/minecraft/entity/Entity;)V")
 
                 if (renderLeash !== null) {
                     try {
@@ -1576,7 +1662,9 @@ function initializeCoreMod() {
                                 for (var k = 1; k < 7; k++)
                                     instructions.push(oldInstructions.get(i + k))
 
-                                if (checkInsn(instructions[1], Opcodes.F2D) && checkVarInsn(instructions[2], Opcodes.ALOAD, 5) && checkObfuscatedFieldInsn(instructions[3], Opcodes.GETFIELD, "net/minecraft/entity/Entity", "prevPosX", "field_70169_q", "D") && checkVarInsn(instructions[4], Opcodes.ALOAD, 5) && checkObfuscatedMethodInsn(instructions[5], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosX", "func_226277_ct_", "()D") && checkObfuscatedMethodInsn(instructions[6], Opcodes.INVOKESTATIC, "net/minecraft/util/math/MathHelper", "lerp", "func_219803_d", "(DDD)D")) {
+                                if (checkInsn(instructions[1], Opcodes.F2D) && checkVarInsn(instructions[2], Opcodes.ALOAD, 5) && checkObfuscatedFieldInsn(instructions[3], Opcodes.GETFIELD, "net/minecraft/entity/Entity", "prevPosX", "field_70169_q", "D")
+                                        && checkVarInsn(instructions[4], Opcodes.ALOAD, 5) && checkObfuscatedMethodInsn(instructions[5], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosX", "func_226277_ct_", "()D")
+                                        && checkObfuscatedMethodInsn(instructions[6], Opcodes.INVOKESTATIC, "net/minecraft/util/math/MathHelper", "lerp", "func_219803_d", "(DDD)D")) {
                                     var getVectorList = new InsnList()
                                     var addXList = new InsnList()
 
@@ -1634,8 +1722,14 @@ function initializeCoreMod() {
                                     for (var k = 1; k < 15; k++)
                                         instructions.push(oldInstructions.get(i + k))
 
-                                    if (checkInsn(instructions[1], Opcodes.F2D) && checkVarInsn(instructions[2], Opcodes.ALOAD, 5) && checkObfuscatedFieldInsn(instructions[3], Opcodes.GETFIELD, "net/minecraft/entity/Entity", "prevPosY", "field_70167_r", "D") && checkVarInsn(instructions[4], Opcodes.ALOAD, 5) && checkObfuscatedMethodInsn(instructions[5], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getEyeHeight", "func_70047_e", "()F") && checkInsn(instructions[6], Opcodes.F2D) && checkLdcInsn(instructions[7], 0.7) && checkInsn(instructions[8], Opcodes.DMUL) && checkInsn(instructions[9], Opcodes.DADD) &&
-                                            checkVarInsn(instructions[10], Opcodes.ALOAD, 5) && checkObfuscatedMethodInsn(instructions[11], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosY", "func_226278_cu_", "()D") && checkVarInsn(instructions[12], Opcodes.ALOAD, 5) && checkObfuscatedMethodInsn(instructions[13], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getEyeHeight", "func_70047_e", "()F") && checkInsn(instructions[14], Opcodes.F2D)) {
+                                    if (checkInsn(instructions[1], Opcodes.F2D) && checkVarInsn(instructions[2], Opcodes.ALOAD, 5) && checkObfuscatedFieldInsn(instructions[3], Opcodes.GETFIELD, "net/minecraft/entity/Entity", "prevPosY", "field_70167_r", "D")
+                                            && checkVarInsn(instructions[4], Opcodes.ALOAD, 5) && checkObfuscatedMethodInsn(instructions[5], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getEyeHeight", "func_70047_e", "()F")
+                                            && checkInsn(instructions[6], Opcodes.F2D) && checkLdcInsn(instructions[7], 0.7) && checkInsn(instructions[8], Opcodes.DMUL)
+                                            && checkInsn(instructions[9], Opcodes.DADD)
+
+                                            && checkVarInsn(instructions[10], Opcodes.ALOAD, 5) && checkObfuscatedMethodInsn(instructions[11], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosY", "func_226278_cu_", "()D")
+                                            && checkVarInsn(instructions[12], Opcodes.ALOAD, 5) && checkObfuscatedMethodInsn(instructions[13], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getEyeHeight", "func_70047_e", "()F")
+                                            && checkInsn(instructions[14], Opcodes.F2D)) {
                                         var addYList = new InsnList()
 
                                         addYList.add(new VarInsnNode(Opcodes.ALOAD, vectorIndex))
@@ -1687,7 +1781,9 @@ function initializeCoreMod() {
                                     for (var k = 1; k < 7; k++)
                                         instructions.push(oldInstructions.get(i + k))
 
-                                    if (checkInsn(instructions[1], Opcodes.F2D) && checkVarInsn(instructions[2], Opcodes.ALOAD, 5) && checkObfuscatedFieldInsn(instructions[3], Opcodes.GETFIELD, "net/minecraft/entity/Entity", "prevPosZ", "field_70166_s", "D") && checkVarInsn(instructions[4], Opcodes.ALOAD, 5) && checkObfuscatedMethodInsn(instructions[5], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosZ", "func_226281_cx_", "()D") && checkObfuscatedMethodInsn(instructions[6], Opcodes.INVOKESTATIC, "net/minecraft/util/math/MathHelper", "lerp", "func_219803_d", "(DDD)D")) {
+                                    if (checkInsn(instructions[1], Opcodes.F2D) && checkVarInsn(instructions[2], Opcodes.ALOAD, 5) && checkObfuscatedFieldInsn(instructions[3], Opcodes.GETFIELD, "net/minecraft/entity/Entity", "prevPosZ", "field_70166_s", "D")
+                                            && checkVarInsn(instructions[4], Opcodes.ALOAD, 5) && checkObfuscatedMethodInsn(instructions[5], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosZ", "func_226281_cx_", "()D")
+                                            && checkObfuscatedMethodInsn(instructions[6], Opcodes.INVOKESTATIC, "net/minecraft/util/math/MathHelper", "lerp", "func_219803_d", "(DDD)D")) {
                                         var addZList = new InsnList()
 
                                         addZList.add(new VarInsnNode(Opcodes.ALOAD, vectorIndex))
@@ -1762,9 +1858,14 @@ function initializeCoreMod() {
                                 for (var k = 1; k < 9; k++)
                                     instructions.push(oldInstructions.get(i + k))
 
-                                if (checkObfuscatedFieldInsn(instructions[1], Opcodes.GETFIELD, "net/minecraft/entity/ai/goal/LookAtGoal", "closestEntity", "field_75334_a", "Lnet/minecraft/entity/Entity;") && checkObfuscatedMethodInsn(instructions[2], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosX", "func_226277_ct_", "()D") &&
-                                        checkVarInsn(instructions[3], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[4], Opcodes.GETFIELD, "net/minecraft/entity/ai/goal/LookAtGoal", "closestEntity", "field_75334_a", "Lnet/minecraft/entity/Entity;") && checkObfuscatedMethodInsn(instructions[5], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosYEye", "func_226280_cw_", "()D") &&
-                                        checkVarInsn(instructions[6], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[7], Opcodes.GETFIELD, "net/minecraft/entity/ai/goal/LookAtGoal", "closestEntity", "field_75334_a", "Lnet/minecraft/entity/Entity;") && checkObfuscatedMethodInsn(instructions[8], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosZ", "func_226281_cx_", "()D")) {
+                                if (checkObfuscatedFieldInsn(instructions[1], Opcodes.GETFIELD, "net/minecraft/entity/ai/goal/LookAtGoal", "closestEntity", "field_75334_a", "Lnet/minecraft/entity/Entity;")
+                                        && checkObfuscatedMethodInsn(instructions[2], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosX", "func_226277_ct_", "()D")
+
+                                        && checkVarInsn(instructions[3], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[4], Opcodes.GETFIELD, "net/minecraft/entity/ai/goal/LookAtGoal", "closestEntity", "field_75334_a", "Lnet/minecraft/entity/Entity;")
+                                        && checkObfuscatedMethodInsn(instructions[5], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosYEye", "func_226280_cw_", "()D")
+
+                                        && checkVarInsn(instructions[6], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[7], Opcodes.GETFIELD, "net/minecraft/entity/ai/goal/LookAtGoal", "closestEntity", "field_75334_a", "Lnet/minecraft/entity/Entity;")
+                                        && checkObfuscatedMethodInsn(instructions[8], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosZ", "func_226281_cx_", "()D")) {
                                     var getVectorList = new InsnList()
                                     var addXList = new InsnList()
                                     var addYList = new InsnList()
@@ -1867,7 +1968,8 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
-                var processTryUseItemOnBlock = findObfuscatedMethodWithSignature(classNode, "processTryUseItemOnBlock", "func_184337_a", "(Lnet/minecraft/network/play/client/CPlayerTryUseItemOnBlockPacket;)V")
+                var processTryUseItemOnBlock = findObfuscatedMethodWithSignature(classNode, "processTryUseItemOnBlock", "func_184337_a",
+                    "(Lnet/minecraft/network/play/client/CPlayerTryUseItemOnBlockPacket;)V")
 
                 if (processTryUseItemOnBlock !== null) {
                     try {
@@ -1877,7 +1979,8 @@ function initializeCoreMod() {
                         for (var i = 0; i < oldInstructions.size(); i++) {
                             var instruction = oldInstructions.get(i)
 
-                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/ServerPlayerEntity", "getDistanceSq", "func_70092_e", "(DDD)D")) {
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/ServerPlayerEntity", "getDistanceSq",
+                                    "func_70092_e", "(DDD)D")) {
                                 oldInstructions.insert(instruction, new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
                                     "com/epiphany/isawedthisplayerinhalf/Offsetter",
@@ -1920,7 +2023,8 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
-                var isUsableByPlayer = findObfuscatedMethodWithSignature(classNode, "isUsableByPlayer", "func_70300_a", "(Lnet/minecraft/entity/player/PlayerEntity;)Z")
+                var isUsableByPlayer = findObfuscatedMethodWithSignature(classNode, "isUsableByPlayer", "func_70300_a",
+                    "(Lnet/minecraft/entity/player/PlayerEntity;)Z")
 
                 if (isUsableByPlayer !== null) {
                     try {
@@ -1930,7 +2034,8 @@ function initializeCoreMod() {
                         for (var i = 0; i < oldInstructions.size(); i++) {
                             var instruction = oldInstructions.get(i)
 
-                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getDistanceSq", "func_70092_e", "(DDD)D")) {
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getDistanceSq",
+                                    "func_70092_e", "(DDD)D")) {
                                 oldInstructions.insert(instruction, new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
                                     "com/epiphany/isawedthisplayerinhalf/Offsetter",
@@ -1973,7 +2078,8 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
-                var isUsableByPlayer = findObfuscatedMethodWithSignature(classNode, "isUsableByPlayer", "func_70300_a", "(Lnet/minecraft/entity/player/PlayerEntity;)Z")
+                var isUsableByPlayer = findObfuscatedMethodWithSignature(classNode, "isUsableByPlayer", "func_70300_a",
+                    "(Lnet/minecraft/entity/player/PlayerEntity;)Z")
 
                 if (isUsableByPlayer !== null) {
                     try {
@@ -1983,7 +2089,8 @@ function initializeCoreMod() {
                         for (var i = 0; i < oldInstructions.size(); i++) {
                             var instruction = oldInstructions.get(i)
 
-                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getDistanceSq", "func_70092_e", "(DDD)D")) {
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getDistanceSq",
+                                    "func_70092_e", "(DDD)D")) {
                                 oldInstructions.insert(instruction, new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
                                     "com/epiphany/isawedthisplayerinhalf/Offsetter",
@@ -2026,7 +2133,8 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
-                var isUsableByPlayer = findObfuscatedMethodWithSignature(classNode, "isUsableByPlayer", "func_70300_a", "(Lnet/minecraft/entity/player/PlayerEntity;)Z")
+                var isUsableByPlayer = findObfuscatedMethodWithSignature(classNode, "isUsableByPlayer", "func_70300_a",
+                    "(Lnet/minecraft/entity/player/PlayerEntity;)Z")
 
                 if (isUsableByPlayer !== null) {
                     try {
@@ -2036,7 +2144,8 @@ function initializeCoreMod() {
                         for (var i = 0; i < oldInstructions.size(); i++) {
                             var instruction = oldInstructions.get(i)
 
-                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getDistanceSq", "func_70092_e", "(DDD)D")) {
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getDistanceSq",
+                                    "func_70092_e", "(DDD)D")) {
                                 oldInstructions.insert(instruction, new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
                                     "com/epiphany/isawedthisplayerinhalf/Offsetter",
@@ -2079,7 +2188,8 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
-                var isUsableByPlayer = findObfuscatedMethodWithSignature(classNode, "isUsableByPlayer", "func_70300_a", "(Lnet/minecraft/entity/player/PlayerEntity;)Z")
+                var isUsableByPlayer = findObfuscatedMethodWithSignature(classNode, "isUsableByPlayer", "func_70300_a",
+                    "(Lnet/minecraft/entity/player/PlayerEntity;)Z")
 
                 if (isUsableByPlayer !== null) {
                     try {
@@ -2089,7 +2199,8 @@ function initializeCoreMod() {
                         for (var i = 0; i < oldInstructions.size(); i++) {
                             var instruction = oldInstructions.get(i)
 
-                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getDistanceSq", "func_70092_e", "(DDD)D")) {
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getDistanceSq",
+                                    "func_70092_e", "(DDD)D")) {
                                 oldInstructions.insert(instruction, new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
                                     "com/epiphany/isawedthisplayerinhalf/Offsetter",
@@ -2142,7 +2253,8 @@ function initializeCoreMod() {
                         for (var i = 0; i < oldInstructions.size(); i++) {
                             var instruction = oldInstructions.get(i)
 
-                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getDistanceSq", "func_70092_e", "(DDD)D")) {
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getDistanceSq",
+                                    "func_70092_e", "(DDD)D")) {
                                 oldInstructions.insert(instruction, new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
                                     "com/epiphany/isawedthisplayerinhalf/Offsetter",
@@ -2185,7 +2297,8 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
-                var isUsableByPlayer = findObfuscatedMethodWithSignature(classNode, "isUsableByPlayer", "func_70300_a", "(Lnet/minecraft/entity/player/PlayerEntity;)Z")
+                var isUsableByPlayer = findObfuscatedMethodWithSignature(classNode, "isUsableByPlayer", "func_70300_a",
+                    "(Lnet/minecraft/entity/player/PlayerEntity;)Z")
 
                 if (isUsableByPlayer !== null) {
                     try {
@@ -2195,7 +2308,8 @@ function initializeCoreMod() {
                         for (var i = 0; i < oldInstructions.size(); i++) {
                             var instruction = oldInstructions.get(i)
 
-                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getDistanceSq", "func_70068_e", "(Lnet/minecraft/entity/Entity;)D")) {
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getDistanceSq",
+                                    "func_70068_e", "(Lnet/minecraft/entity/Entity;)D")) {
                                 var getDistanceList = new InsnList()
 
                                 getDistanceList.add(new InsnNode(Opcodes.SWAP))
@@ -2242,7 +2356,8 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
-                var lambda$isWithinUsableDistance$0 = findObfuscatedMethodWithSignature(classNode, "lambda$isWithinUsableDistance$0", "lambda$func_216963_a$0", "(Lnet/minecraft/block/Block;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)Ljava/lang/Boolean;")
+                var lambda$isWithinUsableDistance$0 = findObfuscatedMethodWithSignature(classNode, "lambda$isWithinUsableDistance$0",
+                    "lambda$func_216963_a$0", "(Lnet/minecraft/block/Block;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)Ljava/lang/Boolean;")
 
                 if (lambda$isWithinUsableDistance$0 !== null) {
                     try {
@@ -2252,7 +2367,8 @@ function initializeCoreMod() {
                         for (var i = 0; i < oldInstructions.size(); i++) {
                             var instruction = oldInstructions.get(i)
 
-                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getDistanceSq", "func_70092_e", "(DDD)D")) {
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getDistanceSq",
+                                    "func_70092_e", "(DDD)D")) {
                                 oldInstructions.insert(instruction, new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
                                     "com/epiphany/isawedthisplayerinhalf/Offsetter",
@@ -2295,7 +2411,8 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
-                var shouldRender = findObfuscatedMethodWithSignature(classNode, "shouldRender", "func_225626_a_", "(Lnet/minecraft/entity/Entity;Lnet/minecraft/client/renderer/culling/ClippingHelperImpl;DDD)Z")
+                var shouldRender = findObfuscatedMethodWithSignature(classNode, "shouldRender", "func_225626_a_",
+                    "(Lnet/minecraft/entity/Entity;Lnet/minecraft/client/renderer/culling/ClippingHelperImpl;DDD)Z")
 
                 if (shouldRender !== null) {
                     try {
@@ -2305,7 +2422,8 @@ function initializeCoreMod() {
                         for (var i = 0; i < oldInstructions.size(); i++) {
                             var instruction = oldInstructions.get(i)
 
-                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "isInRangeToRender3d", "func_145770_h", "(DDD)Z")) {
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "isInRangeToRender3d", "func_145770_h",
+                                    "(DDD)Z")) {
                                 oldInstructions.insert(instruction, new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
                                     "com/epiphany/isawedthisplayerinhalf/rendering/RenderingOffsetter",
@@ -2327,7 +2445,8 @@ function initializeCoreMod() {
                         for (var i = 0; i < oldInstructions.size(); i++) {
                             var instruction = oldInstructions.get(i)
 
-                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/client/renderer/culling/ClippingHelperImpl", "isBoundingBoxInFrustum", "func_228957_a_", "(Lnet/minecraft/util/math/AxisAlignedBB;)Z")) {
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/client/renderer/culling/ClippingHelperImpl",
+                                    "isBoundingBoxInFrustum", "func_228957_a_", "(Lnet/minecraft/util/math/AxisAlignedBB;)Z")) {
                                 var doubleCheckPlayer = new InsnList()
                                 var skipToReturn = new LabelNode()
                                 var noOffsetsReturn = new LabelNode()
@@ -2434,7 +2553,8 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
-                var attackEntityFrom = findObfuscatedMethodWithSignature(classNode, "attackEntityFrom", "func_70097_a", "(Lnet/minecraft/util/DamageSource;F)Z")
+                var attackEntityFrom = findObfuscatedMethodWithSignature(classNode, "attackEntityFrom", "func_70097_a",
+                    "(Lnet/minecraft/util/DamageSource;F)Z")
 
                 if (attackEntityFrom !== null) {
                     try {
@@ -2444,12 +2564,14 @@ function initializeCoreMod() {
                         for (var i = 0; i < oldInstructions.size(); i++) {
                             var instruction = oldInstructions.get(i)
 
-                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/LivingEntity", "knockBack", "func_70653_a", "(Lnet/minecraft/entity/Entity;FDD)V")) {
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/LivingEntity", "knockBack", "func_70653_a",
+                                    "(Lnet/minecraft/entity/Entity;FDD)V")) {
                                 // Offsets the x-position of knockback.
                                 changeX: for (; i >= 0; i--) {
                                     instruction = oldInstructions.get(i)
 
-                                    if (checkVarInsn(instruction, Opcodes.ALOAD, 7) && checkObfuscatedMethodInsn(oldInstructions.get(i + 1), Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosX", "func_226277_ct_", "()D")) {
+                                    if (checkVarInsn(instruction, Opcodes.ALOAD, 7)
+                                            && checkObfuscatedMethodInsn(oldInstructions.get(i + 1), Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosX", "func_226277_ct_", "()D")) {
                                         var newInstructions = new InsnList()
 
                                         // ...
@@ -2496,7 +2618,8 @@ function initializeCoreMod() {
                                     changeZ: for (; i < oldInstructions.size(); i++) {
                                         instruction = oldInstructions.get(i)
 
-                                        if (checkVarInsn(instruction, Opcodes.ALOAD, 7) && checkObfuscatedMethodInsn(oldInstructions.get(i + 1), Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosZ", "func_226281_cx_", "()D")) {
+                                        if (checkVarInsn(instruction, Opcodes.ALOAD, 7)
+                                                && checkObfuscatedMethodInsn(oldInstructions.get(i + 1), Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosZ", "func_226281_cx_", "()D")) {
                                             var newInstructions = new InsnList()
 
                                             // ...
