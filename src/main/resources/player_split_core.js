@@ -10,6 +10,10 @@ var VarInsnNode = Java.type("org.objectweb.asm.tree.VarInsnNode")
 
 
 
+// TODO Add control over which level of logging should be used.
+
+
+
 /**
  * Tries to find a method within the given class.
  * Returns null if nothing is found.
@@ -173,7 +177,7 @@ function logTransformSuccess(functionName, fullClassName) {
 }
 
 function logTransformError(functionName, fullClassName, errorMessage) {
-    logMessage("ERROR", "An error occurred while transforming " + functionName + " function in " + fullClassName + ":\n    " + errorMessage)
+    logMessage("ERROR", "An error occurred while transforming " + functionName + " in " + fullClassName + ":\n    " + errorMessage)
 }
 
 
@@ -225,14 +229,14 @@ function initializeCoreMod() {
                         }
 
                         if (!success)
-                            logMessage("ERROR", "An error occurred while transforming pick function in net.minecraft.entity.Entity:\n    Unable to find injection point in pick() of net.minecraft.entity.Entity")
+                            logTransformError("function pick", "net.minecraft.entity.Entity", "Unable to find injection point")
 
                     } catch (exception) {
-                        logMessage("ERROR", "An error occurred while transforming pick function in net.minecraft.entity.Entity:\n    " + exception)
+                        logTransformError("function pick", "net.minecraft.entity.Entity", exception.message)
                     }
 
                 } else
-                    logMessage("ERROR", "An error occurred while transforming pick function in net.minecraft.entity.Entity:\n    Unable to find function to transform")
+                    logTransformError("function pick", "net.minecraft.entity.Entity", "Unable to find function to transform")
 
                 return classNode
             }
@@ -283,14 +287,14 @@ function initializeCoreMod() {
                         }
 
                         if (!success)
-                            logMessage("ERROR", "An error occurred while transforming getMouseOver function in net.minecraft.client.renderer.GameRenderer:\n    Unable to find injection point")
+                            logTransformError("function getMouseOver", "net.minecraft.client.renderer.GameRenderer", "Unable to find injection point")
 
                     } catch (exception) {
-                        logMessage("ERROR", "An error occurred while transforming getMouseOver function in net.minecraft.client.renderer.GameRenderer:\n    " + exception)
+                        logTransformError("function getMouseOver", "net.minecraft.client.renderer.GameRenderer", exception.message)
                     }
 
                 } else
-                    logMessage("ERROR", "An error occurred while transforming getMouseOver function in net.minecraft.client.renderer.GameRenderer:\n    Unable to find function")
+                    logTransformError("function getMouseOver", "net.minecraft.client.renderer.GameRenderer", "Unable to find function to transform")
 
                 return classNode
             }
@@ -332,11 +336,11 @@ function initializeCoreMod() {
                         logTransformSuccess("function renderItemInFirstPerson", "net.minecraft.client.renderer.FirstPersonRenderer")
 
                     } catch (exception) {
-                        logMessage("ERROR", "An error occurred while transforming renderItemInFirstPerson function in net.minecraft.client.renderer.FirstPersonRenderer:\n    " + exception)
+                        logTransformError("function renderItemInFirstPerson", "net.minecraft.client.renderer.FirstPersonRenderer", exception.message)
                     }
 
                 } else
-                    logMessage("ERROR", "An error occurred while transforming renderItemInFirstPerson function in net.minecraft.client.renderer.FirstPersonRenderer:\n    Unable to find function to transform")
+                    logTransformError("function renderItemInFirstPerson", "net.minecraft.client.renderer.FirstPersonRenderer", "Unable to find function to transform")
 
                 return classNode
             }
@@ -380,14 +384,14 @@ function initializeCoreMod() {
                         }
 
                         if (!success)
-                            logMessage("ERROR", "An error occurred while transforming updateCameraAndRender function in net.minecraft.client.renderer.WorldRenderer:\n    Unable to find injection point")
+                            logTransformError("function updateCameraAndRender", "net.minecraft.client.renderer.WorldRenderer", "Unable to find injection point")
 
                     } catch (exception) {
-                        logMessage("ERROR", "An error occurred while transforming updateCameraAndRender function in net.minecraft.client.renderer.WorldRenderer:\n    " + exception)
+                        logTransformError("function updateCameraAndRender", "net.minecraft.client.renderer.WorldRenderer", exception.message)
                     }
 
                 } else
-                    logMessage("ERROR", "An error occurred while transforming updateCameraAndRender function in net.minecraft.client.renderer.WorldRenderer:\n    Unable to find function to transform")
+                    logTransformError("function updateCameraAndRender", "net.minecraft.client.renderer.WorldRenderer", "Unable to find function to transform")
 
                 return classNode
             }
@@ -438,10 +442,10 @@ function initializeCoreMod() {
                     }
 
                     if (!success)
-                        logMessage("ERROR", "An error occurred while transforming constructor in net.minecraft.entity.projectile.AbstractArrowEntity:\n    Unable to find injection point")
+                        logTransformError("constructor", "net.minecraft.entity.projectile.AbstractArrowEntity", "Unable to find injection point")
 
                 } catch (exception) {
-                    logMessage("ERROR", "An error occurred while transforming constructor in net.minecraft.entity.projectile.AbstractArrowEntity:\n    " + exception)
+                    logTransformError("constructor", "net.minecraft.entity.projectile.AbstractArrowEntity", exception.message)
                 }
 
                 return methodNode
@@ -493,10 +497,10 @@ function initializeCoreMod() {
                     }
 
                     if (!success)
-                        logMessage("ERROR", "An error occurred while transforming constructor in net.minecraft.entity.projectile.ThrowableEntity:\n    Unable to find injection point")
+                        logTransformError("constructor", "net.minecraft.entity.projectile.ThrowableEntity", "Unable to find injection point")
 
                 } catch (exception) {
-                    logMessage("ERROR", "An error occurred while transforming constructor in net.minecraft.entity.projectile.ThrowableEntity:\n    " + exception)
+                    logTransformError("constructor", "net.minecraft.entity.projectile.ThrowableEntity", exception.message)
                 }
 
                 return methodNode
@@ -549,14 +553,14 @@ function initializeCoreMod() {
                         }
 
                         if (!success)
-                            logMessage("ERROR", "An error occurred while transforming onItemRightClick function in net.minecraft.item.EnderEyeItem:\n    Unable to find injection point")
+                            logTransformError("function onItemRightClick", "net.minecraft.item.EnderEyeItem", "Unable to find injection point")
 
                     } catch (exception) {
-                        logMessage("ERROR", "An error occurred while transforming onItemRightClick function in net.minecraft.item.EnderEyeItem:\n    " + exception)
+                        logTransformError("function onItemRightClick", "net.minecraft.item.EnderEyeItem", exception.message)
                     }
 
                 } else
-                    logMessage("ERROR", "An error occurred while transforming onItemRightClick function in net.minecraft.item.EnderEyeItem:\n    Unable to find function to transform")
+                    logTransformError("function onItemRightClick", "net.minecraft.item.EnderEyeItem", "Unable to find function to transform")
 
                 return classNode
             }
@@ -608,14 +612,14 @@ function initializeCoreMod() {
                         }
 
                         if (!success)
-                            logMessage("ERROR", "An error occurred while transforming onItemRightClick function in net.minecraft.item.FishingRodItem:\n    Unable to find injection point")
+                            logTransformError("function onItemRightClick", "net.minecraft.item.FishingRodItem", "Unable to find injection point")
 
                     } catch (exception) {
-                        logMessage("ERROR", "An error occurred while transforming onItemRightClick function in net.minecraft.item.FishingRodItem:\n    " + exception)
+                        logTransformError("function onItemRightClick", "net.minecraft.item.FishingRodItem", exception.message)
                     }
 
                 } else
-                    logMessage("ERROR", "An error occurred while transforming onItemRightClick function in net.minecraft.item.FishingRodItem:\n    Unable to find function to transform")
+                    logTransformError("function onItemRightClick", "net.minecraft.item.FishingRodItem", "Unable to find function to transform")
 
                 return classNode
             }
@@ -662,7 +666,7 @@ function initializeCoreMod() {
                         }
 
                         if (successes & 1 === 0)
-                            logMessage("ERROR", "An error occurred while transforming render function in net.minecraft.client.renderer.FishRenderer:\n    Unable to find primary injection points")
+                            logTransformError("function render", "net.minecraft.client.renderer.FishRenderer", "Unable to find primary injection points")
 
                         // Puts in offset to fishing line position.
                         for (var i = 0; i < oldInstructions.size() - 21; i++) {
@@ -763,17 +767,17 @@ function initializeCoreMod() {
                         }
 
                         if (successes & 2 === 0) {
-                            logMessage("ERROR", "An error occurred while transforming render function in net.minecraft.client.renderer.FishRenderer:\n    Unable to find secondary injection points")
+                            logTransformError("function render", "net.minecraft.client.renderer.FishRenderer", "Unable to find secondary injection points")
 
                         } else if (successes & 1 === 1)
                             logTransformSuccess("function render", "net.minecraft.client.renderer.FishRenderer")
 
                     } catch (exception) {
-                        logMessage("ERROR", "An error occurred while transforming render function in net.minecraft.client.renderer.FishRenderer:\n    " + exception)
+                        logTransformError("function render", "net.minecraft.client.renderer.FishRenderer", exception.message)
                     }
 
                 } else
-                    logMessage("ERROR", "An error occurred while transforming render function in net.minecraft.client.renderer.FishRenderer:\n    Unable to find function to transform")
+                    logTransformError("function render", "net.minecraft.client.renderer.FishRenderer", "Unable to find function to transform")
 
                 return classNode
             }
@@ -819,14 +823,14 @@ function initializeCoreMod() {
                         }
 
                         if (!success)
-                            logMessage("ERROR", "An error occurred while transforming shouldStopFishing function in net.minecraft.entity.projectile.FishingBobberEntity:\n    Unable to find injection point")
+                            logTransformError("function shouldStopFishing", "net.minecraft.entity.projectile.FishingBobberEntity", "Unable to find injection point")
 
                     } catch (exception) {
-                        logMessage("ERROR", "An error occurred while transforming shouldStopFishing function in net.minecraft.entity.projectile.FishingBobberEntity:\n    " + exception)
+                        logTransformError("function shouldStopFishing", "net.minecraft.entity.projectile.FishingBobberEntity", exception.message)
                     }
 
                 } else
-                    logMessage("ERROR", "An error occurred while transforming shouldStopFishing function in net.minecraft.entity.projectile.FishingBobberEntity:\n    Unable to find function to transform")
+                    logTransformError("function shouldStopFishing", "net.minecraft.entity.projectile.FishingBobberEntity", "Unable to find function to transform")
 
 
                 // Offsets the destination of reeled-in items.
@@ -948,14 +952,14 @@ function initializeCoreMod() {
                         }
 
                         if (!success)
-                            logMessage("ERROR", "An error occurred while transforming handleHookRetraction function in net.minecraft.entity.projectile.FishingBobberEntity:\n    Unable to find injection points")
+                            logTransformError("function handleHookRetraction", "net.minecraft.entity.projectile.FishingBobberEntity", "Unable to find injection points")
 
                     } catch (exception) {
-                        logMessage("ERROR", "An error occurred while transforming handleHookRetraction function in net.minecraft.entity.projectile.FishingBobberEntity:\n    " + exception)
+                        logTransformError("function handleHookRetraction", "net.minecraft.entity.projectile.FishingBobberEntity", exception.message)
                     }
 
                 } else
-                    logMessage("ERROR", "An error occurred while transforming handleHookRetraction function in net.minecraft.entity.projectile.FishingBobberEntity:\n    Unable to find function to transform")
+                    logTransformError("function handleHookRetraction", "net.minecraft.entity.projectile.FishingBobberEntity", "Unable to find function to transform")
 
 
                 // Offsets the destination of reeled-in entities and Entities.
@@ -1067,14 +1071,14 @@ function initializeCoreMod() {
                         }
 
                         if (!success)
-                            logMessage("ERROR", "An error occurred while transforming bringInHookedEntity function in net.minecraft.entity.projectile.FishingBobberEntity:\n    Unable to find injection points")
+                            logTransformError("function bringInHookedEntity", "net.minecraft.entity.projectile.FishingBobberEntity", "Unable to find injection points")
 
                     } catch (exception) {
-                        logMessage("ERROR", "An error occurred while transforming bringInHookedEntity function in net.minecraft.entity.projectile.FishingBobberEntity:\n    " + exception)
+                        logTransformError("function bringInHookedEntity", "net.minecraft.entity.projectile.FishingBobberEntity", exception.message)
                     }
 
                 } else
-                    logMessage("ERROR", "An error occurred while transforming bringInHookedEntity function in net.minecraft.entity.projectile.FishingBobberEntity:\n    Unable to find function to transform")
+                    logTransformError("function bringInHookedEntity", "net.minecraft.entity.projectile.FishingBobberEntity", "Unable to find function to transform")
 
                 return classNode
             }
@@ -1219,10 +1223,10 @@ function initializeCoreMod() {
                     }
 
                     if (!success)
-                        logMessage("ERROR", "An error occurred while transforming func_225416_a function in net.minecraft.server.management.PlayerInteractionManager:\n    Unable to find injection points")
+                        logTransformError("function func_225416_a", "net.minecraft.server.management.PlayerInteractionManager", "Unable to find injection points")
 
                 } catch (exception) {
-                    logMessage("ERROR", "An error occurred while transforming func_225416_a function in net.minecraft.server.management.PlayerInteractionManager:\n    " + exception)
+                    logTransformError("function func_225416_a", "net.minecraft.server.management.PlayerInteractionManager", exception.message)
                 }
 
                 return methodNode
@@ -1281,7 +1285,7 @@ function initializeCoreMod() {
                         }
 
                         if (successes & 1 === 0)
-                            logMessage("ERROR", "An error occurred while transforming updateLeashedState function in net.minecraft.entity.CreatureEntity:\n    Unable to find primary injection points")
+                            logTransformError("function updateLeashedState", "net.minecraft.entity.CreatureEntity", "Unable to find primary injection points")
 
 
                         // Modifies distance calculation for leashes.
@@ -1304,7 +1308,7 @@ function initializeCoreMod() {
                         }
 
                         if (successes & 2 === 0)
-                            logMessage("ERROR", "An error occurred while transforming updateLeashedState function in net.minecraft.entity.CreatureEntity:\n    Unable to find secondary injection points")
+                            logTransformError("function updateLeashedState", "net.minecraft.entity.CreatureEntity", "Unable to find secondary injection points")
 
 
                         // Modifies pull position for leashes.
@@ -1416,7 +1420,7 @@ function initializeCoreMod() {
                         }
 
                         if (successes & 4 === 0)
-                            logMessage("ERROR", "An error occurred while transforming updateLeashedState function in net.minecraft.entity.CreatureEntity:\n    Unable to find tertiary injection points")
+                            logTransformError("function updateLeashedState", "net.minecraft.entity.CreatureEntity", "Unable to find tertiary injection points")
 
 
                         // Modifies AI move behavior when leashed.
@@ -1523,17 +1527,17 @@ function initializeCoreMod() {
                         }
 
                         if (successes & 8 === 0) {
-                            logMessage("ERROR", "An error occurred while transforming updateLeashedState function in net.minecraft.entity.CreatureEntity:\n    Unable to find the fourth set of injection points")
+                            logTransformError("function updateLeashedState", "net.minecraft.entity.CreatureEntity", "Unable to find the fourth set of injection points")
 
                         } else if (successes ^ 15 === 0)
                             logTransformSuccess("function updateLeashedState", "net.minecraft.entity.CreatureEntity")
 
                     } catch (exception) {
-                        logMessage("ERROR", "An error occurred while transforming updateLeashedState function in net.minecraft.entity.CreatureEntity:\n    " + exception)
+                        logTransformError("function updateLeashedState", "net.minecraft.entity.CreatureEntity", exception.message)
                     }
 
                 } else
-                    logMessage("ERROR", "An error occurred while transforming updateLeashedState function in net.minecraft.entity.CreatureEntity:\n    Unable to find function to transform")
+                    logTransformError("function updateLeashedState", "net.minecraft.entity.CreatureEntity", "Unable to find function to transform")
 
                 return classNode
             }
@@ -1612,7 +1616,7 @@ function initializeCoreMod() {
                         }
 
                         if (successes & 1 === 0) {
-                            logMessage("ERROR", "An error occurred while transforming renderLeash function in net.minecraft.client.renderer.entity.MobRenderer:\n    Unable to find primary injection points")
+                            logTransformError("function renderLeash", "net.minecraft.client.renderer.entity.MobRenderer", "Unable to find primary injection points")
 
                         } else {
                             // Modifies the y-component of the leash render position.
@@ -1665,7 +1669,7 @@ function initializeCoreMod() {
                             }
 
                             if (successes & 2 === 0)
-                                logMessage("ERROR", "An error occurred while transforming renderLeash function in net.minecraft.client.renderer.entity.MobRenderer:\n    Unable to find secondary injection points")
+                                logTransformError("function renderLeash", "net.minecraft.client.renderer.entity.MobRenderer", "Unable to find secondary injection points")
 
 
                             // Modifies the z-component of the leash render position.
@@ -1709,18 +1713,18 @@ function initializeCoreMod() {
                             }
 
                             if (successes & 4 === 0) {
-                                logMessage("ERROR", "An error occurred while transforming renderLeash function in net.minecraft.client.renderer.entity.MobRenderer:\n    Unable to find tertiary injection points")
+                                logTransformError("function renderLeash", "net.minecraft.client.renderer.entity.MobRenderer", "Unable to find tertiary injection points")
 
                             } else if (successes ^ 7 === 0)
                                 logTransformSuccess("function renderLeash", "net.minecraft.client.renderer.entity.MobRenderer")
                         }
 
                     } catch (exception) {
-                        logMessage("ERROR", "An error occurred while transforming renderLeash function in net.minecraft.client.renderer.entity.MobRenderer:\n    " + exception)
+                        logTransformError("function renderLeash", "net.minecraft.client.renderer.entity.MobRenderer", exception.message)
                     }
 
                 } else
-                    logMessage("ERROR", "An error occurred while transforming renderLeash function in net.minecraft.client.renderer.entity.MobRenderer:\n    Unable to find function to transform")
+                    logTransformError("function renderLeash", "net.minecraft.client.renderer.entity.MobRenderer", "Unable to find function to transform")
 
                 return classNode
             }
@@ -1835,14 +1839,14 @@ function initializeCoreMod() {
                             logTransformSuccess("function tick", "net.minecraft.entity.ai.goal.LookAtGoal")
 
                         } else
-                            logMessage("ERROR", "An error occurred while transforming tick function in net.minecraft.entity.ai.goal.LookAtGoal:\n    Unable to find injection points")
+                            logTransformError("function tick", "net.minecraft.entity.ai.goal.LookAtGoal", "Unable to find injection points")
 
                     } catch (exception) {
-                        logMessage("ERROR", "An error occurred while transforming tick function in net.minecraft.entity.ai.goal.LookAtGoal:\n    " + exception)
+                        logTransformError("function tick", "net.minecraft.entity.ai.goal.LookAtGoal", exception.message)
                     }
 
                 } else
-                    logMessage("ERROR", "An error occurred while transforming tick function in net.minecraft.entity.ai.goal.LookAtGoal:\n    Unable to find function to transform")
+                    logTransformError("function tick", "net.minecraft.entity.ai.goal.LookAtGoal", "Unable to find function to transform")
 
                 return classNode
             }
@@ -1888,14 +1892,14 @@ function initializeCoreMod() {
                             logTransformSuccess("function processTryUseItemOnBlock", "net.minecraft.network.play.ServerPlayNetHandler")
 
                         } else
-                            logMessage("ERROR", "An error occurred while transforming processTryUseItemOnBlock function in net.minecraft.network.play.ServerPlayNetHandler:\n    Unable to find injection point")
+                            logTransformError("function processTryUseItemOnBlock", "net.minecraft.network.play.ServerPlayNetHandler", "Unable to find injection point")
 
                     } catch (exception) {
-                        logMessage("ERROR", "An error occurred while transforming processTryUseItemOnBlock function in net.minecraft.network.play.ServerPlayNetHandler:\n    " + exception)
+                        logTransformError("function processTryUseItemOnBlock", "net.minecraft.network.play.ServerPlayNetHandler", exception.message)
                     }
 
                 } else
-                    logMessage("ERROR", "An error occurred while transforming processTryUseItemOnBlock function in net.minecraft.network.play.ServerPlayNetHandler:\n    Unable to find function to transform")
+                    logTransformError("function processTryUseItemOnBlock", "net.minecraft.network.play.ServerPlayNetHandler", "Unable to find function to transform")
 
                 return classNode
             }
@@ -1941,14 +1945,14 @@ function initializeCoreMod() {
                             logTransformSuccess("function isUsableByPlayer", "net.minecraft.tileentity.AbstractFurnaceTileEntity")
 
                         } else
-                            logMessage("ERROR", "An error occurred while transforming isUsableByPlayer function in net.minecraft.tileentity.AbstractFurnaceTileEntity:\n    Unable to find injection point")
+                            logTransformError("function isUsableByPlayer", "net.minecraft.tileentity.AbstractFurnaceTileEntity", "Unable to find injection point")
 
                     } catch (exception) {
-                        logMessage("ERROR", "An error occurred while transforming isUsableByPlayer function in net.minecraft.tileentity.AbstractFurnaceTileEntity:\n    " + exception)
+                        logTransformError("function isUsableByPlayer", "net.minecraft.tileentity.AbstractFurnaceTileEntity", exception.message)
                     }
 
                 } else
-                    logMessage("ERROR", "An error occurred while transforming isUsableByPlayer function in net.minecraft.tileentity.AbstractFurnaceTileEntity:\n    Unable to find function to transform")
+                    logTransformError("function isUsableByPlayer", "net.minecraft.tileentity.AbstractFurnaceTileEntity", "Unable to find function to transform")
 
                 return classNode
             }
@@ -1994,14 +1998,14 @@ function initializeCoreMod() {
                             logTransformSuccess("function isUsableByPlayer", "net.minecraft.tileentity.BrewingStandTileEntity")
 
                         } else
-                            logMessage("ERROR", "An error occurred while transforming isUsableByPlayer function in net.minecraft.tileentity.BrewingStandTileEntity:\n    Unable to find injection point")
+                            logTransformError("function isUsableByPlayer", "net.minecraft.tileentity.BrewingStandTileEntity", "Unable to find injection point")
 
                     } catch (exception) {
-                        logMessage("ERROR", "An error occurred while transforming isUsableByPlayer function in net.minecraft.tileentity.BrewingStandTileEntity:\n    " + exception)
+                        logTransformError("function isUsableByPlayer", "net.minecraft.tileentity.BrewingStandTileEntity", exception.message)
                     }
 
                 } else
-                    logMessage("ERROR", "An error occurred while transforming isUsableByPlayer function in net.minecraft.tileentity.BrewingStandTileEntity:\n    Unable to find function to transform")
+                    logTransformError("function isUsableByPlayer", "net.minecraft.tileentity.BrewingStandTileEntity", "Unable to find function to transform")
 
                 return classNode
             }
@@ -2047,14 +2051,14 @@ function initializeCoreMod() {
                             logTransformSuccess("function isUsableByPlayer", "net.minecraft.tileentity.LockableLootTileEntity")
 
                         } else
-                            logMessage("ERROR", "An error occurred while transforming isUsableByPlayer function in net.minecraft.tileentity.LockableLootTileEntity:\n    Unable to find injection point")
+                            logTransformError("function isUsableByPlayer", "net.minecraft.tileentity.LockableLootTileEntity", "Unable to find injection point")
 
                     } catch (exception) {
-                        logMessage("ERROR", "An error occurred while transforming isUsableByPlayer function in net.minecraft.tileentity.LockableLootTileEntity:\n    " + exception)
+                        logTransformError("function isUsableByPlayer", "net.minecraft.tileentity.LockableLootTileEntity", exception.message)
                     }
 
                 } else
-                    logMessage("ERROR", "An error occurred while transforming isUsableByPlayer function in net.minecraft.tileentity.LockableLootTileEntity:\n    Unable to find function to transform")
+                    logTransformError("function isUsableByPlayer", "net.minecraft.tileentity.LockableLootTileEntity", "Unable to find function to transform")
 
                 return classNode
             }
@@ -2100,14 +2104,14 @@ function initializeCoreMod() {
                             logTransformSuccess("function isUsableByPlayer", "net.minecraft.tileentity.LecternTileEntity")
 
                         } else
-                            logMessage("ERROR", "An error occurred while transforming isUsableByPlayer function in net.minecraft.tileentity.LecternTileEntity:\n    Unable to find injection point")
+                            logTransformError("function isUsableByPlayer", "net.minecraft.tileentity.LecternTileEntity", "Unable to find injection point")
 
                     } catch (exception) {
-                        logMessage("ERROR", "An error occurred while transforming isUsableByPlayer function in net.minecraft.tileentity.LecternTileEntity:\n    " + exception)
+                        logTransformError("function isUsableByPlayer", "net.minecraft.tileentity.LecternTileEntity", exception.message)
                     }
 
                 } else
-                    logMessage("ERROR", "An error occurred while transforming isUsableByPlayer function in net.minecraft.tileentity.LecternTileEntity:\n    Unable to find function to transform")
+                    logTransformError("function isUsableByPlayer", "net.minecraft.tileentity.LecternTileEntity", "Unable to find function to transform")
 
                 return classNode
             }
@@ -2153,14 +2157,14 @@ function initializeCoreMod() {
                             logTransformSuccess("function canBeUsed", "net.minecraft.tileentity.EnderChestTileEntity")
 
                         } else
-                            logMessage("ERROR", "An error occurred while transforming canBeUsed function in net.minecraft.tileentity.EnderChestTileEntity:\n    Unable to find injection point")
+                            logTransformError("function canBeUsed", "net.minecraft.tileentity.EnderChestTileEntity", "Unable to find injection point")
 
                     } catch (exception) {
-                        logMessage("ERROR", "An error occurred while transforming canBeUsed function in net.minecraft.tileentity.EnderChestTileEntity:\n    " + exception)
+                        logTransformError("function canBeUsed", "net.minecraft.tileentity.EnderChestTileEntity", exception.message)
                     }
 
                 } else
-                    logMessage("ERROR", "An error occurred while transforming canBeUsed function in net.minecraft.tileentity.EnderChestTileEntity:\n    Unable to find function to transform")
+                    logTransformError("function canBeUsed", "net.minecraft.tileentity.EnderChestTileEntity", "Unable to find function to transform")
 
                 return classNode
             }
@@ -2210,14 +2214,14 @@ function initializeCoreMod() {
                             logTransformSuccess("function isUsableByPlayer", "net.minecraft.entity.item.minecart.ContainerMinecartEntity")
 
                         } else
-                            logMessage("ERROR", "An error occurred while transforming isUsableByPlayer function in net.minecraft.entity.item.minecart.ContainerMinecartEntity:\n    Unable to find injection point")
+                            logTransformError("function isUsableByPlayer", "net.minecraft.entity.item.minecart.ContainerMinecartEntity", "Unable to find injection point")
 
                     } catch (exception) {
-                        logMessage("ERROR", "An error occurred while transforming isUsableByPlayer function in net.minecraft.entity.item.minecart.ContainerMinecartEntity:\n    " + exception)
+                        logTransformError("function isUsableByPlayer", "net.minecraft.entity.item.minecart.ContainerMinecartEntity", exception.message)
                     }
 
                 } else
-                    logMessage("ERROR", "An error occurred while transforming isUsableByPlayer function in net.minecraft.entity.item.minecart.ContainerMinecartEntity:\n    Unable to find function to transform")
+                    logTransformError("function isUsableByPlayer", "net.minecraft.entity.item.minecart.ContainerMinecartEntity", "Unable to find function to transform")
 
                 return classNode
             }
@@ -2263,14 +2267,14 @@ function initializeCoreMod() {
                             logTransformSuccess("function lambda$isWithinUsableDistance$0", "net.minecraft.inventory.container.Container")
 
                         } else
-                            logMessage("ERROR", "An error occurred while transforming lambda$isWithinUsableDistance$0 function in net.minecraft.inventory.container.Container:\n    Unable to find injection point")
+                            logTransformError("function lambda$isWithinUsableDistance$0", "net.minecraft.inventory.container.Container", "Unable to find injection point")
 
                     } catch (exception) {
-                        logMessage("ERROR", "An error occurred while transforming lambda$isWithinUsableDistance$0 function in net.minecraft.inventory.container.Container:\n    " + exception)
+                        logTransformError("function lambda$isWithinUsableDistance$0", "net.minecraft.inventory.container.Container", exception.message)
                     }
 
                 } else
-                    logMessage("ERROR", "An error occurred while transforming lambda$isWithinUsableDistance$0 function in net.minecraft.inventory.container.Container:\n    Unable to find function to transform")
+                    logTransformError("function lambda$isWithinUsableDistance$0", "net.minecraft.inventory.container.Container", "Unable to find function to transform")
 
                 return classNode
             }
@@ -2313,7 +2317,7 @@ function initializeCoreMod() {
                         }
 
                         if (successes & 1 === 0)
-                            logMessage("ERROR", "An error occurred while transforming shouldRender function in net.minecraft.client.renderer.entity.EntityRenderer:\n    Unable to find primary injection point")
+                            logTransformError("function shouldRender", "net.minecraft.client.renderer.entity.EntityRenderer", "Unable to find primary injection point")
 
                         for (var i = 0; i < oldInstructions.size(); i++) {
                             var instruction = oldInstructions.get(i)
@@ -2399,17 +2403,17 @@ function initializeCoreMod() {
                         }
 
                         if (successes & 2 === 0) {
-                            logMessage("ERROR", "An error occurred while transforming shouldRender function in net.minecraft.client.renderer.entity.EntityRenderer:\n    Unable to find secondary injection point")
+                            logTransformError("function shouldRender", "net.minecraft.client.renderer.entity.EntityRenderer", "Unable to find secondary injection point")
 
                         } else if (successes & 3 === 3)
                             logTransformSuccess("function shouldRender", "net.minecraft.client.renderer.entity.EntityRenderer")
 
                     } catch (exception) {
-                        logMessage("ERROR", "An error occurred while transforming shouldRender function in net.minecraft.client.renderer.entity.EntityRenderer:\n    " + exception)
+                        logTransformError("function shouldRender", "net.minecraft.client.renderer.entity.EntityRenderer", exception.message)
                     }
 
                 } else
-                    logMessage("ERROR", "An error occurred while transforming shouldRender function in net.minecraft.client.renderer.entity.EntityRenderer:\n    Unable to find function to transform")
+                    logTransformError("function shouldRender", "net.minecraft.client.renderer.entity.EntityRenderer", "Unable to find function to transform")
 
                 return classNode
             }
@@ -2480,7 +2484,7 @@ function initializeCoreMod() {
                                 }
 
                                 if (successes & 2 === 0) {
-                                    logMessage("ERROR", "An error occurred while transforming attackEntityFrom function in net.minecraft.entity.LivingEntity:\n    Unable to find primary injection point")
+                                    logTransformError("function attackEntityFrom", "net.minecraft.entity.LivingEntity", "Unable to find primary injection point")
 
                                 } else {
                                     // Offsets the z-position of knockback.
@@ -2527,7 +2531,7 @@ function initializeCoreMod() {
                                     }
 
                                     if (successes & 4 === 0)
-                                        logMessage("ERROR", "An error occurred while transforming attackEntityFrom function in net.minecraft.entity.LivingEntity:\n    Unable to find secondary injection point")
+                                        logTransformError("function attackEntityFrom", "net.minecraft.entity.LivingEntity", "Unable to find secondary injection point")
                                 }
 
                                 successes |= 1
@@ -2536,17 +2540,17 @@ function initializeCoreMod() {
                         }
 
                         if (successes & 1 === 0) {
-                            logMessage("ERROR", "An error occurred while transforming attackEntityFrom function in net.minecraft.entity.LivingEntity:\n    Unable to find injection area")
+                            logTransformError("function attackEntityFrom", "net.minecraft.entity.LivingEntity", "Unable to find injection area")
 
                         } else if (successes & 7 === 7)
                             logTransformSuccess("function attackEntityFrom", "net.minecraft.entity.LivingEntity")
 
                     } catch (exception) {
-                        logMessage("ERROR", "An error occurred while transforming attackEntityFrom function in net.minecraft.entity.LivingEntity:\n    " + exception)
+                        logTransformError("function attackEntityFrom", "net.minecraft.entity.LivingEntity", exception.message)
                     }
 
                 } else
-                    logMessage("ERROR", "An error occurred while transforming attackEntityFrom function in net.minecraft.entity.LivingEntity:\n    Unable to find function to transform")
+                    logTransformError("function attackEntityFrom", "net.minecraft.entity.LivingEntity", "Unable to function to transform")
 
                 return classNode
             }

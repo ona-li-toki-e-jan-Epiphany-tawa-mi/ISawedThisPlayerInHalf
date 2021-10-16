@@ -9,6 +9,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 // TODO Proofread JavaScript god file.
+// TODO Problem with attacks not landing on entities that are not within range of player's actual body.
 
 // TODO Possibly have offsets stored in a database.
 // TODO Make class transformers more compatible.
