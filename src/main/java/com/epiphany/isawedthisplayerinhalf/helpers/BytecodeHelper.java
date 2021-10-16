@@ -13,8 +13,7 @@ import net.minecraft.util.math.Vec3d;
 import java.lang.reflect.Field;
 
 /**
- * I can't (don't want to) account for name mappings in the bytecode itself, so I'm using these helper functions.
- *  (a.k.a letting Forge and MCP do the work.)
+ * Helper class for calling functions and reading values that can't be done in pure bytecode because of obfuscation.
  */
 public class BytecodeHelper {
     private static final Field closestEntityField;

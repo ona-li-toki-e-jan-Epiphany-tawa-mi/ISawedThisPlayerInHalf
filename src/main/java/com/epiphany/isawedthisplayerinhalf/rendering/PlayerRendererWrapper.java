@@ -24,7 +24,6 @@ import java.util.List;
  */
 @OnlyIn(Dist.CLIENT)
 public class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> {
-    static final float degreesToRadians = (float) (Math.PI / 180.0);
     // Reflected methods grabbed from PlayerRenderer.
     private static final Method setModelVisibilitiesMethod;
     private static final Method applyRotationsMethod;

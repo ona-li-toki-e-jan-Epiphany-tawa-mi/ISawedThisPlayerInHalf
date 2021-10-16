@@ -18,7 +18,7 @@ var VarInsnNode = Java.type("org.objectweb.asm.tree.VarInsnNode")
  * @param {string} methodName The name of the method to find.
  * @param {string} descriptor The descriptor of the method to find.
  *
- * @returns null} The found method. Or null, if nothing is found.
+ * @returns {null} The found method. Or null, if nothing is found.
  */
 function findMethodWithSignature(classNode, methodName, descriptor) {
     for (var i in classNode.methods) {
@@ -345,13 +345,13 @@ function initializeCoreMod() {
                             false
                         ))
                         newInstructions.add(new JumpInsnNode(Opcodes.IFNE, skipReturn))
-
-                        newInstructions.add(new InsnNode(Opcodes.RETURN))
-
+                            newInstructions.add(new InsnNode(Opcodes.RETURN))
                         newInstructions.add(skipReturn)
 
 
                         renderItemInFirstPerson.instructions.insert(newInstructions)
+                        //...
+
                         logTransformSuccess("function renderItemInFirstPerson", "net.minecraft.client.renderer.FirstPersonRenderer")
 
                     } catch (exception) {

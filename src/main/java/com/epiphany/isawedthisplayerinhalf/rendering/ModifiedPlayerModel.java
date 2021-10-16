@@ -1,5 +1,6 @@
 package com.epiphany.isawedthisplayerinhalf.rendering;
 
+import com.epiphany.isawedthisplayerinhalf.helpers.MathConstants;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.MathHelper;
@@ -48,7 +49,7 @@ public class ModifiedPlayerModel<T extends LivingEntity> extends PlayerModel<T> 
         if (this.shouldRotate) {
             // Creates an angle that cancels out the yaw offset put on by the renderer and adds it to the offset to make the model stay in place.
             float netYawOffset = MathHelper.lerp(ageInTicks - entity.ticksExisted, entity.prevRenderYawOffset, entity.renderYawOffset)
-                    * PlayerRendererWrapper.degreesToRadians + this.offsetAngle;
+                    * MathConstants.degreesToRadians + this.offsetAngle;
             float offsetCos = MathHelper.cos(netYawOffset);
             float offsetSin = MathHelper.sin(netYawOffset);
 
