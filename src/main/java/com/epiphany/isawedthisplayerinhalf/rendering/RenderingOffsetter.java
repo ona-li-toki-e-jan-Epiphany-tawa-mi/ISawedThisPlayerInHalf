@@ -2,6 +2,7 @@ package com.epiphany.isawedthisplayerinhalf.rendering;
 
 import com.epiphany.isawedthisplayerinhalf.Offsetter;
 import com.epiphany.isawedthisplayerinhalf.helpers.ReflectionHelper;
+import com.epiphany.isawedthisplayerinhalf.rendering.modfiedModels.ModifiedPlayerModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.ActiveRenderInfo;

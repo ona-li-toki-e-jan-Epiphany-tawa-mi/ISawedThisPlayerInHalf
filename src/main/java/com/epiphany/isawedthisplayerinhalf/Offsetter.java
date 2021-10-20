@@ -108,12 +108,8 @@ public class Offsetter {
         DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> {
             PlayerRendererWrapper wrappedRenderer = RenderingOffsetter.wrappedRendererMap.get(playerUUID);
 
-            if (wrappedRenderer != null) {
+            if (wrappedRenderer != null)
                 wrappedRenderer.setOffsets(offsets);
-
-                if (offsets.equals(Vec3d.ZERO))
-                    wrappedRenderer.reset();
-            }
         });
     }
 

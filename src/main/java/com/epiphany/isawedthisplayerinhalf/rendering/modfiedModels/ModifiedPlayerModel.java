@@ -1,4 +1,4 @@
-package com.epiphany.isawedthisplayerinhalf.rendering;
+package com.epiphany.isawedthisplayerinhalf.rendering.modfiedModels;
 
 import com.epiphany.isawedthisplayerinhalf.helpers.MathConstants;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
@@ -11,7 +11,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
  * A modified version of PlayerModel for customizing how players are rendered.
  */
 @OnlyIn(Dist.CLIENT)
-public class ModifiedPlayerModel<T extends LivingEntity> extends PlayerModel<T> {
+public class ModifiedPlayerModel<T extends LivingEntity> extends PlayerModel<T> implements IModifiedModel {
     private final float[] initialValues = new float[4];
     private float xOffset, yOffset, zOffset;
     private float offsetAngle;
@@ -80,31 +80,27 @@ public class ModifiedPlayerModel<T extends LivingEntity> extends PlayerModel<T> 
     }
 
 
-
-    /**
-     * Sets the offsets for this model.
-     *
-     * @param xOffset The offset in the x-axis.
-     * @param yOffset The offset in the y-axis.
-     * @param zOffset The offset in the z-axis.
-     * @param offsetAngle The angle along the XZ plane that intersects the point (xOffset, zOffset).
-     * @param shouldRotate Whether the model should be rotated in the first place.
-     */
-    void setOffsets(float xOffset, float yOffset, float zOffset, float offsetAngle, boolean shouldRotate) {
+    @Override
+    public void setOffsets(float xOffset, float yOffset, float zOffset, float offsetAngle) {
         this.xOffset = xOffset;
         this.yOffset = yOffset;
         this.zOffset = zOffset;
         this.offsetAngle = offsetAngle;
-        this.shouldRotate = shouldRotate;
+        this.shouldRotate = true;
     }
 
-    /**
-     * Resets certain parts of the player model.
-     */
-    void reset() {
-        bipedHead.rotationPointX = this.initialValues[0];
-        bipedHead.rotationPointZ = this.initialValues[1];
-        bipedBody.rotationPointX = this.initialValues[2];
-        bipedBody.rotationPointZ = this.initialValues[3];
+    @Override
+    public void unsetOffsets() {
+        this.xOffset = 0;
+        this.yOffset = 0;
+        this.zOffset = 0;
+        this.offsetAngle = 0;
+
+        this.bipedHead.rotationPointX = this.initialValues[0];
+        this.bipedHead.rotationPointZ = this.initialValues[1];
+        this.bipedBody.rotationPointX = this.initialValues[2];
+        this.bipedBody.rotationPointZ = this.initialValues[3];
+
+        this.shouldRotate = false;
     }
 }

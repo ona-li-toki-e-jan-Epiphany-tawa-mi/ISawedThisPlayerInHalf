@@ -1,6 +1,9 @@
 package com.epiphany.isawedthisplayerinhalf.rendering;
 
 import com.epiphany.isawedthisplayerinhalf.helpers.ReflectionHelper;
+import com.epiphany.isawedthisplayerinhalf.rendering.modfiedModels.IModifiedModel;
+import com.epiphany.isawedthisplayerinhalf.rendering.modfiedModels.ModifiedBipedModel;
+import com.epiphany.isawedthisplayerinhalf.rendering.modfiedModels.ModifiedPlayerModel;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -137,37 +140,20 @@ public class PlayerRendererWrapper extends LivingRenderer<AbstractClientPlayerEn
      * @param offsets A 3d vector containing the offsets.
      */
     public void setOffsets(Vec3d offsets) {
-        float xOffset, yOffset, zOffset;
-        float offsetAngle;
-        boolean shouldRotate;
-
         if (!offsets.equals(Vec3d.ZERO)) {
-            xOffset = (float) (offsets.x * 16);
-            yOffset = (float) (offsets.y * -16);
-            zOffset = (float) (offsets.z * 16);
+            float xOffset = (float) (offsets.x * 16);
+            float yOffset = (float) (offsets.y * -16);
+            float zOffset = (float) (offsets.z * 16);
             // Angle needs to be multiplied by two for whatever reason.
-            offsetAngle = (float) (Math.atan2(-offsets.z, offsets.x) * 2);
-            shouldRotate = true;
+            float offsetAngle = (float) (Math.atan2(-offsets.z, offsets.x) * 2);
+
+            ((IModifiedModel) this.entityModel).setOffsets(xOffset, yOffset, zOffset, offsetAngle);
+            this.upperArmorModel.setOffsets(xOffset, yOffset, zOffset, offsetAngle);
 
         } else {
-            xOffset = 0;
-            yOffset = 0;
-            zOffset = 0;
-            offsetAngle = 0;
-            shouldRotate = false;
+            ((IModifiedModel) this.entityModel).unsetOffsets();
+            this.upperArmorModel.unsetOffsets();
         }
-
-
-        ((ModifiedPlayerModel<?>) this.entityModel).setOffsets(xOffset, yOffset, zOffset, offsetAngle, shouldRotate);
-        this.upperArmorModel.setOffsets(xOffset, yOffset, zOffset, offsetAngle, shouldRotate);
-    }
-
-    /**
-     * Resets certain parts of the models within this renderer.
-     */
-    public void reset() {
-        ((ModifiedPlayerModel<?>) entityModel).reset();
-        this.upperArmorModel.reset();
     }
 
 
