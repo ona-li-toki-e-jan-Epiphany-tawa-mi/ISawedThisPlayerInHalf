@@ -11,7 +11,6 @@ var VarInsnNode = Java.type("org.objectweb.asm.tree.VarInsnNode")
 
 
 // TODO Find a way to make a copy of method and class nodes so that when transforms fail the unmodified one can be returned.
-// TODO Turn all method transformers into class transformers.
 
 
 
@@ -428,54 +427,58 @@ function initializeCoreMod() {
          */
         "AbstractArrowEntity": {
             "target": {
-                "type": "METHOD",
-                "class": "net.minecraft.entity.projectile.AbstractArrowEntity",
-                "methodName": "<init>",
-                "methodDesc": "(Lnet/minecraft/entity/EntityType;Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/world/World;)V"
+                "type": "CLASS",
+                "name": "net.minecraft.entity.projectile.AbstractArrowEntity"
             },
 
-            "transformer": function(methodNode) {
-                try {
-                    var oldInstructions = methodNode.instructions
-                    var success = false
+            "transformer": function(classNode) {
+                var init = findMethodWithSignature(classNode, "<init>", "(Lnet/minecraft/entity/EntityType;Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/world/World;)V")
 
-                    for (var i = 0; i < oldInstructions.size(); i++) {
-                        var instruction = oldInstructions.get(i)
+                if (init !== null) {
+                    try {
+                        var oldInstructions = init.instructions
+                        var success = false
 
-                        if (checkMethodInsn(instruction, Opcodes.INVOKESPECIAL, "net/minecraft/entity/projectile/AbstractArrowEntity", "<init>",
-                                "(Lnet/minecraft/entity/EntityType;DDDLnet/minecraft/world/World;)V")) {
-                            var newInstructions = new InsnList()
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
 
-                            newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 0))
-                            newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 2))
-                            newInstructions.add(new MethodInsnNode(
-                                Opcodes.INVOKESTATIC,
-                                "com/epiphany/isawedthisplayerinhalf/Offsetter",
-                                "offsetProjectile",
-                                "(Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/LivingEntity;)V",
-                                false
-                            ))
+                            if (checkMethodInsn(instruction, Opcodes.INVOKESPECIAL, "net/minecraft/entity/projectile/AbstractArrowEntity", "<init>",
+                                    "(Lnet/minecraft/entity/EntityType;DDDLnet/minecraft/world/World;)V")) {
+                                var newInstructions = new InsnList()
 
-                            // ...
-                            // INVOKESPECIAL net/minecraft/entity/projectile/AbstractArrowEntity.<init> (Lnet/minecraft/entity/EntityType;DDDLnet/minecraft/world/World;)V
-                            oldInstructions.insert(instruction, newInstructions)
-                            // ...
+                                newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 0))
+                                newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 2))
+                                newInstructions.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                    "offsetProjectile",
+                                    "(Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/LivingEntity;)V",
+                                    false
+                                ))
 
-                            success = true
-                            logTransformSuccess("constructor", "net.minecraft.entity.projectile.AbstractArrowEntity")
+                                // ...
+                                // INVOKESPECIAL net/minecraft/entity/projectile/AbstractArrowEntity.<init> (Lnet/minecraft/entity/EntityType;DDDLnet/minecraft/world/World;)V
+                                oldInstructions.insert(instruction, newInstructions)
+                                // ...
 
-                            break
+                                success = true
+                                logTransformSuccess("constructor", "net.minecraft.entity.projectile.AbstractArrowEntity")
+
+                                break
+                            }
                         }
+
+                        if (!success)
+                            logTransformError("constructor", "net.minecraft.entity.projectile.AbstractArrowEntity", "Unable to find injection point")
+
+                    } catch (exception) {
+                        logTransformError("constructor", "net.minecraft.entity.projectile.AbstractArrowEntity", exception.message)
                     }
 
-                    if (!success)
-                        logTransformError("constructor", "net.minecraft.entity.projectile.AbstractArrowEntity", "Unable to find injection point")
+                } else
+                    logTransformError("constructor", "net.minecraft.entity.projectile.AbstractArrowEntity", "Unable to find function to transform")
 
-                } catch (exception) {
-                    logTransformError("constructor", "net.minecraft.entity.projectile.AbstractArrowEntity", exception.message)
-                }
-
-                return methodNode
+                return classNode
             }
         },
 
@@ -484,54 +487,58 @@ function initializeCoreMod() {
          */
         "ThrowableEntity": {
             "target": {
-                "type": "METHOD",
-                "class": "net.minecraft.entity.projectile.ThrowableEntity",
-                "methodName": "<init>",
-                "methodDesc": "(Lnet/minecraft/entity/EntityType;Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/world/World;)V"
+                "type": "CLASS",
+                "name": "net.minecraft.entity.projectile.ThrowableEntity"
             },
 
-            "transformer": function(methodNode) {
-                try {
-                    var oldInstructions = methodNode.instructions
-                    var success = false
+            "transformer": function(classNode) {
+                var init = findMethodWithSignature(classNode, "<init>", "(Lnet/minecraft/entity/EntityType;Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/world/World;)V")
 
-                    for (var i = 0; i < oldInstructions.size(); i++) {
-                        var instruction = oldInstructions.get(i)
+                if (init !== null) {
+                    try {
+                        var oldInstructions = init.instructions
+                        var success = false
 
-                        if (checkMethodInsn(instruction, Opcodes.INVOKESPECIAL, "net/minecraft/entity/projectile/ThrowableEntity", "<init>",
-                                "(Lnet/minecraft/entity/EntityType;DDDLnet/minecraft/world/World;)V")) {
-                            var newInstructions = new InsnList()
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
 
-                            newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 0))
-                            newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 2))
-                            newInstructions.add(new MethodInsnNode(
-                                Opcodes.INVOKESTATIC,
-                                "com/epiphany/isawedthisplayerinhalf/Offsetter",
-                                "offsetProjectile",
-                                "(Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/LivingEntity;)V",
-                                false
-                            ))
+                            if (checkMethodInsn(instruction, Opcodes.INVOKESPECIAL, "net/minecraft/entity/projectile/ThrowableEntity", "<init>",
+                                    "(Lnet/minecraft/entity/EntityType;DDDLnet/minecraft/world/World;)V")) {
+                                var newInstructions = new InsnList()
 
-                            // ...
-                            // INVOKESPECIAL net/minecraft/entity/projectile/ThrowableEntity.<init> (Lnet/minecraft/entity/EntityType;DDDLnet/minecraft/world/World;)V
-                            oldInstructions.insert(instruction, newInstructions)
-                            // ...
+                                newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 0))
+                                newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 2))
+                                newInstructions.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                    "offsetProjectile",
+                                    "(Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/LivingEntity;)V",
+                                    false
+                                ))
 
-                            success = true
-                            logTransformSuccess("constructor", "net.minecraft.entity.projectile.ThrowableEntity")
+                                // ...
+                                // INVOKESPECIAL net/minecraft/entity/projectile/ThrowableEntity.<init> (Lnet/minecraft/entity/EntityType;DDDLnet/minecraft/world/World;)V
+                                oldInstructions.insert(instruction, newInstructions)
+                                // ...
 
-                            break
+                                success = true
+                                logTransformSuccess("constructor", "net.minecraft.entity.projectile.ThrowableEntity")
+
+                                break
+                            }
                         }
+
+                        if (!success)
+                            logTransformError("constructor", "net.minecraft.entity.projectile.ThrowableEntity", "Unable to find injection point")
+
+                    } catch (exception) {
+                        logTransformError("constructor", "net.minecraft.entity.projectile.ThrowableEntity", exception.message)
                     }
 
-                    if (!success)
-                        logTransformError("constructor", "net.minecraft.entity.projectile.ThrowableEntity", "Unable to find injection point")
+                } else
+                    logTransformError("constructor", "net.minecraft.entity.projectile.ThrowableEntity", "Unable to find function to transform")
 
-                } catch (exception) {
-                    logTransformError("constructor", "net.minecraft.entity.projectile.ThrowableEntity", exception.message)
-                }
-
-                return methodNode
+                return classNode
             }
         },
 
@@ -1160,162 +1167,167 @@ function initializeCoreMod() {
          */
         "PlayerInteractionManager": {
             "target": {
-                "type": "METHOD",
-                "class": "net.minecraft.server.management.PlayerInteractionManager",
-                "methodName": "func_225416_a",
-                "methodDesc": "(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/network/play/client/CPlayerDiggingPacket$Action;Lnet/minecraft/util/Direction;I)V"
+                "type": "CLASS",
+                "name": "net.minecraft.server.management.PlayerInteractionManager"
             },
 
-            "transformer": function(methodNode) {
-                try {
-                    var oldInstructions = methodNode.instructions
-                    var success = false
+            "transformer": function(classNode) {
+                var func_225416_a = findMethodWithSignature(classNode, "func_225416_a",
+                    "(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/network/play/client/CPlayerDiggingPacket$Action;Lnet/minecraft/util/Direction;I)V")
 
-                    // Puts in offset to fishing line position.
-                    for (var i = 0; i < oldInstructions.size() - 38; i++) {
-                        var instruction = oldInstructions.get(i)
+                if (func_225416_a !== null) {
+                    try {
+                        var oldInstructions = func_225416_a.instructions
+                        var success = false
 
-                        if (checkVarInsn(instruction, Opcodes.ALOAD, 0)) {
-                            var instructions = [instruction]
+                        // Puts in offset to fishing line position.
+                        for (var i = 0; i < oldInstructions.size() - 38; i++) {
+                            var instruction = oldInstructions.get(i)
 
-                            for (var k = 1; k < 38; k++) {
-                                var potentialInstruction = oldInstructions.get(i + k)
+                            if (checkVarInsn(instruction, Opcodes.ALOAD, 0)) {
+                                var instructions = [instruction]
 
-                                if (potentialInstruction.getOpcode() !== -1)
-                                    instructions.push(potentialInstruction)
-                            }
+                                for (var k = 1; k < 38; k++) {
+                                    var potentialInstruction = oldInstructions.get(i + k)
 
-                            if (checkObfuscatedFieldInsn(instructions[1], Opcodes.GETFIELD, "net/minecraft/server/management/PlayerInteractionManager", "player", "field_73090_b", "Lnet/minecraft/entity/player/ServerPlayerEntity;")
-                                    && checkObfuscatedMethodInsn(instructions[2], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/ServerPlayerEntity", "getPosX", "func_226277_ct_", "()D")
-                                    && checkVarInsn(instructions[3], Opcodes.ALOAD, 1) && checkObfuscatedMethodInsn(instructions[4], Opcodes.INVOKEVIRTUAL, "net/minecraft/util/math/BlockPos", "getX", "func_177958_n", "()I")
-                                    && checkInsn(instructions[5], Opcodes.I2D) && checkLdcInsn(instructions[6], 0.5) && checkInsn(instructions[7], Opcodes.DADD)
-                                    && checkInsn(instructions[8], Opcodes.DSUB) && checkVarInsn(instructions[9], Opcodes.DSTORE, 5)
+                                    if (potentialInstruction.getOpcode() !== -1)
+                                        instructions.push(potentialInstruction)
+                                }
 
-                                    && checkVarInsn(instructions[10], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[11], Opcodes.GETFIELD, "net/minecraft/server/management/PlayerInteractionManager", "player", "field_73090_b", "Lnet/minecraft/entity/player/ServerPlayerEntity;")
-                                    && checkObfuscatedMethodInsn(instructions[12], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/ServerPlayerEntity", "getPosY", "func_226278_cu_", "()D")
-                                    && checkVarInsn(instructions[13], Opcodes.ALOAD, 1) && checkObfuscatedMethodInsn(instructions[14], Opcodes.INVOKEVIRTUAL, "net/minecraft/util/math/BlockPos", "getY", "func_177956_o", "()I")
-                                    && checkInsn(instructions[15], Opcodes.I2D) && checkLdcInsn(instructions[16], 0.5) && checkInsn(instructions[17], Opcodes.DADD)
-                                    && checkInsn(instructions[18], Opcodes.DSUB) && checkLdcInsn(instructions[19], 1.5) && checkInsn(instructions[20], Opcodes.DADD)
-                                    && checkVarInsn(instructions[21], Opcodes.DSTORE, 7)
+                                if (checkObfuscatedFieldInsn(instructions[1], Opcodes.GETFIELD, "net/minecraft/server/management/PlayerInteractionManager", "player", "field_73090_b", "Lnet/minecraft/entity/player/ServerPlayerEntity;")
+                                        && checkObfuscatedMethodInsn(instructions[2], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/ServerPlayerEntity", "getPosX", "func_226277_ct_", "()D")
+                                        && checkVarInsn(instructions[3], Opcodes.ALOAD, 1) && checkObfuscatedMethodInsn(instructions[4], Opcodes.INVOKEVIRTUAL, "net/minecraft/util/math/BlockPos", "getX", "func_177958_n", "()I")
+                                        && checkInsn(instructions[5], Opcodes.I2D) && checkLdcInsn(instructions[6], 0.5) && checkInsn(instructions[7], Opcodes.DADD)
+                                        && checkInsn(instructions[8], Opcodes.DSUB) && checkVarInsn(instructions[9], Opcodes.DSTORE, 5)
 
-                                    && checkVarInsn(instructions[22], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[23], Opcodes.GETFIELD, "net/minecraft/server/management/PlayerInteractionManager", "player", "field_73090_b", "Lnet/minecraft/entity/player/ServerPlayerEntity;")
-                                    && checkObfuscatedMethodInsn(instructions[24], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/ServerPlayerEntity", "getPosZ", "func_226281_cx_", "()D")
-                                    && checkVarInsn(instructions[25], Opcodes.ALOAD, 1) && checkObfuscatedMethodInsn(instructions[26], Opcodes.INVOKEVIRTUAL, "net/minecraft/util/math/BlockPos", "getZ", "func_177952_p", "()I")
-                                    && checkInsn(instructions[27], Opcodes.I2D) && checkLdcInsn(instructions[28], 0.5) && checkInsn(instructions[29], Opcodes.DADD)
-                                    && checkInsn(instructions[30], Opcodes.DSUB) && checkVarInsn(instructions[31], Opcodes.DSTORE, 9)) {
-                                var getVectorList = new InsnList()
-                                var addXList = new InsnList()
-                                var addYList = new InsnList()
-                                var addZList = new InsnList()
+                                        && checkVarInsn(instructions[10], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[11], Opcodes.GETFIELD, "net/minecraft/server/management/PlayerInteractionManager", "player", "field_73090_b", "Lnet/minecraft/entity/player/ServerPlayerEntity;")
+                                        && checkObfuscatedMethodInsn(instructions[12], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/ServerPlayerEntity", "getPosY", "func_226278_cu_", "()D")
+                                        && checkVarInsn(instructions[13], Opcodes.ALOAD, 1) && checkObfuscatedMethodInsn(instructions[14], Opcodes.INVOKEVIRTUAL, "net/minecraft/util/math/BlockPos", "getY", "func_177956_o", "()I")
+                                        && checkInsn(instructions[15], Opcodes.I2D) && checkLdcInsn(instructions[16], 0.5) && checkInsn(instructions[17], Opcodes.DADD)
+                                        && checkInsn(instructions[18], Opcodes.DSUB) && checkLdcInsn(instructions[19], 1.5) && checkInsn(instructions[20], Opcodes.DADD)
+                                        && checkVarInsn(instructions[21], Opcodes.DSTORE, 7)
 
-
-                                getVectorList.add(new VarInsnNode(Opcodes.ALOAD, 0))
-                                getVectorList.add(new MethodInsnNode(
-                                    Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                    "getPlayerFromManager",
-                                    "(Lnet/minecraft/server/management/PlayerInteractionManager;)Lnet/minecraft/entity/player/ServerPlayerEntity;",
-                                    false
-                                ))
-                                getVectorList.add(new MethodInsnNode(
-                                    Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
-                                    "getOffsets",
-                                    "(Lnet/minecraft/entity/player/PlayerEntity;)Lnet/minecraft/util/math/Vec3d;",
-                                    false
-                                ))
-                                getVectorList.add(new InsnNode(Opcodes.DUP))
-                                getVectorList.add(new InsnNode(Opcodes.DUP))
-
-                                addXList.add(new InsnNode(Opcodes.DUP2_X1))
-                                addXList.add(new InsnNode(Opcodes.POP2))
-                                addXList.add(new MethodInsnNode(
-                                    Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                    "getVectorX",
-                                    "(Lnet/minecraft/util/math/Vec3d;)D",
-                                    false
-                                ))
-                                addXList.add(new InsnNode(Opcodes.DADD))
-
-                                addYList.add(new InsnNode(Opcodes.DUP2_X1))
-                                addYList.add(new InsnNode(Opcodes.POP2))
-                                addYList.add(new MethodInsnNode(
-                                    Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                    "getVectorY",
-                                    "(Lnet/minecraft/util/math/Vec3d;)D",
-                                    false
-                                ))
-                                addYList.add(new InsnNode(Opcodes.DADD))
-
-                                addZList.add(new InsnNode(Opcodes.DUP2_X1))
-                                addZList.add(new InsnNode(Opcodes.POP2))
-                                addZList.add(new MethodInsnNode(
-                                    Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                    "getVectorZ",
-                                    "(Lnet/minecraft/util/math/Vec3d;)D",
-                                    false
-                                ))
-                                addZList.add(new InsnNode(Opcodes.DADD))
+                                        && checkVarInsn(instructions[22], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[23], Opcodes.GETFIELD, "net/minecraft/server/management/PlayerInteractionManager", "player", "field_73090_b", "Lnet/minecraft/entity/player/ServerPlayerEntity;")
+                                        && checkObfuscatedMethodInsn(instructions[24], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/ServerPlayerEntity", "getPosZ", "func_226281_cx_", "()D")
+                                        && checkVarInsn(instructions[25], Opcodes.ALOAD, 1) && checkObfuscatedMethodInsn(instructions[26], Opcodes.INVOKEVIRTUAL, "net/minecraft/util/math/BlockPos", "getZ", "func_177952_p", "()I")
+                                        && checkInsn(instructions[27], Opcodes.I2D) && checkLdcInsn(instructions[28], 0.5) && checkInsn(instructions[29], Opcodes.DADD)
+                                        && checkInsn(instructions[30], Opcodes.DSUB) && checkVarInsn(instructions[31], Opcodes.DSTORE, 9)) {
+                                    var getVectorList = new InsnList()
+                                    var addXList = new InsnList()
+                                    var addYList = new InsnList()
+                                    var addZList = new InsnList()
 
 
-                                // ...
-                                oldInstructions.insertBefore(instructions[0], getVectorList)
-                                // ALOAD 0
-                                // GETFIELD net/minecraft/server/management/PlayerInteractionManager.player : Lnet/minecraft/entity/player/ServerPlayerEntity;
-                                //INVOKEVIRTUAL net/minecraft/entity/player/ServerPlayerEntity.getPosX ()D
-                                // ALOAD 1
-                                // INVOKEVIRTUAL net/minecraft/util/math/BlockPos.getX ()I
-                                // I2D
-                                // LDC 0.5
-                                // DADD
-                                // DSUB
-                                oldInstructions.insert(instructions[8], addXList)
-                                // DSTORE 5
-                                // ALOAD 0
-                                // GETFIELD net/minecraft/server/management/PlayerInteractionManager.player : Lnet/minecraft/entity/player/ServerPlayerEntity;
-                                // INVOKEVIRTUAL net/minecraft/entity/player/ServerPlayerEntity.getPosY ()D
-                                // ALOAD 1
-                                // INVOKEVIRTUAL net/minecraft/util/math/BlockPos.getY ()I
-                                // I2D
-                                // LDC 0.5
-                                // DADD
-                                // DSUB
-                                // LDC 1.5
-                                // DADD
-                                oldInstructions.insert(instructions[20], addYList)
-                                // DSTORE 7
-                                // ALOAD 0
-                                // GETFIELD net/minecraft/server/management/PlayerInteractionManager.player : Lnet/minecraft/entity/player/ServerPlayerEntity;
-                                // INVOKEVIRTUAL net/minecraft/entity/player/ServerPlayerEntity.getPosZ ()D
-                                // ALOAD 1
-                                // INVOKEVIRTUAL net/minecraft/util/math/BlockPos.getZ ()I
-                                // I2D
-                                // LDC 0.5
-                                // DADD
-                                // DSUB
-                                oldInstructions.insert(instructions[30], addZList)
-                                // DSTORE 9
-                                // ...
+                                    getVectorList.add(new VarInsnNode(Opcodes.ALOAD, 0))
+                                    getVectorList.add(new MethodInsnNode(
+                                        Opcodes.INVOKESTATIC,
+                                        "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                        "getPlayerFromManager",
+                                        "(Lnet/minecraft/server/management/PlayerInteractionManager;)Lnet/minecraft/entity/player/ServerPlayerEntity;",
+                                        false
+                                    ))
+                                    getVectorList.add(new MethodInsnNode(
+                                        Opcodes.INVOKESTATIC,
+                                        "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                        "getOffsets",
+                                        "(Lnet/minecraft/entity/player/PlayerEntity;)Lnet/minecraft/util/math/Vec3d;",
+                                        false
+                                    ))
+                                    getVectorList.add(new InsnNode(Opcodes.DUP))
+                                    getVectorList.add(new InsnNode(Opcodes.DUP))
 
-                                logTransformSuccess("function func_225416_a", "net.minecraft.server.management.PlayerInteractionManager")
-                                success = true
+                                    addXList.add(new InsnNode(Opcodes.DUP2_X1))
+                                    addXList.add(new InsnNode(Opcodes.POP2))
+                                    addXList.add(new MethodInsnNode(
+                                        Opcodes.INVOKESTATIC,
+                                        "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                        "getVectorX",
+                                        "(Lnet/minecraft/util/math/Vec3d;)D",
+                                        false
+                                    ))
+                                    addXList.add(new InsnNode(Opcodes.DADD))
 
-                                break
+                                    addYList.add(new InsnNode(Opcodes.DUP2_X1))
+                                    addYList.add(new InsnNode(Opcodes.POP2))
+                                    addYList.add(new MethodInsnNode(
+                                        Opcodes.INVOKESTATIC,
+                                        "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                        "getVectorY",
+                                        "(Lnet/minecraft/util/math/Vec3d;)D",
+                                        false
+                                    ))
+                                    addYList.add(new InsnNode(Opcodes.DADD))
+
+                                    addZList.add(new InsnNode(Opcodes.DUP2_X1))
+                                    addZList.add(new InsnNode(Opcodes.POP2))
+                                    addZList.add(new MethodInsnNode(
+                                        Opcodes.INVOKESTATIC,
+                                        "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                        "getVectorZ",
+                                        "(Lnet/minecraft/util/math/Vec3d;)D",
+                                        false
+                                    ))
+                                    addZList.add(new InsnNode(Opcodes.DADD))
+
+
+                                    // ...
+                                    oldInstructions.insertBefore(instructions[0], getVectorList)
+                                    // ALOAD 0
+                                    // GETFIELD net/minecraft/server/management/PlayerInteractionManager.player : Lnet/minecraft/entity/player/ServerPlayerEntity;
+                                    //INVOKEVIRTUAL net/minecraft/entity/player/ServerPlayerEntity.getPosX ()D
+                                    // ALOAD 1
+                                    // INVOKEVIRTUAL net/minecraft/util/math/BlockPos.getX ()I
+                                    // I2D
+                                    // LDC 0.5
+                                    // DADD
+                                    // DSUB
+                                    oldInstructions.insert(instructions[8], addXList)
+                                    // DSTORE 5
+                                    // ALOAD 0
+                                    // GETFIELD net/minecraft/server/management/PlayerInteractionManager.player : Lnet/minecraft/entity/player/ServerPlayerEntity;
+                                    // INVOKEVIRTUAL net/minecraft/entity/player/ServerPlayerEntity.getPosY ()D
+                                    // ALOAD 1
+                                    // INVOKEVIRTUAL net/minecraft/util/math/BlockPos.getY ()I
+                                    // I2D
+                                    // LDC 0.5
+                                    // DADD
+                                    // DSUB
+                                    // LDC 1.5
+                                    // DADD
+                                    oldInstructions.insert(instructions[20], addYList)
+                                    // DSTORE 7
+                                    // ALOAD 0
+                                    // GETFIELD net/minecraft/server/management/PlayerInteractionManager.player : Lnet/minecraft/entity/player/ServerPlayerEntity;
+                                    // INVOKEVIRTUAL net/minecraft/entity/player/ServerPlayerEntity.getPosZ ()D
+                                    // ALOAD 1
+                                    // INVOKEVIRTUAL net/minecraft/util/math/BlockPos.getZ ()I
+                                    // I2D
+                                    // LDC 0.5
+                                    // DADD
+                                    // DSUB
+                                    oldInstructions.insert(instructions[30], addZList)
+                                    // DSTORE 9
+                                    // ...
+
+                                    logTransformSuccess("function func_225416_a", "net.minecraft.server.management.PlayerInteractionManager")
+                                    success = true
+
+                                    break
+                                }
                             }
                         }
+
+                        if (!success)
+                            logTransformError("function func_225416_a", "net.minecraft.server.management.PlayerInteractionManager", "Unable to find injection points")
+
+                    } catch (exception) {
+                        logTransformError("function func_225416_a", "net.minecraft.server.management.PlayerInteractionManager", exception.message)
                     }
 
-                    if (!success)
-                        logTransformError("function func_225416_a", "net.minecraft.server.management.PlayerInteractionManager", "Unable to find injection points")
+                } else
+                    logTransformError("function func_225416_a", "net.minecraft.server.management.PlayerInteractionManager", "Unable to find function to transform")
 
-                } catch (exception) {
-                    logTransformError("function func_225416_a", "net.minecraft.server.management.PlayerInteractionManager", exception.message)
-                }
-
-                return methodNode
+                return classNode
             }
         },
 
@@ -2589,7 +2601,6 @@ function initializeCoreMod() {
                 var attackEntityFrom = findObfuscatedMethodWithSignature(classNode, "attackEntityFrom", "func_70097_a",
                     "(Lnet/minecraft/util/DamageSource;F)Z")
 
-                // TODO Why are these *named* breaks here.
                 if (attackEntityFrom !== null) {
                     try {
                         var oldInstructions = attackEntityFrom.instructions
@@ -2601,7 +2612,7 @@ function initializeCoreMod() {
                             if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/LivingEntity", "knockBack", "func_70653_a",
                                     "(Lnet/minecraft/entity/Entity;FDD)V")) {
                                 // Offsets the x-position of knockback.
-                                changeX: for (; i >= 0; i--) {
+                                for (; i >= 0; i--) {
                                     instruction = oldInstructions.get(i)
 
                                     if (checkVarInsn(instruction, Opcodes.ALOAD, 7)
@@ -2640,7 +2651,7 @@ function initializeCoreMod() {
                                         // ...
 
                                         success = true
-                                        break changeX
+                                        break
                                     }
                                 }
 
@@ -2653,7 +2664,7 @@ function initializeCoreMod() {
 
 
                                 // Offsets the z-position of knockback.
-                                changeZ: for (; i < oldInstructions.size(); i++) {
+                                for (; i < oldInstructions.size(); i++) {
                                     instruction = oldInstructions.get(i)
 
                                     if (checkVarInsn(instruction, Opcodes.ALOAD, 7)
@@ -2692,7 +2703,7 @@ function initializeCoreMod() {
                                         // ...
 
                                         success = true
-                                        break changeZ
+                                        break
                                     }
                                 }
 
