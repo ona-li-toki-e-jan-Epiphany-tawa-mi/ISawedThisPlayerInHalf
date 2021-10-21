@@ -1,5 +1,8 @@
 package com.epiphany.isawedthisplayerinhalf.rendering.modfiedModels;
 
+/**
+ * Adds the ability to set and unset offsets onto the modified models.
+ */
 public interface IModifiedModel {
     /**
      * Sets the offsets for the model.

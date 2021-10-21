@@ -10,6 +10,11 @@ var VarInsnNode = Java.type("org.objectweb.asm.tree.VarInsnNode")
 
 
 
+// TODO Find a way to make a copy of method and class nodes so that when transforms fail the unmodified one can be returned.
+// TODO Turn all method transformers into class transformers.
+
+
+
 /**
  * Tries to find a method within the given class.
  * Returns null if nothing is found.
@@ -105,7 +110,7 @@ function checkLdcInsn(instructionNode, constant) {
 /**
  * Checks if a method instruction node has the given opcode, name, and descriptor.
  *
- * @param {object/MethodNode} instructionNode The instruction node to check.
+ * @param {object/MethodInsnNode} instructionNode The instruction node to check.
  * @param {number} opCode The opcode the instruction should have.
  * @param {string} name The name of the owning class the instruction should have.
  * @param {string} name The name the instruction should have.
@@ -173,7 +178,7 @@ function logMessage(loggingLevel, message) {
 
     var currentDate = new Date()
     print("[" + currentDate.getHours() + ":" + currentDate.getMinutes() + ":" + currentDate.getSeconds() + "] [PlayerSplitCore/" +
-        loggingLevel.numericLevel + "]: " + message)
+        loggingLevel.name + "]: " + message)
 }
 
 /**
@@ -668,7 +673,7 @@ function initializeCoreMod() {
                 if (render !== null) {
                     try {
                         var oldInstructions = render.instructions
-                        var successes = 0
+                        var success = false
 
                         // Forces third-person fishing line rendering.
                         for (var i = 0; i < oldInstructions.size() - 9; i++) {
@@ -692,14 +697,18 @@ function initializeCoreMod() {
                                     for (var k = 0; k < instructions.length; k++)
                                         oldInstructions.remove(instructions[k])
 
-                                    successes |= 1
+                                    success = true
                                     break
                                 }
                             }
                         }
 
-                        if (successes & 1 === 0)
+                        if (!success) {
                             logTransformError("function render", "net.minecraft.client.renderer.FishRenderer", "Unable to find primary injection points")
+                            return classNode
+
+                        } else
+                            success = false
 
                         // Puts in offset to fishing line position.
                         for (var i = 0; i < oldInstructions.size() - 21; i++) {
@@ -798,17 +807,17 @@ function initializeCoreMod() {
                                     // FSTORE 40
                                     // ...
 
-                                    successes |= 2
+                                    success = true
                                     break
                                 }
                             }
                         }
 
-                        if (successes & 2 === 0) {
-                            logTransformError("function render", "net.minecraft.client.renderer.FishRenderer", "Unable to find secondary injection points")
-
-                        } else if (successes & 1 === 1)
+                        if (success) {
                             logTransformSuccess("function render", "net.minecraft.client.renderer.FishRenderer")
+
+                        } else
+                            logTransformError("function render", "net.minecraft.client.renderer.FishRenderer", "Unable to find secondary injection points")
 
                     } catch (exception) {
                         logTransformError("function render", "net.minecraft.client.renderer.FishRenderer", exception.message)
@@ -1326,7 +1335,7 @@ function initializeCoreMod() {
                 if (updateLeashedState !== null) {
                     try {
                         var oldInstructions = updateLeashedState.instructions
-                        var successes = 0
+                        var success = false
 
                         // Modifies home position set for leashes.
                         for (var i = 0; i < oldInstructions.size() - 4; i++) {
@@ -1356,14 +1365,18 @@ function initializeCoreMod() {
                                         oldInstructions.remove(instructions[k])
 
 
-                                    successes |= 1
+                                    success = true
                                     break
                                 }
                             }
                         }
 
-                        if (successes & 1 === 0)
+                        if (!success) {
                             logTransformError("function updateLeashedState", "net.minecraft.entity.CreatureEntity", "Unable to find primary injection points")
+                            return classNode
+
+                        } else
+                            success = false
 
 
                         // Modifies distance calculation for leashes.
@@ -1381,13 +1394,17 @@ function initializeCoreMod() {
                                 ))
                                 oldInstructions.remove(instruction)
 
-                                successes |= 2
+                                success = true
                                 break
                             }
                         }
 
-                        if (successes & 2 === 0)
+                        if (!success) {
                             logTransformError("function updateLeashedState", "net.minecraft.entity.CreatureEntity", "Unable to find secondary injection points")
+                            return classNode
+
+                        } else
+                            success = false
 
 
                         // Modifies pull position for leashes.
@@ -1503,14 +1520,18 @@ function initializeCoreMod() {
                                     // DSTORE 7
                                     // ...
 
-                                    successes |= 4
+                                    success = true
                                     break
                                 }
                             }
                         }
 
-                        if (successes & 4 === 0)
+                        if (!success) {
                             logTransformError("function updateLeashedState", "net.minecraft.entity.CreatureEntity", "Unable to find tertiary injection points")
+                            return classNode
+
+                        } else
+                            success = false
 
 
                         // Modifies AI move behavior when leashed.
@@ -1610,17 +1631,17 @@ function initializeCoreMod() {
                                     // ASTORE 4
                                     // ...
 
-                                    successes |= 8
+                                    success = true
                                     break
                                 }
                             }
                         }
 
-                        if (successes & 8 === 0) {
-                            logTransformError("function updateLeashedState", "net.minecraft.entity.CreatureEntity", "Unable to find the fourth set of injection points")
-
-                        } else if (successes ^ 15 === 0)
+                        if (success) {
                             logTransformSuccess("function updateLeashedState", "net.minecraft.entity.CreatureEntity")
+
+                        } else
+                            logTransformError("function updateLeashedState", "net.minecraft.entity.CreatureEntity", "Unable to find the fourth set of injection points")
 
                     } catch (exception) {
                         logTransformError("function updateLeashedState", "net.minecraft.entity.CreatureEntity", exception.message)
@@ -1649,7 +1670,7 @@ function initializeCoreMod() {
                 if (renderLeash !== null) {
                     try {
                         var oldInstructions = renderLeash.instructions
-                        var successes = 0
+                        var success = false
                         var vectorIndex = renderLeash.maxLocals
 
                         // Modifies the x-component of the leash render position.
@@ -1702,123 +1723,130 @@ function initializeCoreMod() {
                                     oldInstructions.insert(instructions[6], addXList)
                                     // ...
 
-                                    successes |= 1
+                                    success = true
                                     break
                                 }
                             }
                         }
 
-                        if (successes & 1 === 0) {
+                        if (!success) {
                             logTransformError("function renderLeash", "net.minecraft.client.renderer.entity.MobRenderer", "Unable to find primary injection points")
+                            return classNode
 
-                        } else {
-                            // Modifies the y-component of the leash render position.
-                            for (var i = 0; i < oldInstructions.size() - 15; i++) {
-                                var instruction = oldInstructions.get(i)
+                        } else
+                            success = false
 
-                                if (checkVarInsn(instruction, Opcodes.FLOAD, 2)) {
-                                    var instructions = [instruction]
 
-                                    for (var k = 1; k < 15; k++)
-                                        instructions.push(oldInstructions.get(i + k))
+                        // Modifies the y-component of the leash render position.
+                        for (var i = 0; i < oldInstructions.size() - 15; i++) {
+                            var instruction = oldInstructions.get(i)
 
-                                    if (checkInsn(instructions[1], Opcodes.F2D) && checkVarInsn(instructions[2], Opcodes.ALOAD, 5) && checkObfuscatedFieldInsn(instructions[3], Opcodes.GETFIELD, "net/minecraft/entity/Entity", "prevPosY", "field_70167_r", "D")
-                                            && checkVarInsn(instructions[4], Opcodes.ALOAD, 5) && checkObfuscatedMethodInsn(instructions[5], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getEyeHeight", "func_70047_e", "()F")
-                                            && checkInsn(instructions[6], Opcodes.F2D) && checkLdcInsn(instructions[7], 0.7) && checkInsn(instructions[8], Opcodes.DMUL)
-                                            && checkInsn(instructions[9], Opcodes.DADD)
+                            if (checkVarInsn(instruction, Opcodes.FLOAD, 2)) {
+                                var instructions = [instruction]
 
-                                            && checkVarInsn(instructions[10], Opcodes.ALOAD, 5) && checkObfuscatedMethodInsn(instructions[11], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosY", "func_226278_cu_", "()D")
-                                            && checkVarInsn(instructions[12], Opcodes.ALOAD, 5) && checkObfuscatedMethodInsn(instructions[13], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getEyeHeight", "func_70047_e", "()F")
-                                            && checkInsn(instructions[14], Opcodes.F2D)) {
-                                        var addYList = new InsnList()
+                                for (var k = 1; k < 15; k++)
+                                    instructions.push(oldInstructions.get(i + k))
 
-                                        addYList.add(new VarInsnNode(Opcodes.ALOAD, vectorIndex))
-                                        addYList.add(new MethodInsnNode(
-                                            Opcodes.INVOKESTATIC,
-                                            "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                            "getVectorY",
-                                            "(Lnet/minecraft/util/math/Vec3d;)D",
-                                            false
-                                        ))
-                                        addYList.add(new InsnNode(Opcodes.DADD))
+                                if (checkInsn(instructions[1], Opcodes.F2D) && checkVarInsn(instructions[2], Opcodes.ALOAD, 5) && checkObfuscatedFieldInsn(instructions[3], Opcodes.GETFIELD, "net/minecraft/entity/Entity", "prevPosY", "field_70167_r", "D")
+                                        && checkVarInsn(instructions[4], Opcodes.ALOAD, 5) && checkObfuscatedMethodInsn(instructions[5], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getEyeHeight", "func_70047_e", "()F")
+                                        && checkInsn(instructions[6], Opcodes.F2D) && checkLdcInsn(instructions[7], 0.7) && checkInsn(instructions[8], Opcodes.DMUL)
+                                        && checkInsn(instructions[9], Opcodes.DADD)
 
-                                        // ...
-                                        // FLOAD 2
-                                        // F2D
-                                        // ALOAD 5
-                                        // GETFIELD net/minecraft/entity/Entity.prevPosY : D
-                                        // ALOAD 5
-                                        // INVOKEVIRTUAL net/minecraft/entity/Entity.getEyeHeight ()F
-                                        // F2D
-                                        // LDC 0.7
-                                        // DMUL
-                                        // DADD
-                                        // ALOAD 5
-                                        // INVOKEVIRTUAL net/minecraft/entity/Entity.getPosY ()D
-                                        // ALOAD 5
-                                        // INVOKEVIRTUAL net/minecraft/entity/Entity.getEyeHeight ()F
-                                        // F2D
-                                        oldInstructions.insert(instructions[14], addYList)
-                                        // ...
+                                        && checkVarInsn(instructions[10], Opcodes.ALOAD, 5) && checkObfuscatedMethodInsn(instructions[11], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosY", "func_226278_cu_", "()D")
+                                        && checkVarInsn(instructions[12], Opcodes.ALOAD, 5) && checkObfuscatedMethodInsn(instructions[13], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getEyeHeight", "func_70047_e", "()F")
+                                        && checkInsn(instructions[14], Opcodes.F2D)) {
+                                    var addYList = new InsnList()
 
-                                        successes |= 2
-                                        break
-                                    }
+                                    addYList.add(new VarInsnNode(Opcodes.ALOAD, vectorIndex))
+                                    addYList.add(new MethodInsnNode(
+                                        Opcodes.INVOKESTATIC,
+                                        "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                        "getVectorY",
+                                        "(Lnet/minecraft/util/math/Vec3d;)D",
+                                        false
+                                    ))
+                                    addYList.add(new InsnNode(Opcodes.DADD))
+
+                                    // ...
+                                    // FLOAD 2
+                                    // F2D
+                                    // ALOAD 5
+                                    // GETFIELD net/minecraft/entity/Entity.prevPosY : D
+                                    // ALOAD 5
+                                    // INVOKEVIRTUAL net/minecraft/entity/Entity.getEyeHeight ()F
+                                    // F2D
+                                    // LDC 0.7
+                                    // DMUL
+                                    // DADD
+                                    // ALOAD 5
+                                    // INVOKEVIRTUAL net/minecraft/entity/Entity.getPosY ()D
+                                    // ALOAD 5
+                                    // INVOKEVIRTUAL net/minecraft/entity/Entity.getEyeHeight ()F
+                                    // F2D
+                                    oldInstructions.insert(instructions[14], addYList)
+                                    // ...
+
+                                    success = true
+                                    break
                                 }
                             }
-
-                            if (successes & 2 === 0)
-                                logTransformError("function renderLeash", "net.minecraft.client.renderer.entity.MobRenderer", "Unable to find secondary injection points")
-
-
-                            // Modifies the z-component of the leash render position.
-                            for (var i = 0; i < oldInstructions.size() - 7; i++) {
-                                var instruction = oldInstructions.get(i)
-
-                                if (checkVarInsn(instruction, Opcodes.FLOAD, 2)) {
-                                    var instructions = [instruction]
-
-                                    for (var k = 1; k < 7; k++)
-                                        instructions.push(oldInstructions.get(i + k))
-
-                                    if (checkInsn(instructions[1], Opcodes.F2D) && checkVarInsn(instructions[2], Opcodes.ALOAD, 5) && checkObfuscatedFieldInsn(instructions[3], Opcodes.GETFIELD, "net/minecraft/entity/Entity", "prevPosZ", "field_70166_s", "D")
-                                            && checkVarInsn(instructions[4], Opcodes.ALOAD, 5) && checkObfuscatedMethodInsn(instructions[5], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosZ", "func_226281_cx_", "()D")
-                                            && checkObfuscatedMethodInsn(instructions[6], Opcodes.INVOKESTATIC, "net/minecraft/util/math/MathHelper", "lerp", "func_219803_d", "(DDD)D")) {
-                                        var addZList = new InsnList()
-
-                                        addZList.add(new VarInsnNode(Opcodes.ALOAD, vectorIndex))
-                                        addZList.add(new MethodInsnNode(
-                                            Opcodes.INVOKESTATIC,
-                                            "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                            "getVectorZ",
-                                            "(Lnet/minecraft/util/math/Vec3d;)D",
-                                            false
-                                        ))
-                                        addZList.add(new InsnNode(Opcodes.DADD))
-
-                                        // ...
-                                        // FLOAD 2
-                                        // F2D
-                                        // ALOAD 5
-                                        // GETFIELD net/minecraft/entity/Entity.prevPosZ : D
-                                        // ALOAD 5
-                                        // INVOKEVIRTUAL net/minecraft/entity/Entity.getPosZ ()D
-                                        // INVOKESTATIC net/minecraft/util/math/MathHelper.lerp (DDD)D
-                                        oldInstructions.insert(instructions[6], addZList)
-                                        // ...
-
-                                        successes |= 4
-                                        break
-                                    }
-                                }
-                            }
-
-                            if (successes & 4 === 0) {
-                                logTransformError("function renderLeash", "net.minecraft.client.renderer.entity.MobRenderer", "Unable to find tertiary injection points")
-
-                            } else if (successes ^ 7 === 0)
-                                logTransformSuccess("function renderLeash", "net.minecraft.client.renderer.entity.MobRenderer")
                         }
+
+                        if (!success) {
+                            logTransformError("function renderLeash", "net.minecraft.client.renderer.entity.MobRenderer", "Unable to find secondary injection points")
+                            return classNode
+
+                        } else
+                            success = false
+
+
+                        // Modifies the z-component of the leash render position.
+                        for (var i = 0; i < oldInstructions.size() - 7; i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkVarInsn(instruction, Opcodes.FLOAD, 2)) {
+                                var instructions = [instruction]
+
+                                for (var k = 1; k < 7; k++)
+                                    instructions.push(oldInstructions.get(i + k))
+
+                                if (checkInsn(instructions[1], Opcodes.F2D) && checkVarInsn(instructions[2], Opcodes.ALOAD, 5) && checkObfuscatedFieldInsn(instructions[3], Opcodes.GETFIELD, "net/minecraft/entity/Entity", "prevPosZ", "field_70166_s", "D")
+                                        && checkVarInsn(instructions[4], Opcodes.ALOAD, 5) && checkObfuscatedMethodInsn(instructions[5], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosZ", "func_226281_cx_", "()D")
+                                        && checkObfuscatedMethodInsn(instructions[6], Opcodes.INVOKESTATIC, "net/minecraft/util/math/MathHelper", "lerp", "func_219803_d", "(DDD)D")) {
+                                    var addZList = new InsnList()
+
+                                    addZList.add(new VarInsnNode(Opcodes.ALOAD, vectorIndex))
+                                    addZList.add(new MethodInsnNode(
+                                        Opcodes.INVOKESTATIC,
+                                        "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                        "getVectorZ",
+                                        "(Lnet/minecraft/util/math/Vec3d;)D",
+                                        false
+                                    ))
+                                    addZList.add(new InsnNode(Opcodes.DADD))
+
+                                    // ...
+                                    // FLOAD 2
+                                    // F2D
+                                    // ALOAD 5
+                                    // GETFIELD net/minecraft/entity/Entity.prevPosZ : D
+                                    // ALOAD 5
+                                    // INVOKEVIRTUAL net/minecraft/entity/Entity.getPosZ ()D
+                                    // INVOKESTATIC net/minecraft/util/math/MathHelper.lerp (DDD)D
+                                    oldInstructions.insert(instructions[6], addZList)
+                                    // ...
+
+                                    success = true
+                                    break
+                                }
+                            }
+                        }
+
+                        if (success) {
+                            logTransformSuccess("function renderLeash", "net.minecraft.client.renderer.entity.MobRenderer")
+
+                        } else
+                            logTransformError("function renderLeash", "net.minecraft.client.renderer.entity.MobRenderer", "Unable to find tertiary injection points")
 
                     } catch (exception) {
                         logTransformError("function renderLeash", "net.minecraft.client.renderer.entity.MobRenderer", exception.message)
@@ -2417,7 +2445,7 @@ function initializeCoreMod() {
                 if (shouldRender !== null) {
                     try {
                         var oldInstructions = shouldRender.instructions
-                        var successes = 0
+                        var success = false
 
                         for (var i = 0; i < oldInstructions.size(); i++) {
                             var instruction = oldInstructions.get(i)
@@ -2434,13 +2462,18 @@ function initializeCoreMod() {
 
                                 oldInstructions.remove(instruction)
 
-                                successes |= 1
+                                success = true
                                 break
                             }
                         }
 
-                        if (successes & 1 === 0)
+                        if (!success) {
                             logTransformError("function shouldRender", "net.minecraft.client.renderer.entity.EntityRenderer", "Unable to find primary injection point")
+                            return classNode
+
+                        } else
+                            success = false
+
 
                         for (var i = 0; i < oldInstructions.size(); i++) {
                             var instruction = oldInstructions.get(i)
@@ -2521,16 +2554,16 @@ function initializeCoreMod() {
                                 oldInstructions.insert(instruction, doubleCheckPlayer)
                                 //...
 
-                                successes |= 2
+                                success = true
                                 break
                             }
                         }
 
-                        if (successes & 2 === 0) {
-                            logTransformError("function shouldRender", "net.minecraft.client.renderer.entity.EntityRenderer", "Unable to find secondary injection point")
-
-                        } else if (successes & 3 === 3)
+                        if (success) {
                             logTransformSuccess("function shouldRender", "net.minecraft.client.renderer.entity.EntityRenderer")
+
+                        } else
+                            logTransformError("function shouldRender", "net.minecraft.client.renderer.entity.EntityRenderer", "Unable to find secondary injection point")
 
                     } catch (exception) {
                         logTransformError("function shouldRender", "net.minecraft.client.renderer.entity.EntityRenderer", exception.message)
@@ -2556,10 +2589,11 @@ function initializeCoreMod() {
                 var attackEntityFrom = findObfuscatedMethodWithSignature(classNode, "attackEntityFrom", "func_70097_a",
                     "(Lnet/minecraft/util/DamageSource;F)Z")
 
+                // TODO Why are these *named* breaks here.
                 if (attackEntityFrom !== null) {
                     try {
                         var oldInstructions = attackEntityFrom.instructions
-                        var successes = 0
+                        success = false
 
                         for (var i = 0; i < oldInstructions.size(); i++) {
                             var instruction = oldInstructions.get(i)
@@ -2605,73 +2639,77 @@ function initializeCoreMod() {
                                         // DADD
                                         // ...
 
-                                        successes |= 2
+                                        success = true
                                         break changeX
                                     }
                                 }
 
-                                if (successes & 2 === 0) {
+                                if (!success) {
                                     logTransformError("function attackEntityFrom", "net.minecraft.entity.LivingEntity", "Unable to find primary injection point")
+                                    return classNode
 
-                                } else {
-                                    // Offsets the z-position of knockback.
-                                    changeZ: for (; i < oldInstructions.size(); i++) {
-                                        instruction = oldInstructions.get(i)
+                                } else
+                                    success = false
 
-                                        if (checkVarInsn(instruction, Opcodes.ALOAD, 7)
-                                                && checkObfuscatedMethodInsn(oldInstructions.get(i + 1), Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosZ", "func_226281_cx_", "()D")) {
-                                            var newInstructions = new InsnList()
 
-                                            // ...
-                                            // ALOAD 7
-                                            // INVOKEVIRTUAL net/minecraft/entity/Entity.getPosZ ()D
-                                            oldInstructions.insert(oldInstructions.get(i + 1), new InsnNode(Opcodes.DADD))
-                                            // ...
+                                // Offsets the z-position of knockback.
+                                changeZ: for (; i < oldInstructions.size(); i++) {
+                                    instruction = oldInstructions.get(i)
 
-                                            newInstructions.add(new InsnNode(Opcodes.DUP))
-                                            newInstructions.add(new MethodInsnNode(
-                                                Opcodes.INVOKESTATIC,
-                                                "com/epiphany/isawedthisplayerinhalf/Offsetter",
-                                                "getOffsets",
-                                                "(Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/math/Vec3d;",
-                                                false
-                                            ))
-                                            newInstructions.add(new MethodInsnNode(
-                                                Opcodes.INVOKESTATIC,
-                                                "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                                "getVectorZ",
-                                                "(Lnet/minecraft/util/math/Vec3d;)D",
-                                                false
-                                            ))
-                                            newInstructions.add(new InsnNode(Opcodes.DUP2_X1))
-                                            newInstructions.add(new InsnNode(Opcodes.POP2))
+                                    if (checkVarInsn(instruction, Opcodes.ALOAD, 7)
+                                            && checkObfuscatedMethodInsn(oldInstructions.get(i + 1), Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosZ", "func_226281_cx_", "()D")) {
+                                        var newInstructions = new InsnList()
 
-                                            // ...
-                                            // ALOAD 7
-                                            oldInstructions.insert(instruction, newInstructions)
-                                            // INVOKEVIRTUAL net/minecraft/entity/Entity.getPosZ ()D
-                                            // DADD
-                                            // ...
+                                        // ...
+                                        // ALOAD 7
+                                        // INVOKEVIRTUAL net/minecraft/entity/Entity.getPosZ ()D
+                                        oldInstructions.insert(oldInstructions.get(i + 1), new InsnNode(Opcodes.DADD))
+                                        // ...
 
-                                            successes |= 4
-                                            break changeZ
-                                        }
+                                        newInstructions.add(new InsnNode(Opcodes.DUP))
+                                        newInstructions.add(new MethodInsnNode(
+                                            Opcodes.INVOKESTATIC,
+                                            "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                            "getOffsets",
+                                            "(Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/math/Vec3d;",
+                                            false
+                                        ))
+                                        newInstructions.add(new MethodInsnNode(
+                                            Opcodes.INVOKESTATIC,
+                                            "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                            "getVectorZ",
+                                            "(Lnet/minecraft/util/math/Vec3d;)D",
+                                            false
+                                        ))
+                                        newInstructions.add(new InsnNode(Opcodes.DUP2_X1))
+                                        newInstructions.add(new InsnNode(Opcodes.POP2))
+
+                                        // ...
+                                        // ALOAD 7
+                                        oldInstructions.insert(instruction, newInstructions)
+                                        // INVOKEVIRTUAL net/minecraft/entity/Entity.getPosZ ()D
+                                        // DADD
+                                        // ...
+
+                                        success = true
+                                        break changeZ
                                     }
-
-                                    if (successes & 4 === 0)
-                                        logTransformError("function attackEntityFrom", "net.minecraft.entity.LivingEntity", "Unable to find secondary injection point")
                                 }
 
-                                successes |= 1
+                                if (!success) {
+                                        logTransformError("function attackEntityFrom", "net.minecraft.entity.LivingEntity", "Unable to find secondary injection point")
+                                        return classNode
+                                }
+
                                 break
                             }
                         }
 
-                        if (successes & 1 === 0) {
-                            logTransformError("function attackEntityFrom", "net.minecraft.entity.LivingEntity", "Unable to find injection area")
-
-                        } else if (successes & 7 === 7)
+                        if (success) {
                             logTransformSuccess("function attackEntityFrom", "net.minecraft.entity.LivingEntity")
+
+                        } else
+                            logTransformError("function attackEntityFrom", "net.minecraft.entity.LivingEntity", "Unable to find injection area")
 
                     } catch (exception) {
                         logTransformError("function attackEntityFrom", "net.minecraft.entity.LivingEntity", exception.message)
