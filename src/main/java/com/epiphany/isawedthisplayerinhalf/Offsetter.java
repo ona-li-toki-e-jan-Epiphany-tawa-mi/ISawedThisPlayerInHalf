@@ -2,7 +2,6 @@ package com.epiphany.isawedthisplayerinhalf;
 
 import com.epiphany.isawedthisplayerinhalf.networking.Networker;
 import com.epiphany.isawedthisplayerinhalf.networking.SetOffsetPacket;
-import com.epiphany.isawedthisplayerinhalf.rendering.PlayerRendererWrapper;
 import com.epiphany.isawedthisplayerinhalf.rendering.RenderingOffsetter;
 import com.mojang.realmsclient.gui.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -59,7 +58,7 @@ public class Offsetter {
     @SubscribeEvent
     public static void onLeaveServer(ClientPlayerNetworkEvent.LoggedOutEvent loggedOutEvent) {
         playerOffsetMap.clear();
-        RenderingOffsetter.wrappedRendererMap.clear();
+        RenderingOffsetter.renderingOffsetsMap.clear();
     }
 
     /**
@@ -104,13 +103,7 @@ public class Offsetter {
      */
     public static void setOffsets(UUID playerUUID, Vec3d offsets) {
         playerOffsetMap.put(playerUUID, offsets);
-
-        DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> {
-            PlayerRendererWrapper wrappedRenderer = RenderingOffsetter.wrappedRendererMap.get(playerUUID);
-
-            if (wrappedRenderer != null)
-                wrappedRenderer.setOffsets(offsets);
-        });
+        DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> RenderingOffsetter.setOffsets(playerUUID, offsets));
     }
 
     /**

@@ -10,9 +10,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 // TODO Problem with attacks not landing on entities that are not within range of player's actual body.
 
-// TODO Possibly have offsets stored in a database.
-// TODO Make class transformers more compatible.
-// TODO Mod may be incompatible with other mods using player render event; investigate.
+// TODO (MAYBE) Make class transformers more compatible with other mods.
 
 @Mod("swdthsplyrnhlf")
 public class ISawedThisPlayerInHalf {
@@ -21,12 +19,15 @@ public class ISawedThisPlayerInHalf {
     public ISawedThisPlayerInHalf() {
         FMLJavaModLoadingContext.get().getModEventBus().register(ISawedThisPlayerInHalf.class);
         MinecraftForge.EVENT_BUS.register(Offsetter.class);
+
         Networker.registerPackets();
     }
 
     @SubscribeEvent
     public static void doClientStuff(final FMLClientSetupEvent fmlClientSetupEvent) {
         MinecraftForge.EVENT_BUS.register(RenderingOffsetter.class);
+
         Config.onEnable();
+        RenderingOffsetter.replacePlayerRenderers();
     }
 }
