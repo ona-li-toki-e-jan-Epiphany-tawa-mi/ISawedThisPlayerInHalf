@@ -265,6 +265,7 @@ function initializeCoreMod() {
 
         /**
          * Adds an offset to the raycast that finds what entity the player is looking at.
+         * Allows players to interact with entities relative to their offsets.
          */
         "GameRenderer": {
             "target": {
@@ -278,9 +279,11 @@ function initializeCoreMod() {
                 if (getMouseOver !== null) {
                     try {
                         var oldInstructions = getMouseOver.instructions
+                        var i = 0
                         var success = false
 
-                        for (var i = 0; i < oldInstructions.size(); i++) {
+                        // Adds an offset to the raycast that finds what entity the player is looking at.
+                        for (; i < oldInstructions.size(); i++) {
                             var instruction = oldInstructions.get(i)
 
                             if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getEyePosition", "func_174824_e",
@@ -301,15 +304,60 @@ function initializeCoreMod() {
                                 oldInstructions.insert(instruction, newInstructions)
                                 // ...
 
-                                logTransformSuccess("function getMouseOver", "net.minecraft.client.renderer.GameRenderer")
                                 success = true
 
                                 break
                             }
                         }
 
-                        if (!success)
-                            logTransformError("function getMouseOver", "net.minecraft.client.renderer.GameRenderer", "Unable to find injection point")
+                        if (!success) {
+                            logTransformError("function getMouseOver", "net.minecraft.client.renderer.GameRenderer", "Unable to find function primary injection point")
+                            return classNode
+
+                        } else
+                            success = false
+
+
+                        // Allows players to interact with entities relative to their offsets.
+                        for (; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/util/math/AxisAlignedBB", "grow", "func_72314_b",
+                                    "(DDD)Lnet/minecraft/util/math/AxisAlignedBB;")) {
+                                var newInstructions = new InsnList()
+
+                                newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 2))
+                                newInstructions.add(new TypeInsnNode(Opcodes.CHECKCAST, "net/minecraft/entity/player/PlayerEntity"))
+                                newInstructions.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                    "getOffsets",
+                                    "(Lnet/minecraft/entity/player/PlayerEntity;)Lnet/minecraft/util/math/Vec3d;",
+                                    false
+                                ))
+                                newInstructions.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "offsetAABB",
+                                    "(Lnet/minecraft/util/math/AxisAlignedBB;Lnet/minecraft/util/math/Vec3d;)Lnet/minecraft/util/math/AxisAlignedBB;"
+                                ))
+
+                                // ...
+                                // INVOKEVIRTUAL net/minecraft/util/math/AxisAlignedBB.grow (DDD)Lnet/minecraft/util/math/AxisAlignedBB;
+                                oldInstructions.insert(instruction, newInstructions)
+                                // ...
+
+                                success = true
+
+                                break
+                            }
+                        }
+
+                        if (success) {
+                            logTransformSuccess("function getMouseOver", "net.minecraft.client.renderer.GameRenderer")
+
+                        } else
+                            logTransformError("function getMouseOver", "net.minecraft.client.renderer.GameRenderer", "Unable to find secondary injection point")
 
                     } catch (exception) {
                         logTransformError("function getMouseOver", "net.minecraft.client.renderer.GameRenderer", exception.message)
@@ -2000,6 +2048,7 @@ function initializeCoreMod() {
 
         /**
          * Allows players to interact with blocks relative to their offsets.
+         * Allows players to interact with entities relative to their offsets.
          */
         "ServerPlayNetHandler": {
             "target": {
@@ -2008,6 +2057,7 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
+                // Allows players to interact with blocks relative to their offsets.
                 var processTryUseItemOnBlock = findObfuscatedMethodWithSignature(classNode, "processTryUseItemOnBlock", "func_184337_a",
                     "(Lnet/minecraft/network/play/client/CPlayerTryUseItemOnBlockPacket;)V")
 
@@ -2048,6 +2098,51 @@ function initializeCoreMod() {
 
                 } else
                     logTransformError("function processTryUseItemOnBlock", "net.minecraft.network.play.ServerPlayNetHandler", "Unable to find function to transform")
+
+
+                // Allows players to interact with entities relative to their offsets.
+                var processUseEntity = findObfuscatedMethodWithSignature(classNode, "processUseEntity", "func_147340_a",
+                                    "(Lnet/minecraft/network/play/client/CUseEntityPacket;)V")
+
+                if (processUseEntity !== null) {
+                    try {
+                        var oldInstructions = processUseEntity.instructions
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/ServerPlayerEntity", "getDistanceSq",
+                                    "func_70068_e", "(Lnet/minecraft/entity/Entity;)D")) {
+                                oldInstructions.insertBefore(instruction, new InsnNode(Opcodes.SWAP))
+                                oldInstructions.insert(instruction, new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                    "modifiedGetDistanceSq",
+                                    "(Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/player/PlayerEntity;)D",
+                                    false
+                                ))
+
+                                oldInstructions.remove(instruction)
+
+                                success = true
+                                break
+                            }
+                        }
+
+                        if (success) {
+                            logTransformSuccess("function processUseEntity", "net.minecraft.network.play.ServerPlayNetHandler")
+
+                        } else
+                            logTransformError("function processUseEntity", "net.minecraft.network.play.ServerPlayNetHandler", "Unable to find injection point")
+
+                    } catch (exception) {
+                        logTransformError("function processUseEntity", "net.minecraft.network.play.ServerPlayNetHandler", exception.message)
+                    }
+
+                } else
+                    logTransformError("function processUseEntity", "net.minecraft.network.play.ServerPlayNetHandler", "Unable to find function to transform")
+
 
                 return classNode
             }
@@ -2731,6 +2826,6 @@ function initializeCoreMod() {
 
                 return classNode
             }
-        },
+        }
     }
 }

@@ -8,7 +8,15 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-// TODO Problem with attacks not landing on entities that are not within range of player's actual body.
+// TODO Offset player nametags.
+/* TODO Check this function in PlayerEntity.
+for(LivingEntity livingentity : this.world.getEntitiesWithinAABB(LivingEntity.class, targetEntity.getBoundingBox().grow(1.0D, 0.25D, 1.0D))) {
+    if (livingentity != this && livingentity != targetEntity && !this.isOnSameTeam(livingentity) && (!(livingentity instanceof ArmorStandEntity) || !((ArmorStandEntity)livingentity).hasMarker()) && this.getDistanceSq(livingentity) < 9.0D) {
+        livingentity.knockBack(this, 0.4F, (double)MathHelper.sin(this.rotationYaw * ((float)Math.PI / 180F)), (double)(-MathHelper.cos(this.rotationYaw * ((float)Math.PI / 180F))));
+        livingentity.attackEntityFrom(DamageSource.causePlayerDamage(this), f3);
+    }
+}
+*/
 
 // TODO (MAYBE) Make class transformers more compatible with other mods.
 
