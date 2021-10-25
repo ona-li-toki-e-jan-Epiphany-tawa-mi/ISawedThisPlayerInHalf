@@ -11,6 +11,8 @@ var VarInsnNode = Java.type("org.objectweb.asm.tree.VarInsnNode")
 
 
 // TODO Find a way to make a copy of method and class nodes so that when transforms fail the unmodified one can be returned.
+// TODO Sort transformers.
+// TODO Find an automatic way to minify this file when making a jar.
 
 
 
@@ -57,6 +59,7 @@ function findObfuscatedMethodWithSignature(classNode, methodName, obfuscatedName
     return null
 }
 
+
 /**
  * Checks if a field instruction node has the given opcode, owner, name, and descriptor.
  *
@@ -87,13 +90,23 @@ function checkObfuscatedFieldInsn(instructionNode, opCode, owner, name, obfuscat
 }
 
 /**
- * Checks if a instruction node has the given opcode.
+ * Checks if an instruction node has the given opcode.
  *
  * @param {object/InsnNode} instructionNode The instruction node to check.
  * @param {number} opCode The opcode the instruction should have.
  */
 function checkInsn(instructionNode, opCode) {
     return instructionNode.getOpcode() === opCode
+}
+
+/**
+ * Checks if a jump instruction node has the given opcode.
+ *
+ * @param {object/JumpInsnNode} instructionNode The instruction node to check.
+ * @param {number} opCode The opcode the instruction should have.
+ */
+function checkJumpInsn(instructionNode, opCode) {
+    return checkInsn(instructionNode, opCode)
 }
 
 /**
@@ -158,6 +171,7 @@ function checkVarInsn(instructionNode, opCode, varIndex) {
 }
 
 
+
 var LoggingLevel = {
     DEBUG: {numericLevel: 0, name: "DEBUG"},
     ERROR: {numericLevel: 1, name: "ERROR"}
@@ -165,6 +179,7 @@ var LoggingLevel = {
 // The minimum logging level required for a message to be logged.
 var minimumLoggingLevel = LoggingLevel.DEBUG
 
+// TODO Update the date retriever if possible (look into Date.)
 /**
  * Logs a message to the console, showing the time and severity level with it.
  *
@@ -187,6 +202,7 @@ function logMessage(loggingLevel, message) {
  * @param {string} fullClassName The full name of the class that the function resides in.
  */
 function logTransformSuccess(functionName, fullClassName) {
+
     logMessage(LoggingLevel.DEBUG, "Successfully transformed " + functionName + " in " + fullClassName)
 }
 
@@ -222,16 +238,14 @@ function initializeCoreMod() {
                         var success = false
 
                         for (var i = 0; i < oldInstructions.size(); i++) {
-                            var instruction = oldInstructions.get(i)
-
-                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getEyePosition", "func_174824_e",
+                            if (checkObfuscatedMethodInsn(oldInstructions.get(i), Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getEyePosition", "func_174824_e",
                                     "(F)Lnet/minecraft/util/math/Vec3d;")) {
-                                var newInstructions = new InsnList()
+                                var offsetRaycastInstructions = new InsnList()
 
-                                newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 0))
-                                newInstructions.add(new MethodInsnNode(
+                                offsetRaycastInstructions.add(new VarInsnNode(Opcodes.ALOAD, 0)) // this Lnet/minecraft/entity/Entity;
+                                offsetRaycastInstructions.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
                                     "offsetRaycast",
                                     "(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/math/Vec3d;",
                                     false
@@ -239,11 +253,11 @@ function initializeCoreMod() {
 
                                 // ...
                                 // INVOKEVIRTUAL net/minecraft/entity/Entity.getEyePosition (F)Lnet/minecraft/util/math/Vec3d;
-                                oldInstructions.insert(instruction, newInstructions)
+                                oldInstructions.insert(oldInstructions.get(i), offsetRaycastInstructions)
                                 // ...
 
-                                logTransformSuccess("function pick", "net.minecraft.entity.Entity")
                                 success = true
+                                logTransformSuccess("function pick", "net.minecraft.entity.Entity")
 
                                 break
                             }
@@ -277,23 +291,21 @@ function initializeCoreMod() {
                 var getMouseOver = findObfuscatedMethodWithSignature(classNode, "getMouseOver", "func_78473_a", "(F)V")
 
                 if (getMouseOver !== null) {
+                    var oldInstructions = getMouseOver.instructions
+
+                    // Adds an offset to the raycast that finds what entity the player is looking at.
                     try {
-                        var oldInstructions = getMouseOver.instructions
-                        var i = 0
                         var success = false
 
-                        // Adds an offset to the raycast that finds what entity the player is looking at.
-                        for (; i < oldInstructions.size(); i++) {
-                            var instruction = oldInstructions.get(i)
-
-                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getEyePosition", "func_174824_e",
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            if (checkObfuscatedMethodInsn(oldInstructions.get(i), Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getEyePosition", "func_174824_e",
                                     "(F)Lnet/minecraft/util/math/Vec3d;")) {
-                                var newInstructions = new InsnList()
+                                var offsetRaycastInstructions = new InsnList()
 
-                                newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 2))
-                                newInstructions.add(new MethodInsnNode(
+                                offsetRaycastInstructions.add(new VarInsnNode(Opcodes.ALOAD, 2)) // entity Lnet/minecraft/entity/Entity;
+                                offsetRaycastInstructions.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
                                     "offsetRaycast",
                                     "(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/math/Vec3d;",
                                     false
@@ -301,66 +313,58 @@ function initializeCoreMod() {
 
                                 // ...
                                 // INVOKEVIRTUAL net/minecraft/entity/Entity.getEyePosition (F)Lnet/minecraft/util/math/Vec3d;
-                                oldInstructions.insert(instruction, newInstructions)
+                                oldInstructions.insert(oldInstructions.get(i), offsetRaycastInstructions)
                                 // ...
 
                                 success = true
+                                logTransformSuccess("first area of function getMouseOver", "net.minecraft.client.renderer.GameRenderer")
 
                                 break
                             }
                         }
 
-                        if (!success) {
-                            logTransformError("function getMouseOver", "net.minecraft.client.renderer.GameRenderer", "Unable to find function primary injection point")
-                            return classNode
+                        if (!success)
+                            logTransformError("function getMouseOver", "net.minecraft.client.renderer.GameRenderer", "Unable to find injection point")
 
-                        } else
-                            success = false
+                    } catch (exception) {
+                        logTransformError("first area of function getMouseOver", "net.minecraft.client.renderer.GameRenderer", exception.message)
+                    }
 
+                    // Allows players to interact with entities relative to their offsets.
+                    try {
+                        var success = false
 
-                        // Allows players to interact with entities relative to their offsets.
-                        for (; i < oldInstructions.size(); i++) {
-                            var instruction = oldInstructions.get(i)
-
-                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/util/math/AxisAlignedBB", "grow", "func_72314_b",
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            if (checkObfuscatedMethodInsn(oldInstructions.get(i), Opcodes.INVOKEVIRTUAL, "net/minecraft/util/math/AxisAlignedBB", "grow", "func_72314_b",
                                     "(DDD)Lnet/minecraft/util/math/AxisAlignedBB;")) {
-                                var newInstructions = new InsnList()
+                                var offsetAABBInstructions = new InsnList()
 
-                                newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 2))
-                                newInstructions.add(new TypeInsnNode(Opcodes.CHECKCAST, "net/minecraft/entity/player/PlayerEntity"))
-                                newInstructions.add(new MethodInsnNode(
-                                    Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
-                                    "getOffsets",
-                                    "(Lnet/minecraft/entity/player/PlayerEntity;)Lnet/minecraft/util/math/Vec3d;",
-                                    false
-                                ))
-                                newInstructions.add(new MethodInsnNode(
+                                offsetAABBInstructions.add(new VarInsnNode(Opcodes.ALOAD, 2)) // entity Lnet/minecraft/entity/Entity;
+                                offsetAABBInstructions.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
                                     "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                    "offsetAABB",
-                                    "(Lnet/minecraft/util/math/AxisAlignedBB;Lnet/minecraft/util/math/Vec3d;)Lnet/minecraft/util/math/AxisAlignedBB;"
+                                    "offsetAxisAlignedBB",
+                                    "(Lnet/minecraft/util/math/AxisAlignedBB;Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/math/AxisAlignedBB;",
+                                    false
                                 ))
 
                                 // ...
                                 // INVOKEVIRTUAL net/minecraft/util/math/AxisAlignedBB.grow (DDD)Lnet/minecraft/util/math/AxisAlignedBB;
-                                oldInstructions.insert(instruction, newInstructions)
+                                oldInstructions.insert(oldInstructions.get(i), offsetAABBInstructions)
                                 // ...
 
                                 success = true
+                                logTransformSuccess("second area of function getMouseOver", "net.minecraft.client.renderer.GameRenderer")
 
                                 break
                             }
                         }
 
-                        if (success) {
-                            logTransformSuccess("function getMouseOver", "net.minecraft.client.renderer.GameRenderer")
-
-                        } else
-                            logTransformError("function getMouseOver", "net.minecraft.client.renderer.GameRenderer", "Unable to find secondary injection point")
+                        if (!success)
+                            logTransformError("function getMouseOver", "net.minecraft.client.renderer.GameRenderer", "Unable to find injection point")
 
                     } catch (exception) {
-                        logTransformError("function getMouseOver", "net.minecraft.client.renderer.GameRenderer", exception.message)
+                        logTransformError("second area of function getMouseOver", "net.minecraft.client.renderer.GameRenderer", exception.message)
                     }
 
                 } else
@@ -385,24 +389,23 @@ function initializeCoreMod() {
 
                 if (renderItemInFirstPerson !== null) {
                     try {
-                        var newInstructions = new InsnList()
+                        var testSkipRenderFirstPerson = new InsnList()
                         var skipReturn = new LabelNode()
 
-
-                        newInstructions.add(new MethodInsnNode(
+                        testSkipRenderFirstPerson.add(new MethodInsnNode(
                             Opcodes.INVOKESTATIC,
-                            "com/epiphany/isawedthisplayerinhalf/rendering/RenderingOffsetter",
+                            "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
                             "shouldRenderHand",
                             "()Z",
                             false
                         ))
-                        newInstructions.add(new JumpInsnNode(Opcodes.IFNE, skipReturn))
-                            newInstructions.add(new InsnNode(Opcodes.RETURN))
-                        newInstructions.add(skipReturn)
+                        testSkipRenderFirstPerson.add(new JumpInsnNode(Opcodes.IFNE, skipReturn))
+                            testSkipRenderFirstPerson.add(new InsnNode(Opcodes.RETURN))
+                        testSkipRenderFirstPerson.add(skipReturn)
 
-
-                        renderItemInFirstPerson.instructions.insert(newInstructions)
-                        //...
+                        // METHOD START.
+                        renderItemInFirstPerson.instructions.insert(testSkipRenderFirstPerson)
+                        // ...
 
                         logTransformSuccess("function renderItemInFirstPerson", "net.minecraft.client.renderer.FirstPersonRenderer")
 
@@ -436,18 +439,24 @@ function initializeCoreMod() {
                         var success = false
 
                         for (var i = 0; i < oldInstructions.size(); i++) {
-                            var instruction = oldInstructions.get(i)
-
-                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/client/renderer/ActiveRenderInfo", "isThirdPerson",
+                            if (checkObfuscatedMethodInsn(oldInstructions.get(i), Opcodes.INVOKEVIRTUAL, "net/minecraft/client/renderer/ActiveRenderInfo", "isThirdPerson",
                                     "func_216770_i", "()Z")) {
-                                oldInstructions.insert(instruction, new MethodInsnNode(
+                                var overrideIsThirdPerson = new InsnList()
+
+                                overrideIsThirdPerson.add(new VarInsnNode(Opcodes.ALOAD, 6)) // activeRenderInfoIn Lnet/minecraft/client/renderer/ActiveRenderInfo;
+                                overrideIsThirdPerson.add(new InsnNode(Opcodes.SWAP))
+                                overrideIsThirdPerson.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/rendering/RenderingOffsetter",
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
                                     "modifiedIsThirdPerson",
-                                    "(Lnet/minecraft/client/renderer/ActiveRenderInfo;)Z",
+                                    "(Lnet/minecraft/client/renderer/ActiveRenderInfo;Z)Z",
                                     false
                                 ))
-                                oldInstructions.remove(instruction)
+
+                                // ...
+                                // INVOKEVIRTUAL net/minecraft/client/renderer/ActiveRenderInfo.isThirdPerson ()Z
+                                oldInstructions.insert(oldInstructions.get(i), overrideIsThirdPerson)
+                                // ...
 
                                 success = true
                                 logTransformSuccess("function updateCameraAndRender", "net.minecraft.client.renderer.WorldRenderer")
@@ -488,17 +497,15 @@ function initializeCoreMod() {
                         var success = false
 
                         for (var i = 0; i < oldInstructions.size(); i++) {
-                            var instruction = oldInstructions.get(i)
-
-                            if (checkMethodInsn(instruction, Opcodes.INVOKESPECIAL, "net/minecraft/entity/projectile/AbstractArrowEntity", "<init>",
+                            if (checkMethodInsn(oldInstructions.get(i), Opcodes.INVOKESPECIAL, "net/minecraft/entity/projectile/AbstractArrowEntity", "<init>",
                                     "(Lnet/minecraft/entity/EntityType;DDDLnet/minecraft/world/World;)V")) {
-                                var newInstructions = new InsnList()
+                                var offsetProjectileInstructions = new InsnList()
 
-                                newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 0))
-                                newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 2))
-                                newInstructions.add(new MethodInsnNode(
+                                offsetProjectileInstructions.add(new VarInsnNode(Opcodes.ALOAD, 0)) // this Lnet/minecraft/entity/projectile/AbstractArrowEntity;
+                                offsetProjectileInstructions.add(new VarInsnNode(Opcodes.ALOAD, 2)) // shooter Lnet/minecraft/entity/LivingEntity;
+                                offsetProjectileInstructions.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
                                     "offsetProjectile",
                                     "(Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/LivingEntity;)V",
                                     false
@@ -506,7 +513,7 @@ function initializeCoreMod() {
 
                                 // ...
                                 // INVOKESPECIAL net/minecraft/entity/projectile/AbstractArrowEntity.<init> (Lnet/minecraft/entity/EntityType;DDDLnet/minecraft/world/World;)V
-                                oldInstructions.insert(instruction, newInstructions)
+                                oldInstructions.insert(oldInstructions.get(i), offsetProjectileInstructions)
                                 // ...
 
                                 success = true
@@ -548,17 +555,15 @@ function initializeCoreMod() {
                         var success = false
 
                         for (var i = 0; i < oldInstructions.size(); i++) {
-                            var instruction = oldInstructions.get(i)
-
-                            if (checkMethodInsn(instruction, Opcodes.INVOKESPECIAL, "net/minecraft/entity/projectile/ThrowableEntity", "<init>",
+                            if (checkMethodInsn(oldInstructions.get(i), Opcodes.INVOKESPECIAL, "net/minecraft/entity/projectile/ThrowableEntity", "<init>",
                                     "(Lnet/minecraft/entity/EntityType;DDDLnet/minecraft/world/World;)V")) {
-                                var newInstructions = new InsnList()
+                                var offsetProjectileInstructions = new InsnList()
 
-                                newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 0))
-                                newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 2))
-                                newInstructions.add(new MethodInsnNode(
+                                offsetProjectileInstructions.add(new VarInsnNode(Opcodes.ALOAD, 0)) // this Lnet/minecraft/entity/projectile/ThrowableEntity;
+                                offsetProjectileInstructions.add(new VarInsnNode(Opcodes.ALOAD, 2)) // livingEntityIn Lnet/minecraft/entity/LivingEntity;
+                                offsetProjectileInstructions.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
                                     "offsetProjectile",
                                     "(Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/LivingEntity;)V",
                                     false
@@ -566,7 +571,7 @@ function initializeCoreMod() {
 
                                 // ...
                                 // INVOKESPECIAL net/minecraft/entity/projectile/ThrowableEntity.<init> (Lnet/minecraft/entity/EntityType;DDDLnet/minecraft/world/World;)V
-                                oldInstructions.insert(instruction, newInstructions)
+                                oldInstructions.insert(oldInstructions.get(i), offsetProjectileInstructions)
                                 // ...
 
                                 success = true
@@ -609,17 +614,15 @@ function initializeCoreMod() {
                         var success = false
 
                         for (var i = 0; i < oldInstructions.size(); i++) {
-                            var instruction = oldInstructions.get(i)
-
-                            if (checkMethodInsn(instruction, Opcodes.INVOKESPECIAL, "net/minecraft/entity/item/EyeOfEnderEntity", "<init>",
+                            if (checkMethodInsn(oldInstructions.get(i), Opcodes.INVOKESPECIAL, "net/minecraft/entity/item/EyeOfEnderEntity", "<init>",
                                     "(Lnet/minecraft/world/World;DDD)V")) {
-                                var newInstructions = new InsnList()
+                                var offsetProjectileInstructions = new InsnList()
 
-                                newInstructions.add(new InsnNode(Opcodes.DUP))
-                                newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 2))
-                                newInstructions.add(new MethodInsnNode(
+                                offsetProjectileInstructions.add(new InsnNode(Opcodes.DUP))
+                                offsetProjectileInstructions.add(new VarInsnNode(Opcodes.ALOAD, 2)) // playerIn Lnet/minecraft/entity/player/PlayerEntity;
+                                offsetProjectileInstructions.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
                                     "offsetProjectile",
                                     "(Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/LivingEntity;)V",
                                     false
@@ -627,7 +630,7 @@ function initializeCoreMod() {
 
                                 // ...
                                 // INVOKESPECIAL net/minecraft/entity/item/EyeOfEnderEntity.<init> (Lnet/minecraft/world/World;DDD)V
-                                oldInstructions.insert(instruction, newInstructions)
+                                oldInstructions.insert(oldInstructions.get(i), offsetProjectileInstructions)
                                 // ...
 
                                 success = true
@@ -670,17 +673,15 @@ function initializeCoreMod() {
                         var success = false
 
                         for (var i = 0; i < oldInstructions.size(); i++) {
-                            var instruction = oldInstructions.get(i)
-
-                            if (checkMethodInsn(instruction, Opcodes.INVOKESPECIAL, "net/minecraft/entity/projectile/FishingBobberEntity", "<init>",
+                            if (checkMethodInsn(oldInstructions.get(i), Opcodes.INVOKESPECIAL, "net/minecraft/entity/projectile/FishingBobberEntity", "<init>",
                                     "(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/world/World;II)V")) {
-                                var newInstructions = new InsnList()
+                                var offsetBobberInstructions = new InsnList()
 
-                                newInstructions.add(new InsnNode(Opcodes.DUP))
-                                newInstructions.add(new VarInsnNode(Opcodes.ALOAD, 2))
-                                newInstructions.add(new MethodInsnNode(
+                                offsetBobberInstructions.add(new InsnNode(Opcodes.DUP))
+                                offsetBobberInstructions.add(new VarInsnNode(Opcodes.ALOAD, 2)) // playerIn Lnet/minecraft/entity/player/PlayerEntity;
+                                offsetBobberInstructions.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
                                     "offsetProjectile",
                                     "(Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/LivingEntity;)V",
                                     false
@@ -688,7 +689,7 @@ function initializeCoreMod() {
 
                                 // ...
                                 // INVOKESPECIAL net/minecraft/entity/projectile/FishingBobberEntity.<init> (Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/world/World;II)V
-                                oldInstructions.insert(instruction, newInstructions)
+                                oldInstructions.insert(oldInstructions.get(i), offsetBobberInstructions)
                                 // ...
 
                                 success = true
@@ -713,7 +714,8 @@ function initializeCoreMod() {
         },
 
         /**
-         * Offsets the fishing line, and forces it to always render if it was in third-person.
+         * Forces fishing lines to always render as if the player was in third-person if the player has offsets.
+         * Offsets rendered fishing lines.
          */
         "FishRenderer": {
             "target": {
@@ -726,156 +728,146 @@ function initializeCoreMod() {
                     "(Lnet/minecraft/entity/projectile/FishingBobberEntity;FFLcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;I)V")
 
                 if (render !== null) {
+                    var oldInstructions = render.instructions
+
+                    // Forces third-person fishing line rendering when player is offset.
                     try {
-                        var oldInstructions = render.instructions
                         var success = false
 
-                        // Forces third-person fishing line rendering.
-                        for (var i = 0; i < oldInstructions.size() - 9; i++) {
-                            var instruction = oldInstructions.get(i)
+                        for (var i = 0; i <= oldInstructions.size() - 9; i++) {
+                            if (checkVarInsn(oldInstructions.get(i), Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(oldInstructions.get(i+1), Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/FishRenderer", "renderManager", "field_76990_c", "Lnet/minecraft/client/renderer/entity/EntityRendererManager;")
+                                    && checkObfuscatedFieldInsn(oldInstructions.get(i+2), Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/EntityRendererManager", "options", "field_78733_k", "Lnet/minecraft/client/GameSettings;")
+                                    && checkInsn(oldInstructions.get(i+3), Opcodes.IFNULL)
 
-                            if (checkVarInsn(instruction, Opcodes.ALOAD, 0)) {
-                                var instructions = [instruction]
+                                    && checkVarInsn(oldInstructions.get(i+4), Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(oldInstructions.get(i+5), Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/FishRenderer", "renderManager", "field_76990_c", "Lnet/minecraft/client/renderer/entity/EntityRendererManager;")
+                                    && checkObfuscatedFieldInsn(oldInstructions.get(i+6), Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/EntityRendererManager", "options", "field_78733_k", "Lnet/minecraft/client/GameSettings;")
+                                    && checkObfuscatedFieldInsn(oldInstructions.get(i+7), Opcodes.GETFIELD, "net/minecraft/client/GameSettings", "thirdPersonView", "field_74320_O", "I")
 
-                                for (var k = 1; k < 9; k++)
-                                    instructions.push(oldInstructions.get(i + k))
+                                    && checkJumpInsn(oldInstructions.get(i+8), Opcodes.IFGT)) {
+                                var firstInstruction = oldInstructions.get(i)
+                                var lastInstruction = oldInstructions.get(i+8)
+                                var render3dIfHasOffsets = new InsnList()
+                                var skipOriginal = new LabelNode()
+                                var runOriginal = new LabelNode()
+                                var skipRender3dIfNoOffsets = new LabelNode()
 
-                                if (checkObfuscatedFieldInsn(instructions[1], Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/FishRenderer", "renderManager", "field_76990_c", "Lnet/minecraft/client/renderer/entity/EntityRendererManager;")
-                                        && checkObfuscatedFieldInsn(instructions[2], Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/EntityRendererManager", "options", "field_78733_k", "Lnet/minecraft/client/GameSettings;")
-                                        && checkInsn(instructions[3], Opcodes.IFNULL)
+                                // Skips inserted code after returning to and running original code.
+                                render3dIfHasOffsets.add(new JumpInsnNode(Opcodes.GOTO, skipRender3dIfNoOffsets))
+                                // Skips (this.renderManager.options == null || this.renderManager.options.thirdPersonView <= 0).
+                                render3dIfHasOffsets.add(skipOriginal)
+                                render3dIfHasOffsets.add(new VarInsnNode(Opcodes.ALOAD, 7)) // playerentity Lnet/minecraft/entity/player/PlayerEntity;
+                                render3dIfHasOffsets.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "isPlayerOffset",
+                                    "(Lnet/minecraft/entity/player/PlayerEntity;)Z",
+                                    false
+                                ))
+                                // Goes to third-person rendering if the player has offsets, else it returns to the original code.
+                                render3dIfHasOffsets.add(new JumpInsnNode(Opcodes.IFEQ, lastInstruction.label))
+                                render3dIfHasOffsets.add(new JumpInsnNode(Opcodes.GOTO, runOriginal))
+                                render3dIfHasOffsets.add(skipRender3dIfNoOffsets)
 
-                                        && checkVarInsn(instructions[4], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[5], Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/FishRenderer", "renderManager", "field_76990_c", "Lnet/minecraft/client/renderer/entity/EntityRendererManager;")
-                                        && checkObfuscatedFieldInsn(instructions[6], Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/EntityRendererManager", "options", "field_78733_k", "Lnet/minecraft/client/GameSettings;")
-                                        && checkObfuscatedFieldInsn(instructions[7], Opcodes.GETFIELD, "net/minecraft/client/GameSettings", "thirdPersonView", "field_74320_O", "I") && checkInsn(instructions[8], Opcodes.IFGT)) {
-                                    oldInstructions.insertBefore(instructions[0], new JumpInsnNode(Opcodes.GOTO, instructions[8].label))
+                                // ...
+                                oldInstructions.insertBefore(firstInstruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                oldInstructions.insertBefore(firstInstruction, runOriginal)
+                                // ALOAD 0
+                                // GETFIELD net/minecraft/client/renderer/entity/FishRenderer.renderManager : Lnet/minecraft/client/renderer/entity/EntityRendererManager;
+                                // GETFIELD net/minecraft/client/renderer/entity/EntityRendererManager.options : Lnet/minecraft/client/GameSettings;
+                                // IFNULL L31
+                                // ALOAD 0
+                                // GETFIELD net/minecraft/client/renderer/entity/FishRenderer.renderManager : Lnet/minecraft/client/renderer/entity/EntityRendererManager;
+                                // GETFIELD net/minecraft/client/renderer/entity/EntityRendererManager.options : Lnet/minecraft/client/GameSettings;
+                                // GETFIELD net/minecraft/client/GameSettings.thirdPersonView : I
+                                oldInstructions.insert(lastInstruction, render3dIfHasOffsets)
+                                // ...
 
-                                    for (var k = 0; k < instructions.length; k++)
-                                        oldInstructions.remove(instructions[k])
+                                success = true
+                                logTransformSuccess("first area of function render", "net.minecraft.client.renderer.FishRenderer")
 
-                                    success = true
-                                    break
-                                }
+                                break
                             }
                         }
 
-                        if (!success) {
-                            logTransformError("function render", "net.minecraft.client.renderer.FishRenderer", "Unable to find primary injection points")
-                            return classNode
+                        if (!success)
+                            logTransformError("first area of function render", "net.minecraft.client.renderer.FishRenderer", "Unable to find injection point")
 
-                        } else
-                            success = false
+                    } catch (expression) {
+                        logTransformError("first area of function render", "net.minecraft.client.renderer.FishRenderer", exception.message)
+                    }
 
-                        // Puts in offset to fishing line position.
+                    // Puts in offset to fishing line position.
+                    try {
+                        var success = false
+
                         for (var i = 0; i < oldInstructions.size() - 21; i++) {
-                            var instruction = oldInstructions.get(i)
-
-                            if (checkVarInsn(instruction, Opcodes.DLOAD, 25)) {
-                                var instructions = [instruction]
-
-                                for (var k = 1; k < 21; k++) {
-                                    var potentialInstruction = oldInstructions.get(i + k)
-
-                                    if (potentialInstruction.getOpcode() !== -1)
-                                        instructions.push(potentialInstruction)
-                                }
-
-                                if (checkVarInsn(instructions[1], Opcodes.DLOAD, 32) && checkInsn(instructions[2], Opcodes.DSUB) && checkInsn(instructions[3], Opcodes.D2F)
-                                        && checkVarInsn(instructions[4], Opcodes.FSTORE, 38)
-
-                                        && checkVarInsn(instructions[5], Opcodes.DLOAD, 27) && checkVarInsn(instructions[6], Opcodes.DLOAD, 34) && checkInsn(instructions[7], Opcodes.DSUB) && checkInsn(instructions[8], Opcodes.D2F)
-                                        && checkVarInsn(instructions[9], Opcodes.FLOAD, 31) && checkInsn(instructions[10], Opcodes.FADD) && checkVarInsn(instructions[11], Opcodes.FSTORE, 39)
-
-                                        && checkVarInsn(instructions[12], Opcodes.DLOAD, 29) && checkVarInsn(instructions[13], Opcodes.DLOAD, 36) && checkInsn(instructions[14], Opcodes.DSUB) && checkInsn(instructions[15], Opcodes.D2F)
-                                        && checkVarInsn(instructions[16], Opcodes.FSTORE, 40)) {
-                                    var getVectorList = new InsnList()
-                                    var addXList = new InsnList()
-                                    var addYList = new InsnList()
-                                    var addZList = new InsnList()
+                            if (checkVarInsn(oldInstructions.get(i), Opcodes.ALOAD, 7) && checkObfuscatedMethodInsn(oldInstructions.get(i+1), Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "isCrouching", "func_213453_ef", "()Z")) {
+                                var addOffsetsWhen3d = new InsnList()
 
 
-                                    getVectorList.add(new VarInsnNode(Opcodes.ALOAD, 7))
-                                    getVectorList.add(new MethodInsnNode(
-                                        Opcodes.INVOKESTATIC,
-                                        "com/epiphany/isawedthisplayerinhalf/Offsetter",
-                                        "getOffsets",
-                                        "(Lnet/minecraft/entity/player/PlayerEntity;)Lnet/minecraft/util/math/Vec3d;",
-                                        false
-                                    ))
-                                    getVectorList.add(new InsnNode(Opcodes.DUP))
-                                    getVectorList.add(new InsnNode(Opcodes.DUP))
+                                addOffsetsWhen3d.add(new VarInsnNode(Opcodes.ALOAD, 7)) // playerentity Lnet/minecraft/entity/player/PlayerEntity;
+                                addOffsetsWhen3d.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                    "getOffsets",
+                                    "(Lnet/minecraft/entity/player/PlayerEntity;)Lnet/minecraft/util/math/Vec3d;",
+                                    false
+                                ))
+                                addOffsetsWhen3d.add(new InsnNode(Opcodes.DUP))
+                                addOffsetsWhen3d.add(new InsnNode(Opcodes.DUP))
 
-                                    addXList.add(new InsnNode(Opcodes.DUP2_X1))
-                                    addXList.add(new InsnNode(Opcodes.POP2))
-                                    addXList.add(new MethodInsnNode(
-                                        Opcodes.INVOKESTATIC,
-                                        "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                        "getVectorX",
-                                        "(Lnet/minecraft/util/math/Vec3d;)D",
-                                        false
-                                    ))
-                                    addXList.add(new InsnNode(Opcodes.DADD))
+                                addOffsetsWhen3d.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "getVectorX",
+                                    "(Lnet/minecraft/util/math/Vec3d;)D",
+                                    false
+                                ))
+                                addOffsetsWhen3d.add(new VarInsnNode(Opcodes.DLOAD, 25)) // d4 D
+                                addOffsetsWhen3d.add(new InsnNode(Opcodes.DADD))
+                                addOffsetsWhen3d.add(new VarInsnNode(Opcodes.DSTORE, 25)) // d4 D
 
-                                    addYList.add(new InsnNode(Opcodes.DUP2_X1))
-                                    addYList.add(new InsnNode(Opcodes.POP2))
-                                    addYList.add(new MethodInsnNode(
-                                        Opcodes.INVOKESTATIC,
-                                        "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                        "getVectorY",
-                                        "(Lnet/minecraft/util/math/Vec3d;)D",
-                                        false
-                                    ))
-                                    addYList.add(new InsnNode(Opcodes.DADD))
+                                addOffsetsWhen3d.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "getVectorY",
+                                    "(Lnet/minecraft/util/math/Vec3d;)D",
+                                    false
+                                ))
+                                addOffsetsWhen3d.add(new VarInsnNode(Opcodes.DLOAD, 27)) // d5 D
+                                addOffsetsWhen3d.add(new InsnNode(Opcodes.DADD))
+                                addOffsetsWhen3d.add(new VarInsnNode(Opcodes.DSTORE, 27)) // d5 D
 
-                                    addZList.add(new InsnNode(Opcodes.DUP2_X1))
-                                    addZList.add(new InsnNode(Opcodes.POP2))
-                                    addZList.add(new MethodInsnNode(
-                                        Opcodes.INVOKESTATIC,
-                                        "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                        "getVectorZ",
-                                        "(Lnet/minecraft/util/math/Vec3d;)D",
-                                        false
-                                    ))
-                                    addZList.add(new InsnNode(Opcodes.DADD))
+                                addOffsetsWhen3d.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "getVectorZ",
+                                    "(Lnet/minecraft/util/math/Vec3d;)D",
+                                    false
+                                ))
+                                addOffsetsWhen3d.add(new VarInsnNode(Opcodes.DLOAD, 29)) // d6 D
+                                addOffsetsWhen3d.add(new InsnNode(Opcodes.DADD))
+                                addOffsetsWhen3d.add(new VarInsnNode(Opcodes.DSTORE, 29)) // d6 D
 
 
-                                    // ...
-                                    oldInstructions.insertBefore(instructions[0], getVectorList)
-                                    // DLOAD 25
-                                    // DLOAD 32
-                                    // DSUB
-                                    oldInstructions.insert(instructions[2], addXList)
-                                    // D2F
-                                    // FSTORE 38
-                                    // DLOAD 27
-                                    // DLOAD 34
-                                    // DSUB
-                                    oldInstructions.insert(instructions[7], addYList)
-                                    // D2F
-                                    // FLOAD 31
-                                    // FADD
-                                    // FSTORE 39
-                                    // DLOAD 29
-                                    // DLOAD 36
-                                    // DSUB
-                                    oldInstructions.insert(instructions[14], addZList)
-                                    // D2F
-                                    // FSTORE 40
-                                    // ...
+                                // ...
+                                oldInstructions.insertBefore(oldInstructions.get(i), addOffsetsWhen3d)
+                                // ALOAD 7
+                                // INVOKEVIRTUAL net/minecraft/entity/player/PlayerEntity.isCrouching ()Z
+                                // ...
 
-                                    success = true
-                                    break
-                                }
+                                success = true
+                                logTransformSuccess("second area of function render", "net.minecraft.client.renderer.FishRenderer")
+
+                                break
                             }
                         }
 
-                        if (success) {
-                            logTransformSuccess("function render", "net.minecraft.client.renderer.FishRenderer")
-
-                        } else
-                            logTransformError("function render", "net.minecraft.client.renderer.FishRenderer", "Unable to find secondary injection points")
+                        if (!success)
+                            logTransformError("second area of function render", "net.minecraft.client.renderer.FishRenderer", "Unable to find injection point")
 
                     } catch (exception) {
-                        logTransformError("function render", "net.minecraft.client.renderer.FishRenderer", exception.message)
+                        logTransformError("second area of function render", "net.minecraft.client.renderer.FishRenderer", exception.message)
                     }
 
                 } else
@@ -887,7 +879,7 @@ function initializeCoreMod() {
 
         /**
          * Corrects player-bobber distance calculation.
-         * Offsets the destination of reeled-in entities and items.
+         * Offsets the destination of reeled-in entities and items.  TODO
          */
         "FishingBobberEntity": {
             "target": {
@@ -1211,7 +1203,7 @@ function initializeCoreMod() {
         },
 
         /**
-         * Allows players to break far away blocks.
+         * Allows players to break far away blocks. TODO
          */
         "PlayerInteractionManager": {
             "target": {
@@ -1381,7 +1373,7 @@ function initializeCoreMod() {
 
         /**
          * Modifies the home position and the position they are pulled to for leashed animals to account for offsets.
-         * Modifies the distance calculations for when to change the movement type and to break the leash.
+         * Modifies the distance calculations for when to change the movement type and to break the leash. TODO
          */
         "CreatureEntity": {
             "target": {
@@ -1416,7 +1408,8 @@ function initializeCoreMod() {
                                         Opcodes.INVOKESTATIC,
                                         "com/epiphany/isawedthisplayerinhalf/Offsetter",
                                         "modifiedBlockPos",
-                                        "(Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/math/BlockPos;"
+                                        "(Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/math/BlockPos;",
+                                        false
                                     ))
 
                                     oldInstructions.insertBefore(instructions[0], newInstructions)
@@ -1715,7 +1708,7 @@ function initializeCoreMod() {
         },
 
         /**
-         * Modifies the rendering of leashes.
+         * Modifies the rendering of leashes. TODO
          */
         "MobRenderer": {
             "target": {
@@ -1920,7 +1913,7 @@ function initializeCoreMod() {
         },
 
         /**
-         * Makes entities look at the offset position of players.
+         * Makes entities look at the offset position of players. TODO
          */
         "LookAtGoal": {
             "target": {
@@ -1966,7 +1959,8 @@ function initializeCoreMod() {
                                         Opcodes.INVOKESTATIC,
                                         "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
                                         "getClosestEntity",
-                                        "(Lnet/minecraft/entity/ai/goal/LookAtGoal;)Lnet/minecraft/entity/Entity;"
+                                        "(Lnet/minecraft/entity/ai/goal/LookAtGoal;)Lnet/minecraft/entity/Entity;",
+                                        false
                                     ))
                                     getVectorList.add(new MethodInsnNode(
                                         Opcodes.INVOKESTATIC,
@@ -2047,8 +2041,8 @@ function initializeCoreMod() {
         },
 
         /**
-         * Allows players to interact with blocks relative to their offsets.
-         * Allows players to interact with entities relative to their offsets.
+         * Allows players to interact with blocks relative to their offsets on a server.
+         * Allows players to interact with entities relative to their offsets on a server. TODO
          */
         "ServerPlayNetHandler": {
             "target": {
@@ -2073,7 +2067,7 @@ function initializeCoreMod() {
                                     "func_70092_e", "(DDD)D")) {
                                 oldInstructions.insert(instruction, new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
                                     "modifiedGetDistanceSq",
                                     "(Lnet/minecraft/entity/player/PlayerEntity;DDD)D",
                                     false
@@ -2171,25 +2165,32 @@ function initializeCoreMod() {
 
                             if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getDistanceSq",
                                     "func_70092_e", "(DDD)D")) {
-                                oldInstructions.insert(instruction, new MethodInsnNode(
+                                var redoGetDistanceSq = new InsnList();
+                                var skipOriginal = new LabelNode();
+
+                                redoGetDistanceSq.add(skipOriginal);
+                                redoGetDistanceSq.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
                                     "modifiedGetDistanceSq",
                                     "(Lnet/minecraft/entity/player/PlayerEntity;DDD)D",
                                     false
                                 ))
 
-                                oldInstructions.remove(instruction)
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/entity/player/PlayerEntity.getDistanceSq (DDD)D
+                                oldInstructions.insert(instruction, redoGetDistanceSq)
+                                // ...
 
                                 success = true
+                                logTransformSuccess("function isUsableByPlayer", "net.minecraft.tileentity.AbstractFurnaceTileEntity")
+
                                 break
                             }
                         }
 
-                        if (success) {
-                            logTransformSuccess("function isUsableByPlayer", "net.minecraft.tileentity.AbstractFurnaceTileEntity")
-
-                        } else
+                        if (!success)
                             logTransformError("function isUsableByPlayer", "net.minecraft.tileentity.AbstractFurnaceTileEntity", "Unable to find injection point")
 
                     } catch (exception) {
@@ -2226,25 +2227,32 @@ function initializeCoreMod() {
 
                             if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getDistanceSq",
                                     "func_70092_e", "(DDD)D")) {
-                                oldInstructions.insert(instruction, new MethodInsnNode(
+                                var redoGetDistanceSq = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                redoGetDistanceSq.add(skipOriginal)
+                                redoGetDistanceSq.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
                                     "modifiedGetDistanceSq",
                                     "(Lnet/minecraft/entity/player/PlayerEntity;DDD)D",
                                     false
                                 ))
 
-                                oldInstructions.remove(instruction)
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/entity/player/PlayerEntity.getDistanceSq (DDD)D
+                                oldInstructions.insert(instruction, redoGetDistanceSq)
+                                // ...
 
                                 success = true
+                                logTransformSuccess("function isUsableByPlayer", "net.minecraft.tileentity.BrewingStandTileEntity")
+
                                 break
                             }
                         }
 
-                        if (success) {
-                            logTransformSuccess("function isUsableByPlayer", "net.minecraft.tileentity.BrewingStandTileEntity")
-
-                        } else
+                        if (!success)
                             logTransformError("function isUsableByPlayer", "net.minecraft.tileentity.BrewingStandTileEntity", "Unable to find injection point")
 
                     } catch (exception) {
@@ -2281,25 +2289,32 @@ function initializeCoreMod() {
 
                             if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getDistanceSq",
                                     "func_70092_e", "(DDD)D")) {
-                                oldInstructions.insert(instruction, new MethodInsnNode(
+                                var redoGetDistanceSq = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                redoGetDistanceSq.add(skipOriginal)
+                                redoGetDistanceSq.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
                                     "modifiedGetDistanceSq",
                                     "(Lnet/minecraft/entity/player/PlayerEntity;DDD)D",
                                     false
                                 ))
 
-                                oldInstructions.remove(instruction)
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/entity/player/PlayerEntity.getDistanceSq (DDD)D
+                                oldInstructions.insert(instruction, redoGetDistanceSq)
+                                // ...
 
                                 success = true
+                                logTransformSuccess("function isUsableByPlayer", "net.minecraft.tileentity.LockableLootTileEntity")
+
                                 break
                             }
                         }
 
-                        if (success) {
-                            logTransformSuccess("function isUsableByPlayer", "net.minecraft.tileentity.LockableLootTileEntity")
-
-                        } else
+                        if (!success)
                             logTransformError("function isUsableByPlayer", "net.minecraft.tileentity.LockableLootTileEntity", "Unable to find injection point")
 
                     } catch (exception) {
@@ -2336,25 +2351,32 @@ function initializeCoreMod() {
 
                             if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getDistanceSq",
                                     "func_70092_e", "(DDD)D")) {
-                                oldInstructions.insert(instruction, new MethodInsnNode(
+                                var redoGetDistanceSq = new InsnList();
+                                var skipOriginal = new LabelNode();
+
+                                redoGetDistanceSq.add(skipOriginal);
+                                redoGetDistanceSq.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
                                     "modifiedGetDistanceSq",
                                     "(Lnet/minecraft/entity/player/PlayerEntity;DDD)D",
                                     false
                                 ))
 
-                                oldInstructions.remove(instruction)
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/entity/player/PlayerEntity.getDistanceSq (DDD)D
+                                oldInstructions.insert(instruction, redoGetDistanceSq)
+                                // ...
 
                                 success = true
+                                logTransformSuccess("function isUsableByPlayer", "net.minecraft.tileentity.LecternTileEntity")
+
                                 break
                             }
                         }
 
-                        if (success) {
-                            logTransformSuccess("function isUsableByPlayer", "net.minecraft.tileentity.LecternTileEntity")
-
-                        } else
+                        if (!success)
                             logTransformError("function isUsableByPlayer", "net.minecraft.tileentity.LecternTileEntity", "Unable to find injection point")
 
                     } catch (exception) {
@@ -2390,25 +2412,32 @@ function initializeCoreMod() {
 
                             if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getDistanceSq",
                                     "func_70092_e", "(DDD)D")) {
-                                oldInstructions.insert(instruction, new MethodInsnNode(
+                                var redoGetDistanceSq = new InsnList();
+                                var skipOriginal = new LabelNode();
+
+                                redoGetDistanceSq.add(skipOriginal);
+                                redoGetDistanceSq.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
                                     "modifiedGetDistanceSq",
                                     "(Lnet/minecraft/entity/player/PlayerEntity;DDD)D",
                                     false
                                 ))
 
-                                oldInstructions.remove(instruction)
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/entity/player/PlayerEntity.getDistanceSq (DDD)D
+                                oldInstructions.insert(instruction, redoGetDistanceSq)
+                                // ...
 
                                 success = true
+                                logTransformSuccess("function canBeUsed", "net.minecraft.tileentity.EnderChestTileEntity")
+
                                 break
                             }
                         }
 
-                        if (success) {
-                            logTransformSuccess("function canBeUsed", "net.minecraft.tileentity.EnderChestTileEntity")
-
-                        } else
+                        if (!success)
                             logTransformError("function canBeUsed", "net.minecraft.tileentity.EnderChestTileEntity", "Unable to find injection point")
 
                     } catch (exception) {
@@ -2445,10 +2474,12 @@ function initializeCoreMod() {
 
                             if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getDistanceSq",
                                     "func_70068_e", "(Lnet/minecraft/entity/Entity;)D")) {
-                                var getDistanceList = new InsnList()
+                                var redoGetDistanceSq = new InsnList()
+                                var skipOriginal = new LabelNode();
 
-                                getDistanceList.add(new InsnNode(Opcodes.SWAP))
-                                getDistanceList.add(new MethodInsnNode(
+                                redoGetDistanceSq.add(skipOriginal);
+                                redoGetDistanceSq.add(new InsnNode(Opcodes.SWAP))
+                                redoGetDistanceSq.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
                                     "com/epiphany/isawedthisplayerinhalf/Offsetter",
                                     "modifiedGetDistanceSq",
@@ -2456,18 +2487,20 @@ function initializeCoreMod() {
                                     false
                                 ))
 
-                                oldInstructions.insert(instruction, getDistanceList)
-                                oldInstructions.remove(instruction)
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/entity/player/PlayerEntity.getDistanceSq (Lnet/minecraft/entity/Entity;)D
+                                oldInstructions.insert(instruction, redoGetDistanceSq)
+                                // ...
 
                                 success = true
+                                logTransformSuccess("function isUsableByPlayer", "net.minecraft.entity.item.minecart.ContainerMinecartEntity")
+
                                 break
                             }
                         }
 
-                        if (success) {
-                            logTransformSuccess("function isUsableByPlayer", "net.minecraft.entity.item.minecart.ContainerMinecartEntity")
-
-                        } else
+                        if (!success)
                             logTransformError("function isUsableByPlayer", "net.minecraft.entity.item.minecart.ContainerMinecartEntity", "Unable to find injection point")
 
                     } catch (exception) {
@@ -2504,25 +2537,32 @@ function initializeCoreMod() {
 
                             if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getDistanceSq",
                                     "func_70092_e", "(DDD)D")) {
-                                oldInstructions.insert(instruction, new MethodInsnNode(
+                                var redoGetDistanceSq = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                redoGetDistanceSq.add(skipOriginal)
+                                redoGetDistanceSq.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
                                     "modifiedGetDistanceSq",
                                     "(Lnet/minecraft/entity/player/PlayerEntity;DDD)D",
                                     false
                                 ))
 
-                                oldInstructions.remove(instruction)
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/entity/player/PlayerEntity.getDistanceSq (DDD)D
+                                oldInstructions.insert(instruction, redoGetDistanceSq)
+                                // ...
 
                                 success = true
+                                logTransformSuccess("function lambda$isWithinUsableDistance$0", "net.minecraft.inventory.container.Container")
+
                                 break
                             }
                         }
 
-                        if (success) {
-                            logTransformSuccess("function lambda$isWithinUsableDistance$0", "net.minecraft.inventory.container.Container")
-
-                        } else
+                        if (!success)
                             logTransformError("function lambda$isWithinUsableDistance$0", "net.minecraft.inventory.container.Container", "Unable to find injection point")
 
                     } catch (exception) {
@@ -2537,7 +2577,7 @@ function initializeCoreMod() {
         },
 
         /**
-         * Runs the frustum check twice so it can account for players' offsets, allowing the offset position to be rendered even when the original position is not in view.
+         * Runs the frustum check twice so it can account for players' offsets, allowing the offset position to be rendered even when the original position is not in view. TODO
          */
         "EntityRenderer": {
             "target": {
@@ -2616,7 +2656,8 @@ function initializeCoreMod() {
                                     Opcodes.INVOKESTATIC,
                                     "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
                                     "getZeroVector",
-                                    "()Lnet/minecraft/util/math/Vec3d;"
+                                    "()Lnet/minecraft/util/math/Vec3d;",
+                                    false
                                 ))
                                 doubleCheckPlayer.add(new MethodInsnNode(
                                     Opcodes.INVOKEVIRTUAL,
@@ -2639,14 +2680,16 @@ function initializeCoreMod() {
                                     Opcodes.INVOKESTATIC,
                                     "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
                                     "offsetAABB",
-                                    "(Lnet/minecraft/util/math/AxisAlignedBB;Lnet/minecraft/util/math/Vec3d;)Lnet/minecraft/util/math/AxisAlignedBB;"
+                                    "(Lnet/minecraft/util/math/AxisAlignedBB;Lnet/minecraft/util/math/Vec3d;)Lnet/minecraft/util/math/AxisAlignedBB;",
+                                    false
                                 ))
                                 // Recalculates frustum collision.
                                 doubleCheckPlayer.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
                                     "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
                                     "isBoundingBoxInFrustum",
-                                    "(Lnet/minecraft/client/renderer/culling/ClippingHelperImpl;Lnet/minecraft/util/math/AxisAlignedBB;)Z"
+                                    "(Lnet/minecraft/client/renderer/culling/ClippingHelperImpl;Lnet/minecraft/util/math/AxisAlignedBB;)Z",
+                                    false
                                 ))
                                 doubleCheckPlayer.add(new JumpInsnNode(Opcodes.GOTO, skipToReturn))
 
@@ -2684,7 +2727,7 @@ function initializeCoreMod() {
         },
 
         /**
-         * Alters knockback to account for offsets.
+         * Alters knockback to account for offsets. TODO
          */
         "LivingEntity": {
             "target": {

@@ -8,7 +8,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
@@ -119,44 +118,6 @@ public class Offsetter {
 
 
     /**
-     * Offsets the initial position of A raycast if the entity is a player.
-     *
-     * @param entity The entity whose raycast is being offset.
-     * @param initialPosition The initial position of the raycast.
-     *
-     * @return The offset position for the raycast to use.
-     */
-    public static Vec3d offsetRaycast(Vec3d initialPosition, Entity entity) {
-        if (entity instanceof PlayerEntity) {
-            Vec3d offsets = getOffsets((PlayerEntity) entity);
-
-            if (!offsets.equals(Vec3d.ZERO))
-                return initialPosition.add(offsets);
-        }
-
-        return initialPosition;
-    }
-
-    /**
-     * Offsets a projectile based on the offset of its shooter.
-     *
-     * @param projectile The projectile to offset the position of.
-     * @param shooter The shooter of the projectile.
-     */
-    public static void offsetProjectile(Entity projectile, LivingEntity shooter) {
-        if (shooter instanceof PlayerEntity) {
-            Vec3d offsets = getOffsets((PlayerEntity) shooter);
-
-            if (!offsets.equals(Vec3d.ZERO))
-                projectile.setPosition(
-                        projectile.getPosX() + offsets.x,
-                        projectile.getPosY() + offsets.y,
-                        projectile.getPosZ() + offsets.z
-                );
-        }
-    }
-
-    /**
      * Offsets the position of thrown items.
      */
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -190,24 +151,6 @@ public class Offsetter {
     }
 
     /**
-     * Gets the corrected distance squared from a player to a point.
-     *
-     * @param playerEntity The player to use for the first position.
-     * @param x The x-position of the second position.
-     * @param y The y-position of the second position.
-     * @param z The z-position of the second position.
-     *
-     * @return The distance, squared, between the player and the point.
-     */
-    public static double modifiedGetDistanceSq(PlayerEntity playerEntity, double x, double y, double z) {
-        Vec3d offsets = getOffsets(playerEntity);
-        double dx = playerEntity.getPosX() + offsets.x - x;
-        double dy = playerEntity.getPosY() + offsets.y - y;
-        double dz = playerEntity.getPosZ() + offsets.z - z;
-        return dx * dx + dy * dy + dz * dz;
-    }
-
-    /**
      * Gets the corrected distance from an entity to the player.
      *
      * @param entity1 The entity to use for the first position.
@@ -231,6 +174,8 @@ public class Offsetter {
         Vec3d offsets = getOffsets(entity);
         return !offsets.equals(Vec3d.ZERO) ? new BlockPos(entity.getPositionVec().add(offsets)) : new BlockPos(entity);
     }
+
+
 
 
 

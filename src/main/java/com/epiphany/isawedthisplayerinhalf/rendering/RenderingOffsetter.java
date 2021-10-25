@@ -4,7 +4,6 @@ import com.epiphany.isawedthisplayerinhalf.Offsetter;
 import com.epiphany.isawedthisplayerinhalf.helpers.ReflectionHelper;
 import com.epiphany.isawedthisplayerinhalf.rendering.modfiedRendering.ModifiedPlayerRenderer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.entity.Entity;
@@ -87,28 +86,6 @@ public class RenderingOffsetter {
     }
 
 
-
-    /**
-     * Gets whether the arm of the player should be rendered.
-     * Used for the first person renderer.
-     *
-     * @return Whether the arm of the player should be rendered.
-     */
-    public static boolean shouldRenderHand() {
-        return Offsetter.getOffsets(Minecraft.getInstance().player).equals(Vec3d.ZERO);
-    }
-
-    /**
-     * Gets whether the game is in third-person.
-     * Overrides normal behavior if the player has an offset.
-     *
-     * @param activeRenderInfo The active render info of the calling renderer.
-     *
-     * @return Whether the game is in third-person.
-     */
-    public static boolean modifiedIsThirdPerson(ActiveRenderInfo activeRenderInfo) {
-        return activeRenderInfo.isThirdPerson() || !Offsetter.getOffsets(Minecraft.getInstance().player).equals(Vec3d.ZERO);
-    }
 
     /**
      * Gets whether the entity is within range to render.
