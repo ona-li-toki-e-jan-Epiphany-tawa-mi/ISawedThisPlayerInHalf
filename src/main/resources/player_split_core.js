@@ -179,7 +179,6 @@ var LoggingLevel = {
 // The minimum logging level required for a message to be logged.
 var minimumLoggingLevel = LoggingLevel.DEBUG
 
-// TODO Update the date retriever if possible (look into Date.)
 /**
  * Logs a message to the console, showing the time and severity level with it.
  *
@@ -202,7 +201,6 @@ function logMessage(loggingLevel, message) {
  * @param {string} fullClassName The full name of the class that the function resides in.
  */
 function logTransformSuccess(functionName, fullClassName) {
-
     logMessage(LoggingLevel.DEBUG, "Successfully transformed " + functionName + " in " + fullClassName)
 }
 
@@ -438,24 +436,25 @@ function initializeCoreMod() {
                         var oldInstructions = updateCameraAndRender.instructions
                         var success = false
 
-                        for (var i = 0; i < oldInstructions.size(); i++) {
-                            if (checkObfuscatedMethodInsn(oldInstructions.get(i), Opcodes.INVOKEVIRTUAL, "net/minecraft/client/renderer/ActiveRenderInfo", "isThirdPerson",
-                                    "func_216770_i", "()Z")) {
+                        for (var i = 0; i <= oldInstructions.size() - 2; i++) {
+                            if (checkObfuscatedMethodInsn(oldInstructions.get(i), Opcodes.INVOKEVIRTUAL, "net/minecraft/client/renderer/ActiveRenderInfo", "isThirdPerson", "func_216770_i", "()Z")
+                                    && checkJumpInsn(oldInstructions.get(i+1), Opcodes.IFNE)) {
                                 var overrideIsThirdPerson = new InsnList()
 
                                 overrideIsThirdPerson.add(new VarInsnNode(Opcodes.ALOAD, 6)) // activeRenderInfoIn Lnet/minecraft/client/renderer/ActiveRenderInfo;
-                                overrideIsThirdPerson.add(new InsnNode(Opcodes.SWAP))
                                 overrideIsThirdPerson.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
                                     "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
                                     "modifiedIsThirdPerson",
-                                    "(Lnet/minecraft/client/renderer/ActiveRenderInfo;Z)Z",
+                                    "(Lnet/minecraft/client/renderer/ActiveRenderInfo;)Z",
                                     false
                                 ))
+                                overrideIsThirdPerson.add(new JumpInsnNode(Opcodes.IFNE, oldInstructions.get(i+1).label))
 
                                 // ...
                                 // INVOKEVIRTUAL net/minecraft/client/renderer/ActiveRenderInfo.isThirdPerson ()Z
-                                oldInstructions.insert(oldInstructions.get(i), overrideIsThirdPerson)
+                                // IFNE L83
+                                oldInstructions.insert(oldInstructions.get(i+1), overrideIsThirdPerson)
                                 // ...
 
                                 success = true
@@ -800,7 +799,7 @@ function initializeCoreMod() {
                     try {
                         var success = false
 
-                        for (var i = 0; i < oldInstructions.size() - 21; i++) {
+                        for (var i = 0; i <= oldInstructions.size() - 2; i++) {
                             if (checkVarInsn(oldInstructions.get(i), Opcodes.ALOAD, 7) && checkObfuscatedMethodInsn(oldInstructions.get(i+1), Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "isCrouching", "func_213453_ef", "()Z")) {
                                 var addOffsetsWhen3d = new InsnList()
 
@@ -903,7 +902,7 @@ function initializeCoreMod() {
                                     "func_70068_e", "(Lnet/minecraft/entity/Entity;)D")) {
                                 oldInstructions.insert(instruction, new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
                                     "modifiedGetDistanceSq",
                                     "(Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/player/PlayerEntity;)D",
                                     false
@@ -1914,6 +1913,7 @@ function initializeCoreMod() {
 
         /**
          * Makes entities look at the offset position of players. TODO
+         * TODO Make randomly swap between body and offset one.
          */
         "LookAtGoal": {
             "target": {
@@ -2042,7 +2042,7 @@ function initializeCoreMod() {
 
         /**
          * Allows players to interact with blocks relative to their offsets on a server.
-         * Allows players to interact with entities relative to their offsets on a server. TODO
+         * Allows players to interact with entities relative to their offsets on a server.
          */
         "ServerPlayNetHandler": {
             "target": {
@@ -2065,7 +2065,11 @@ function initializeCoreMod() {
 
                             if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/ServerPlayerEntity", "getDistanceSq",
                                     "func_70092_e", "(DDD)D")) {
-                                oldInstructions.insert(instruction, new MethodInsnNode(
+                                var redoGetDistanceSq = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                redoGetDistanceSq.add(skipOriginal)
+                                redoGetDistanceSq.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
                                     "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
                                     "modifiedGetDistanceSq",
@@ -2073,17 +2077,20 @@ function initializeCoreMod() {
                                     false
                                 ))
 
-                                oldInstructions.remove(instruction)
+                                // ...
+                                redoGetDistanceSq.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/entity/player/ServerPlayerEntity.getDistanceSq (DDD)D
+                                redoGetDistanceSq.insert(instruction, redoGetDistanceSq)
+                                // ...
 
                                 success = true
+                                logTransformSuccess("function processTryUseItemOnBlock", "net.minecraft.network.play.ServerPlayNetHandler")
+
                                 break
                             }
                         }
 
-                        if (success) {
-                            logTransformSuccess("function processTryUseItemOnBlock", "net.minecraft.network.play.ServerPlayNetHandler")
-
-                        } else
+                        if (!success)
                             logTransformError("function processTryUseItemOnBlock", "net.minecraft.network.play.ServerPlayNetHandler", "Unable to find injection point")
 
                     } catch (exception) {
@@ -2092,7 +2099,6 @@ function initializeCoreMod() {
 
                 } else
                     logTransformError("function processTryUseItemOnBlock", "net.minecraft.network.play.ServerPlayNetHandler", "Unable to find function to transform")
-
 
                 // Allows players to interact with entities relative to their offsets.
                 var processUseEntity = findObfuscatedMethodWithSignature(classNode, "processUseEntity", "func_147340_a",
@@ -2108,26 +2114,33 @@ function initializeCoreMod() {
 
                             if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/ServerPlayerEntity", "getDistanceSq",
                                     "func_70068_e", "(Lnet/minecraft/entity/Entity;)D")) {
-                                oldInstructions.insertBefore(instruction, new InsnNode(Opcodes.SWAP))
-                                oldInstructions.insert(instruction, new MethodInsnNode(
+                                var redoGetDistanceSq = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                redoGetDistanceSq.add(skipOriginal)
+                                redoGetDistanceSq.add(new InsnNode(Opcodes.SWAP))
+                                redoGetDistanceSq.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
                                     "modifiedGetDistanceSq",
                                     "(Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/player/PlayerEntity;)D",
                                     false
                                 ))
 
-                                oldInstructions.remove(instruction)
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/entity/player/ServerPlayerEntity.getDistanceSq (Lnet/minecraft/entity/Entity;)D
+                                oldInstructions.insert(instruction, redoGetDistanceSq)
+                                // ...
 
                                 success = true
+                                logTransformSuccess("function processUseEntity", "net.minecraft.network.play.ServerPlayNetHandler")
+
                                 break
                             }
                         }
 
-                        if (success) {
-                            logTransformSuccess("function processUseEntity", "net.minecraft.network.play.ServerPlayNetHandler")
-
-                        } else
+                        if (!success)
                             logTransformError("function processUseEntity", "net.minecraft.network.play.ServerPlayNetHandler", "Unable to find injection point")
 
                     } catch (exception) {
@@ -2136,7 +2149,6 @@ function initializeCoreMod() {
 
                 } else
                     logTransformError("function processUseEntity", "net.minecraft.network.play.ServerPlayNetHandler", "Unable to find function to transform")
-
 
                 return classNode
             }
@@ -2165,10 +2177,10 @@ function initializeCoreMod() {
 
                             if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getDistanceSq",
                                     "func_70092_e", "(DDD)D")) {
-                                var redoGetDistanceSq = new InsnList();
-                                var skipOriginal = new LabelNode();
+                                var redoGetDistanceSq = new InsnList()
+                                var skipOriginal = new LabelNode()
 
-                                redoGetDistanceSq.add(skipOriginal);
+                                redoGetDistanceSq.add(skipOriginal)
                                 redoGetDistanceSq.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
                                     "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
@@ -2351,10 +2363,10 @@ function initializeCoreMod() {
 
                             if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getDistanceSq",
                                     "func_70092_e", "(DDD)D")) {
-                                var redoGetDistanceSq = new InsnList();
-                                var skipOriginal = new LabelNode();
+                                var redoGetDistanceSq = new InsnList()
+                                var skipOriginal = new LabelNode()
 
-                                redoGetDistanceSq.add(skipOriginal);
+                                redoGetDistanceSq.add(skipOriginal)
                                 redoGetDistanceSq.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
                                     "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
@@ -2412,10 +2424,10 @@ function initializeCoreMod() {
 
                             if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getDistanceSq",
                                     "func_70092_e", "(DDD)D")) {
-                                var redoGetDistanceSq = new InsnList();
-                                var skipOriginal = new LabelNode();
+                                var redoGetDistanceSq = new InsnList()
+                                var skipOriginal = new LabelNode()
 
-                                redoGetDistanceSq.add(skipOriginal);
+                                redoGetDistanceSq.add(skipOriginal)
                                 redoGetDistanceSq.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
                                     "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
@@ -2475,13 +2487,13 @@ function initializeCoreMod() {
                             if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getDistanceSq",
                                     "func_70068_e", "(Lnet/minecraft/entity/Entity;)D")) {
                                 var redoGetDistanceSq = new InsnList()
-                                var skipOriginal = new LabelNode();
+                                var skipOriginal = new LabelNode()
 
-                                redoGetDistanceSq.add(skipOriginal);
+                                redoGetDistanceSq.add(skipOriginal)
                                 redoGetDistanceSq.add(new InsnNode(Opcodes.SWAP))
                                 redoGetDistanceSq.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
                                     "modifiedGetDistanceSq",
                                     "(Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/player/PlayerEntity;)D",
                                     false
@@ -2577,7 +2589,8 @@ function initializeCoreMod() {
         },
 
         /**
-         * Runs the frustum check twice so it can account for players' offsets, allowing the offset position to be rendered even when the original position is not in view. TODO
+         * Checks if the player is in range to render both with the normal and offset positions.
+         * Runs the frustum check twice so it can account for players' offsets, allowing the offset position to be rendered even when the original position is not in view.
          */
         "EntityRenderer": {
             "target": {
@@ -2590,133 +2603,94 @@ function initializeCoreMod() {
                     "(Lnet/minecraft/entity/Entity;Lnet/minecraft/client/renderer/culling/ClippingHelperImpl;DDD)Z")
 
                 if (shouldRender !== null) {
+                    var oldInstructions = shouldRender.instructions
+
+                    // Checks if the player is in range to render both with the normal and offset positions.
                     try {
-                        var oldInstructions = shouldRender.instructions
                         var success = false
 
-                        for (var i = 0; i < oldInstructions.size(); i++) {
-                            var instruction = oldInstructions.get(i)
+                        for (var i = 0; i <= oldInstructions.size() - 2; i++) {
+                            if (checkObfuscatedMethodInsn(oldInstructions.get(i), Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "isInRangeToRender3d", "func_145770_h", "(DDD)Z")
+                                    && checkJumpInsn(oldInstructions.get(i+1), Opcodes.IFNE)) {
+                                var redoIsInRange = new InsnList()
 
-                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "isInRangeToRender3d", "func_145770_h",
-                                    "(DDD)Z")) {
-                                oldInstructions.insert(instruction, new MethodInsnNode(
+                                redoIsInRange.add(new VarInsnNode(Opcodes.ALOAD, 1)) // livingEntityIn Lnet/minecraft/entity/Entity;
+                                redoIsInRange.add(new VarInsnNode(Opcodes.DLOAD, 3)) // camX D
+                                redoIsInRange.add(new VarInsnNode(Opcodes.DLOAD, 5)) // camY D
+                                redoIsInRange.add(new VarInsnNode(Opcodes.DLOAD, 7)) // camZ D
+                                redoIsInRange.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/rendering/RenderingOffsetter",
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
                                     "modifiedIsInRangeToRender3d",
                                     "(Lnet/minecraft/entity/Entity;DDD)Z",
                                     false
                                 ))
+                                redoIsInRange.add(new JumpInsnNode(Opcodes.IFNE, oldInstructions.get(i+1).label))
 
-                                oldInstructions.remove(instruction)
+                                // ...
+                                // INVOKEVIRTUAL net/minecraft/entity/Entity.isInRangeToRender3d (DDD)Z
+                                // IFNE L1
+                                oldInstructions.insert(oldInstructions.get(i+1), redoIsInRange)
+                                // ...
 
                                 success = true
+                                logTransformSuccess("first area of function shouldRender", "net.minecraft.client.renderer.entity.EntityRenderer")
+
                                 break
                             }
                         }
 
-                        if (!success) {
-                            logTransformError("function shouldRender", "net.minecraft.client.renderer.entity.EntityRenderer", "Unable to find primary injection point")
-                            return classNode
+                        if (!success)
+                            logTransformError("first area of function shouldRender", "net.minecraft.client.renderer.entity.EntityRenderer", "Unable to find injection point")
 
-                        } else
-                            success = false
+                    } catch (exception) {
+                        logTransformError("first area of function shouldRender", "net.minecraft.client.renderer.entity.EntityRenderer", exception.message)
+                    }
 
+                    // Runs the frustum check twice so it can account for players' offsets, allowing the offset position to be rendered even when the original position is not in view.
+                    try {
+                        var success = false
 
                         for (var i = 0; i < oldInstructions.size(); i++) {
                             var instruction = oldInstructions.get(i)
 
                             if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/client/renderer/culling/ClippingHelperImpl",
                                     "isBoundingBoxInFrustum", "func_228957_a_", "(Lnet/minecraft/util/math/AxisAlignedBB;)Z")) {
-                                var doubleCheckPlayer = new InsnList()
+                                var doubleCheckFrustum = new InsnList()
                                 var skipToReturn = new LabelNode()
-                                var noOffsetsReturn = new LabelNode()
-
 
                                 // Returns if the entity should be rendered.
-                                doubleCheckPlayer.add(new InsnNode(Opcodes.DUP))
-                                doubleCheckPlayer.add(new JumpInsnNode(Opcodes.IFNE, skipToReturn))
-                                // Returns if the entity is not a player.
-                                doubleCheckPlayer.add(new VarInsnNode(Opcodes.ALOAD, 1)) // livingEntityIn.
-                                doubleCheckPlayer.add(new TypeInsnNode(Opcodes.INSTANCEOF, "net/minecraft/entity/player/PlayerEntity"))
-                                doubleCheckPlayer.add(new JumpInsnNode(Opcodes.IFEQ, skipToReturn))
-
-                                // Gets the player's offset and stores it.
-                                doubleCheckPlayer.add(new VarInsnNode(Opcodes.ALOAD, 1)) // livingEntityIn.
-                                doubleCheckPlayer.add(new TypeInsnNode(Opcodes.CHECKCAST, "net/minecraft/entity/player/PlayerEntity"))
-                                doubleCheckPlayer.add(new MethodInsnNode(
-                                    Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
-                                    "getOffsets",
-                                    "(Lnet/minecraft/entity/player/PlayerEntity;)Lnet/minecraft/util/math/Vec3d;",
-                                    false
-                                ))
-                                doubleCheckPlayer.add(new InsnNode(Opcodes.DUP))
-                                // Returns if the player has no offset.
-                                doubleCheckPlayer.add(new MethodInsnNode(
-                                    Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                    "getZeroVector",
-                                    "()Lnet/minecraft/util/math/Vec3d;",
-                                    false
-                                ))
-                                doubleCheckPlayer.add(new MethodInsnNode(
-                                    Opcodes.INVOKEVIRTUAL,
-                                    "net/minecraft/util/math/Vec3d",
-                                    "equals",
-                                    "(Ljava/lang/Object;)Z",
-                                    false
-                                ))
-                                doubleCheckPlayer.add(new JumpInsnNode(Opcodes.IFNE, noOffsetsReturn))
-
-                                // Discards result and runs second check, accounting for the player's offsets.
-                                doubleCheckPlayer.add(new InsnNode(Opcodes.SWAP))
-                                doubleCheckPlayer.add(new InsnNode(Opcodes.POP))
-                                doubleCheckPlayer.add(new VarInsnNode(Opcodes.ALOAD, 2)) // camera.
-                                doubleCheckPlayer.add(new InsnNode(Opcodes.SWAP))
-                                // Offsets bounding box with the player's offsets.
-                                doubleCheckPlayer.add(new VarInsnNode(Opcodes.ALOAD, 9)) // axisalignedbb.
-                                doubleCheckPlayer.add(new InsnNode(Opcodes.SWAP))
-                                doubleCheckPlayer.add(new MethodInsnNode(
-                                    Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                    "offsetAABB",
-                                    "(Lnet/minecraft/util/math/AxisAlignedBB;Lnet/minecraft/util/math/Vec3d;)Lnet/minecraft/util/math/AxisAlignedBB;",
-                                    false
-                                ))
-                                // Recalculates frustum collision.
-                                doubleCheckPlayer.add(new MethodInsnNode(
-                                    Opcodes.INVOKESTATIC,
-                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                    "isBoundingBoxInFrustum",
-                                    "(Lnet/minecraft/client/renderer/culling/ClippingHelperImpl;Lnet/minecraft/util/math/AxisAlignedBB;)Z",
-                                    false
-                                ))
-                                doubleCheckPlayer.add(new JumpInsnNode(Opcodes.GOTO, skipToReturn))
-
-                                doubleCheckPlayer.add(noOffsetsReturn)
-                                doubleCheckPlayer.add(new InsnNode(Opcodes.POP))
-
-                                doubleCheckPlayer.add(skipToReturn)
-
+                                doubleCheckFrustum.add(new InsnNode(Opcodes.DUP))
+                                doubleCheckFrustum.add(new JumpInsnNode(Opcodes.IFNE, skipToReturn))
+                                    doubleCheckFrustum.add(new VarInsnNode(Opcodes.ALOAD, 1)) // livingEntityIn Lnet/minecraft/entity/Entity;
+                                    doubleCheckFrustum.add(new VarInsnNode(Opcodes.ALOAD, 2)) // camera Lnet/minecraft/client/renderer/culling/ClippingHelperImpl;
+                                    doubleCheckFrustum.add(new VarInsnNode(Opcodes.ALOAD, 9)) // axisalignedbb Lnet/minecraft/util/math/AxisAlignedBB;
+                                    doubleCheckFrustum.add(new MethodInsnNode(
+                                        Opcodes.INVOKESTATIC,
+                                        "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                        "modifiedIsBoundingBoxInFrustum",
+                                        "(ZLnet/minecraft/entity/Entity;Lnet/minecraft/client/renderer/culling/ClippingHelperImpl;Lnet/minecraft/util/math/AxisAlignedBB;)Z",
+                                        false
+                                    ))
+                                doubleCheckFrustum.add(skipToReturn)
 
                                 //...
                                 // INVOKEVIRTUAL net/minecraft/client/renderer/culling/ClippingHelperImpl.isBoundingBoxInFrustum (Lnet/minecraft/util/math/AxisAlignedBB;)Z
-                                oldInstructions.insert(instruction, doubleCheckPlayer)
+                                oldInstructions.insert(instruction, doubleCheckFrustum)
                                 //...
 
                                 success = true
+                                logTransformSuccess("second area of function shouldRender", "net.minecraft.client.renderer.entity.EntityRenderer")
+
                                 break
                             }
                         }
 
-                        if (success) {
-                            logTransformSuccess("function shouldRender", "net.minecraft.client.renderer.entity.EntityRenderer")
-
-                        } else
-                            logTransformError("function shouldRender", "net.minecraft.client.renderer.entity.EntityRenderer", "Unable to find secondary injection point")
+                        if (!success)
+                            logTransformError("second area of function shouldRender", "net.minecraft.client.renderer.entity.EntityRenderer", "Unable to find injection point")
 
                     } catch (exception) {
-                        logTransformError("function shouldRender", "net.minecraft.client.renderer.entity.EntityRenderer", exception.message)
+                        logTransformError("second area of function shouldRender", "net.minecraft.client.renderer.entity.EntityRenderer", exception.message)
                     }
 
                 } else
@@ -2727,7 +2701,7 @@ function initializeCoreMod() {
         },
 
         /**
-         * Alters knockback to account for offsets. TODO
+         * Alters knockback to account for offsets.
          */
         "LivingEntity": {
             "target": {
@@ -2744,121 +2718,65 @@ function initializeCoreMod() {
                         var oldInstructions = attackEntityFrom.instructions
                         success = false
 
-                        for (var i = 0; i < oldInstructions.size(); i++) {
-                            var instruction = oldInstructions.get(i)
-
-                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/LivingEntity", "knockBack", "func_70653_a",
-                                    "(Lnet/minecraft/entity/Entity;FDD)V")) {
-                                // Offsets the x-position of knockback.
-                                for (; i >= 0; i--) {
-                                    instruction = oldInstructions.get(i)
-
-                                    if (checkVarInsn(instruction, Opcodes.ALOAD, 7)
-                                            && checkObfuscatedMethodInsn(oldInstructions.get(i + 1), Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosX", "func_226277_ct_", "()D")) {
-                                        var newInstructions = new InsnList()
-
-                                        // ...
-                                        // ALOAD 7
-                                        // INVOKEVIRTUAL net/minecraft/entity/Entity.getPosX ()D
-                                        oldInstructions.insert(oldInstructions.get(i + 1), new InsnNode(Opcodes.DADD))
-                                        // ...
-
-                                        newInstructions.add(new InsnNode(Opcodes.DUP))
-                                        newInstructions.add(new MethodInsnNode(
-                                            Opcodes.INVOKESTATIC,
-                                            "com/epiphany/isawedthisplayerinhalf/Offsetter",
-                                            "getOffsets",
-                                            "(Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/math/Vec3d;",
-                                            false
-                                        ))
-                                        newInstructions.add(new MethodInsnNode(
-                                            Opcodes.INVOKESTATIC,
-                                            "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                            "getVectorX",
-                                            "(Lnet/minecraft/util/math/Vec3d;)D",
-                                            false
-                                        ))
-                                        newInstructions.add(new InsnNode(Opcodes.DUP2_X1))
-                                        newInstructions.add(new InsnNode(Opcodes.POP2))
-
-                                        // ...
-                                        // ALOAD 7
-                                        oldInstructions.insert(instruction, newInstructions)
-                                        // INVOKEVIRTUAL net/minecraft/entity/Entity.getPosX ()D
-                                        // DADD
-                                        // ...
-
-                                        success = true
-                                        break
-                                    }
-                                }
-
-                                if (!success) {
-                                    logTransformError("function attackEntityFrom", "net.minecraft.entity.LivingEntity", "Unable to find primary injection point")
-                                    return classNode
-
-                                } else
-                                    success = false
+                        for (var i = 0; i <= oldInstructions.size() - 6; i++) {
+                            if (checkVarInsn(oldInstructions.get(i), Opcodes.ALOAD, 0) && checkVarInsn(oldInstructions.get(i+1), Opcodes.ALOAD, 7)
+                                    && checkVarInsn(oldInstructions.get(i+3), Opcodes.DLOAD, 8) && checkVarInsn(oldInstructions.get(i+4), Opcodes.DLOAD, 10)
+                                    && checkObfuscatedMethodInsn(oldInstructions.get(i+5), Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/LivingEntity", "knockBack", "func_70653_a", "(Lnet/minecraft/entity/Entity;FDD)V")) {
+                                var offsetKnockback = new InsnList()
 
 
-                                // Offsets the z-position of knockback.
-                                for (; i < oldInstructions.size(); i++) {
-                                    instruction = oldInstructions.get(i)
+                                offsetKnockback.add(new VarInsnNode(Opcodes.ALOAD, 7)) // entity1 Lnet/minecraft/entity/Entity;
+                                offsetKnockback.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                    "getOffsets",
+                                    "(Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/math/Vec3d;",
+                                    false
+                                ))
+                                offsetKnockback.add(new InsnNode(Opcodes.DUP))
 
-                                    if (checkVarInsn(instruction, Opcodes.ALOAD, 7)
-                                            && checkObfuscatedMethodInsn(oldInstructions.get(i + 1), Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosZ", "func_226281_cx_", "()D")) {
-                                        var newInstructions = new InsnList()
+                                offsetKnockback.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "getVectorX",
+                                    "(Lnet/minecraft/util/math/Vec3d;)D",
+                                    false
+                                ))
+                                offsetKnockback.add(new VarInsnNode(Opcodes.DLOAD, 8)) // d1 D
+                                offsetKnockback.add(new InsnNode(Opcodes.DADD))
+                                offsetKnockback.add(new VarInsnNode(Opcodes.DSTORE, 8)) // d1 D
 
-                                        // ...
-                                        // ALOAD 7
-                                        // INVOKEVIRTUAL net/minecraft/entity/Entity.getPosZ ()D
-                                        oldInstructions.insert(oldInstructions.get(i + 1), new InsnNode(Opcodes.DADD))
-                                        // ...
+                                offsetKnockback.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "getVectorZ",
+                                    "(Lnet/minecraft/util/math/Vec3d;)D",
+                                    false
+                                ))
+                                offsetKnockback.add(new VarInsnNode(Opcodes.DLOAD, 10)) // d0 D
+                                offsetKnockback.add(new InsnNode(Opcodes.DADD))
+                                offsetKnockback.add(new VarInsnNode(Opcodes.DSTORE, 10)) // d0 D
 
-                                        newInstructions.add(new InsnNode(Opcodes.DUP))
-                                        newInstructions.add(new MethodInsnNode(
-                                            Opcodes.INVOKESTATIC,
-                                            "com/epiphany/isawedthisplayerinhalf/Offsetter",
-                                            "getOffsets",
-                                            "(Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/math/Vec3d;",
-                                            false
-                                        ))
-                                        newInstructions.add(new MethodInsnNode(
-                                            Opcodes.INVOKESTATIC,
-                                            "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                            "getVectorZ",
-                                            "(Lnet/minecraft/util/math/Vec3d;)D",
-                                            false
-                                        ))
-                                        newInstructions.add(new InsnNode(Opcodes.DUP2_X1))
-                                        newInstructions.add(new InsnNode(Opcodes.POP2))
 
-                                        // ...
-                                        // ALOAD 7
-                                        oldInstructions.insert(instruction, newInstructions)
-                                        // INVOKEVIRTUAL net/minecraft/entity/Entity.getPosZ ()D
-                                        // DADD
-                                        // ...
+                                // ...
+                                oldInstructions.insertBefore(oldInstructions.get(i), offsetKnockback)
+                                // ALOAD 0
+                                // ALOAD 7
+                                // ?LDC 0.4?
+                                // DLOAD 8
+                                // DLOAD 10
+                                // INVOKEVIRTUAL net/minecraft/entity/LivingEntity.knockBack (Lnet/minecraft/entity/Entity;FDD)V
+                                // ...
 
-                                        success = true
-                                        break
-                                    }
-                                }
-
-                                if (!success) {
-                                        logTransformError("function attackEntityFrom", "net.minecraft.entity.LivingEntity", "Unable to find secondary injection point")
-                                        return classNode
-                                }
+                                success = true
+                                logTransformSuccess("function attackEntityFrom", "net.minecraft.entity.LivingEntity")
 
                                 break
                             }
                         }
 
-                        if (success) {
-                            logTransformSuccess("function attackEntityFrom", "net.minecraft.entity.LivingEntity")
-
-                        } else
-                            logTransformError("function attackEntityFrom", "net.minecraft.entity.LivingEntity", "Unable to find injection area")
+                        if (!success)
+                            logTransformError("function attackEntityFrom", "net.minecraft.entity.LivingEntity", "Unable to find injection point")
 
                     } catch (exception) {
                         logTransformError("function attackEntityFrom", "net.minecraft.entity.LivingEntity", exception.message)

@@ -1,5 +1,6 @@
 package com.epiphany.isawedthisplayerinhalf;
 
+import com.epiphany.isawedthisplayerinhalf.helpers.BytecodeHelper;
 import com.epiphany.isawedthisplayerinhalf.networking.Networker;
 import com.epiphany.isawedthisplayerinhalf.networking.SetOffsetPacket;
 import com.epiphany.isawedthisplayerinhalf.rendering.RenderingOffsetter;
@@ -138,19 +139,6 @@ public class Offsetter {
     }
 
     /**
-     * Gets the corrected distance squared from an entity to the player.
-     *
-     * @param entity The entity to use for the first position.
-     * @param player The player to use for the second position.
-     *
-     * @return The distance, squared, between the entity and the player.
-     */
-    public static double modifiedGetDistanceSq(Entity entity, PlayerEntity player) {
-        Vec3d offsets = getOffsets(player);
-        return !offsets.equals(Vec3d.ZERO) ? entity.getDistanceSq(player.getPositionVec().add(offsets)) : entity.getDistanceSq(player);
-    }
-
-    /**
      * Gets the corrected distance from an entity to the player.
      *
      * @param entity1 The entity to use for the first position.
@@ -159,7 +147,7 @@ public class Offsetter {
      * @return The distance between the first entity and second entity.
      */
     public static float modifiedGetDistance(Entity entity1, Entity entity2) {
-        return entity2 instanceof PlayerEntity ? (float) Math.sqrt(modifiedGetDistanceSq(entity1, (PlayerEntity) entity2)) :
+        return entity2 instanceof PlayerEntity ? (float) Math.sqrt(BytecodeHelper.modifiedGetDistanceSq(entity1, (PlayerEntity) entity2)) :
                 entity1.getDistance(entity2);
     }
 

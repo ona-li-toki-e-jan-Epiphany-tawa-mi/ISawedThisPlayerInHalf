@@ -1,12 +1,10 @@
 package com.epiphany.isawedthisplayerinhalf.rendering;
 
-import com.epiphany.isawedthisplayerinhalf.Offsetter;
 import com.epiphany.isawedthisplayerinhalf.helpers.ReflectionHelper;
 import com.epiphany.isawedthisplayerinhalf.rendering.modfiedRendering.ModifiedPlayerRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
-import net.minecraft.entity.Entity;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -15,6 +13,8 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+// TODO Theres a bug with the offset position rendering short of where it should be, inaccuracy scales with distance.
 
 /**
  * Contains various functions to offset the rendering of players.
@@ -58,6 +58,8 @@ public class RenderingOffsetter {
             throw new NullPointerException("Unable to acquire value of field 'skinMap' from EntityRendererManager");
     }
 
+
+
     /**
      * Calculates and assigns rendering offset information to a player.
      *
@@ -83,21 +85,5 @@ public class RenderingOffsetter {
         }
 
         renderingOffsetsMap.put(playerUUID, new RenderingOffsets(xOffset, yOffset, zOffset, yawOffset));
-    }
-
-
-
-    /**
-     * Gets whether the entity is within range to render.
-     *
-     * @param entity The entity to test.
-     * @param x The x-coordinate of the camera.
-     * @param y The y-coordinate of the camera.
-     * @param z The z-coordinate of the camera.
-     * @return Whether the entity is within range to render.
-     */
-    public static boolean modifiedIsInRangeToRender3d(Entity entity, double x, double y, double z) {
-        Vec3d entityOffsets = Offsetter.getOffsets(entity);
-        return entity.isInRangeToRender3d(x, y, z) || (!entityOffsets.equals(Vec3d.ZERO) && entity.isInRangeToRender3d(x - entityOffsets.x, y - entityOffsets.y, z - entityOffsets.z));
     }
 }

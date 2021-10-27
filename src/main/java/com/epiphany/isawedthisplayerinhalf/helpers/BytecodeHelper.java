@@ -114,17 +114,6 @@ public class BytecodeHelper {
         return Vec3d.ZERO;
     }
 
-    /**
-     * Gets whether the axis aligned bounding box is in the frustum of the camera.
-     *
-     * @param camera The camera to get the frustum from.
-     * @param axisAlignedBB The axis aligned bounding box to check.
-     * @return Whether the axis aligned bounding box is in the frustum of the camera.
-     */
-    public static boolean isBoundingBoxInFrustum(ClippingHelperImpl camera, AxisAlignedBB axisAlignedBB) {
-        return camera.isBoundingBoxInFrustum(axisAlignedBB);
-    }
-
 
 
     /**
@@ -196,10 +185,24 @@ public class BytecodeHelper {
         return Offsetter.getOffsets(playerEntity).equals(Vec3d.ZERO);
     }
 
+    /**
+     * TODO Prune parameter types.
+     * Gets the corrected distance squared from an entity to the player.
+     *
+     * @param entity The entity to use for the first position.
+     * @param player The player to use for the second position.
+     *
+     * @return The distance, squared, between the entity and the player.
+     */
+    public static double modifiedGetDistanceSq(Entity entity, PlayerEntity player) {
+        Vec3d offsets = Offsetter.getOffsets(player);
+
+        return !offsets.equals(Vec3d.ZERO) ? entity.getDistanceSq(player.getPositionVec().add(offsets)) : entity.getDistanceSq(player);
+    }
+
 
     /**
-     * Gets whether the arm of the player should be rendered.
-     * Used for the first person renderer.
+     * Gets whether the arm of the player should be rendered, returning false if the player is offset.
      *
      * @return Whether the arm of the player should be rendered.
      */
@@ -209,15 +212,50 @@ public class BytecodeHelper {
     }
 
     /**
-     * Gets whether the game is in third-person.
-     * Overrides normal behavior if the player has an offset.
+     * Gets whether the game is in third-person, overriding normal behavior if the player has an offset.
      *
      * @param activeRenderInfo The active render info of the calling renderer.
      *
      * @return Whether the game is in third-person.
      */
     @OnlyIn(Dist.CLIENT)
-    public static boolean modifiedIsThirdPerson(ActiveRenderInfo activeRenderInfo, boolean isInThirdPerson) {
-        return isInThirdPerson || !Offsetter.getOffsets(Minecraft.getInstance().player).equals(Vec3d.ZERO);
+    public static boolean modifiedIsThirdPerson(ActiveRenderInfo activeRenderInfo) {
+        return !Offsetter.getOffsets(activeRenderInfo.getRenderViewEntity()).equals(Vec3d.ZERO);
+    }
+
+    /**
+     * Gets whether the entity is within range to render.
+     *
+     * @param entity The entity to test.
+     * @param x The x-coordinate of the camera.
+     * @param y The y-coordinate of the camera.
+     * @param z The z-coordinate of the camera.
+     *
+     * @return Whether the entity is within range to render.
+     */
+    @OnlyIn(Dist.CLIENT)
+    public static boolean modifiedIsInRangeToRender3d(Entity entity, double x, double y, double z) {
+        Vec3d entityOffsets = Offsetter.getOffsets(entity);
+
+        return !entityOffsets.equals(Vec3d.ZERO) && entity.isInRangeToRender3d(x + entityOffsets.x, y + entityOffsets.y, z + entityOffsets.z);
+    }
+
+    /**
+     * Gets whether the axis aligned bounding box, after being offset, is in the frustum of the camera.
+     *
+     * @param entity The entity that is being rendered.
+     * @param camera The camera to get the frustum from.
+     * @param axisAlignedBB The axis aligned bounding box to check.
+     *
+     * @return Whether the axis aligned bounding box is in the frustum of the camera.
+     */
+    @OnlyIn(Dist.CLIENT)
+    public static boolean modifiedIsBoundingBoxInFrustum(boolean originalResult, Entity entity, ClippingHelperImpl camera, AxisAlignedBB axisAlignedBB) {
+        Vec3d offsets = Offsetter.getOffsets(entity);
+
+        if (!offsets.equals(Vec3d.ZERO))
+            return camera.isBoundingBoxInFrustum(axisAlignedBB.offset(offsets));
+
+        return originalResult;
     }
 }

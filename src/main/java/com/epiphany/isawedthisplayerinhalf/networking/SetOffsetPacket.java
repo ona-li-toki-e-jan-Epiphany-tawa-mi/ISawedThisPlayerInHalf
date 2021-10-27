@@ -14,6 +14,8 @@ import net.minecraftforge.fml.network.PacketDistributor;
 import java.util.UUID;
 import java.util.function.Supplier;
 
+// TODO Client does not receive offsets from other players when those other players are not loaded on that client.
+
 /**
  * A packet used for sending a player's offset.
  */
