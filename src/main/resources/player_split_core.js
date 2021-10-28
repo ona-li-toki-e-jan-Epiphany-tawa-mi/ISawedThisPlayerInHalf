@@ -13,6 +13,7 @@ var VarInsnNode = Java.type("org.objectweb.asm.tree.VarInsnNode")
 // TODO Find a way to make a copy of method and class nodes so that when transforms fail the unmodified one can be returned.
 // TODO Sort transformers.
 // TODO Find an automatic way to minify this file when making a jar.
+// TODO Prune functions after refactor.
 
 
 
@@ -812,9 +813,8 @@ function initializeCoreMod() {
                                     "(Lnet/minecraft/entity/player/PlayerEntity;)Lnet/minecraft/util/math/Vec3d;",
                                     false
                                 ))
-                                addOffsetsWhen3d.add(new InsnNode(Opcodes.DUP))
-                                addOffsetsWhen3d.add(new InsnNode(Opcodes.DUP))
 
+                                addOffsetsWhen3d.add(new InsnNode(Opcodes.DUP))
                                 addOffsetsWhen3d.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
                                     "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
@@ -826,6 +826,7 @@ function initializeCoreMod() {
                                 addOffsetsWhen3d.add(new InsnNode(Opcodes.DADD))
                                 addOffsetsWhen3d.add(new VarInsnNode(Opcodes.DSTORE, 25)) // d4 D
 
+                                addOffsetsWhen3d.add(new InsnNode(Opcodes.DUP))
                                 addOffsetsWhen3d.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
                                     "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
@@ -878,7 +879,7 @@ function initializeCoreMod() {
 
         /**
          * Corrects player-bobber distance calculation.
-         * Offsets the destination of reeled-in entities and items.  TODO
+         * Offsets the destination of reeled-in entities and items.
          */
         "FishingBobberEntity": {
             "target": {
@@ -900,14 +901,23 @@ function initializeCoreMod() {
 
                             if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/projectile/FishingBobberEntity", "getDistanceSq",
                                     "func_70068_e", "(Lnet/minecraft/entity/Entity;)D")) {
-                                oldInstructions.insert(instruction, new MethodInsnNode(
+                                var redoGetDistanceSq = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                redoGetDistanceSq.add(skipOriginal)
+                                redoGetDistanceSq.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
                                     "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
                                     "modifiedGetDistanceSq",
                                     "(Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/player/PlayerEntity;)D",
                                     false
                                 ))
-                                oldInstructions.remove(instruction)
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/entity/projectile/FishingBobberEntity.getDistanceSq (Lnet/minecraft/entity/Entity;)D
+                                oldInstructions.insert(instruction, redoGetDistanceSq)
+                                // ...
 
                                 success = true
                                 logTransformSuccess("function shouldStopFishing", "net.minecraft.entity.projectile.FishingBobberEntity")
@@ -936,129 +946,72 @@ function initializeCoreMod() {
                         var oldInstructions = handleHookRetraction.instructions
                         var success = false
 
-                        for (var i = 0; i < oldInstructions.size() - 25; i++) {
-                            var instruction = oldInstructions.get(i)
+                        for (var i = 0; i <= oldInstructions.size() - 3; i++) {
+                            if (checkObfuscatedMethodInsn(oldInstructions.get(i), Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/projectile/FishingBobberEntity", "getPosZ", "func_226281_cx_", "()D")
+                                    && checkInsn(oldInstructions.get(i+1), Opcodes.DSUB) && checkVarInsn(oldInstructions.get(i+2), Opcodes.DSTORE, 14)) {
+                                var offsetAnglerPosition = new InsnList()
 
-                            if (checkVarInsn(instruction, Opcodes.ALOAD, 0)) {
-                                var instructions = [instruction]
+                                offsetAnglerPosition.add(new VarInsnNode(Opcodes.ALOAD, 0)) // this Lnet/minecraft/entity/projectile/FishingBobberEntity;
+                                offsetAnglerPosition.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "getAnglerOffsets",
+                                    "(Lnet/minecraft/entity/projectile/FishingBobberEntity;)Lnet/minecraft/util/math/Vec3d;",
+                                    false
+                                ))
 
-                                for (var k = 1; k < 25; k++) {
-                                    var potentialInstruction = oldInstructions.get(i + k)
+                                offsetAnglerPosition.add(new InsnNode(Opcodes.DUP))
+                                offsetAnglerPosition.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "getVectorX",
+                                    "(Lnet/minecraft/util/math/Vec3d;)D",
+                                    false
+                                ))
+                                offsetAnglerPosition.add(new VarInsnNode(Opcodes.DLOAD, 10)) // d0 D
+                                offsetAnglerPosition.add(new InsnNode(Opcodes.DADD))
+                                offsetAnglerPosition.add(new VarInsnNode(Opcodes.DSTORE, 10)) // d0 D
 
-                                    if (potentialInstruction.getOpcode() !== -1)
-                                        instructions.push(potentialInstruction)
-                                }
+                                offsetAnglerPosition.add(new InsnNode(Opcodes.DUP))
+                                offsetAnglerPosition.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "getVectorY",
+                                    "(Lnet/minecraft/util/math/Vec3d;)D",
+                                    false
+                                ))
+                                offsetAnglerPosition.add(new VarInsnNode(Opcodes.DLOAD, 12)) // d1 D
+                                offsetAnglerPosition.add(new InsnNode(Opcodes.DADD))
+                                offsetAnglerPosition.add(new VarInsnNode(Opcodes.DSTORE, 12)) // d1 D
 
-                                if (checkObfuscatedFieldInsn(instructions[1], Opcodes.GETFIELD, "net/minecraft/entity/projectile/FishingBobberEntity", "angler", "field_146042_b", "Lnet/minecraft/entity/player/PlayerEntity;")
-                                        && checkObfuscatedMethodInsn(instructions[2], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getPosX", "func_226277_ct_", "()D")
-                                        && checkVarInsn(instructions[3], Opcodes.ALOAD, 0) && checkObfuscatedMethodInsn(instructions[4], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/projectile/FishingBobberEntity", "getPosX", "func_226277_ct_", "()D")
-                                        && checkInsn(instructions[5], Opcodes.DSUB) && checkVarInsn(instructions[6], Opcodes.DSTORE, 10)
-
-                                        && checkVarInsn(instructions[7], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[8], Opcodes.GETFIELD, "net/minecraft/entity/projectile/FishingBobberEntity", "angler", "field_146042_b", "Lnet/minecraft/entity/player/PlayerEntity;")
-                                        && checkObfuscatedMethodInsn(instructions[9], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getPosY", "func_226278_cu_", "()D")
-                                        && checkVarInsn(instructions[10], Opcodes.ALOAD, 0) && checkObfuscatedMethodInsn(instructions[11], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/projectile/FishingBobberEntity", "getPosY", "func_226278_cu_", "()D")
-                                        && checkInsn(instructions[12], Opcodes.DSUB) && checkVarInsn(instructions[13], Opcodes.DSTORE, 12)
-
-                                        && checkVarInsn(instructions[14], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[15], Opcodes.GETFIELD, "net/minecraft/entity/projectile/FishingBobberEntity", "angler", "field_146042_b", "Lnet/minecraft/entity/player/PlayerEntity;")
-                                        && checkObfuscatedMethodInsn(instructions[16], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getPosZ", "func_226281_cx_", "()D")
-                                        && checkVarInsn(instructions[17], Opcodes.ALOAD, 0) && checkObfuscatedMethodInsn(instructions[18], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/projectile/FishingBobberEntity", "getPosZ", "func_226281_cx_", "()D")
-                                        && checkInsn(instructions[19], Opcodes.DSUB) && checkVarInsn(instructions[20], Opcodes.DSTORE, 14)) {
-                                    var getVectorList = new InsnList()
-                                    var addXList = new InsnList()
-                                    var addYList = new InsnList()
-                                    var addZList = new InsnList()
-
-
-                                    getVectorList.add(new VarInsnNode(Opcodes.ALOAD, 0))
-                                    getVectorList.add(new MethodInsnNode(
-                                        Opcodes.INVOKESTATIC,
-                                        "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                        "getAngler",
-                                        "(Lnet/minecraft/entity/projectile/FishingBobberEntity;)Lnet/minecraft/entity/player/PlayerEntity;",
-                                        false
-                                    ))
-                                    getVectorList.add(new MethodInsnNode(
-                                        Opcodes.INVOKESTATIC,
-                                        "com/epiphany/isawedthisplayerinhalf/Offsetter",
-                                        "getOffsets",
-                                        "(Lnet/minecraft/entity/player/PlayerEntity;)Lnet/minecraft/util/math/Vec3d;",
-                                        false
-                                    ))
-                                    getVectorList.add(new InsnNode(Opcodes.DUP))
-                                    getVectorList.add(new InsnNode(Opcodes.DUP))
-
-                                    addXList.add(new InsnNode(Opcodes.DUP2_X1))
-                                    addXList.add(new InsnNode(Opcodes.POP2))
-                                    addXList.add(new MethodInsnNode(
-                                        Opcodes.INVOKESTATIC,
-                                        "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                        "getVectorX",
-                                        "(Lnet/minecraft/util/math/Vec3d;)D",
-                                        false
-                                    ))
-                                    addXList.add(new InsnNode(Opcodes.DADD))
-
-                                    addYList.add(new InsnNode(Opcodes.DUP2_X1))
-                                    addYList.add(new InsnNode(Opcodes.POP2))
-                                    addYList.add(new MethodInsnNode(
-                                        Opcodes.INVOKESTATIC,
-                                        "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                        "getVectorY",
-                                        "(Lnet/minecraft/util/math/Vec3d;)D",
-                                        false
-                                    ))
-                                    addYList.add(new InsnNode(Opcodes.DADD))
-
-                                    addZList.add(new InsnNode(Opcodes.DUP2_X1))
-                                    addZList.add(new InsnNode(Opcodes.POP2))
-                                    addZList.add(new MethodInsnNode(
-                                        Opcodes.INVOKESTATIC,
-                                        "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                        "getVectorZ",
-                                        "(Lnet/minecraft/util/math/Vec3d;)D",
-                                        false
-                                    ))
-                                    addZList.add(new InsnNode(Opcodes.DADD))
+                                offsetAnglerPosition.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "getVectorZ",
+                                    "(Lnet/minecraft/util/math/Vec3d;)D",
+                                    false
+                                ))
+                                offsetAnglerPosition.add(new VarInsnNode(Opcodes.DLOAD, 14)) // d2 D
+                                offsetAnglerPosition.add(new InsnNode(Opcodes.DADD))
+                                offsetAnglerPosition.add(new VarInsnNode(Opcodes.DSTORE, 14)) // d2 D
 
 
-                                    // ...
-                                    oldInstructions.insertBefore(instructions[0], getVectorList)
-                                    // ALOAD 0
-                                    // GETFIELD net/minecraft/entity/projectile/FishingBobberEntity.angler : Lnet/minecraft/entity/player/PlayerEntity;
-                                    // INVOKEVIRTUAL net/minecraft/entity/player/PlayerEntity.getPosX ()D
-                                    // ALOAD 0
-                                    // INVOKEVIRTUAL net/minecraft/entity/projectile/FishingBobberEntity.getPosX ()D
-                                    // DSUB
-                                    oldInstructions.insert(instructions[5], addXList)
-                                    // DSTORE 10
-                                    // ALOAD 0
-                                    // GETFIELD net/minecraft/entity/projectile/FishingBobberEntity.angler : Lnet/minecraft/entity/player/PlayerEntity;
-                                    // INVOKEVIRTUAL net/minecraft/entity/player/PlayerEntity.getPosY ()D
-                                    // ALOAD 0
-                                    // INVOKEVIRTUAL net/minecraft/entity/projectile/FishingBobberEntity.getPosY ()D
-                                    // DSUB
-                                    oldInstructions.insert(instructions[12], addYList)
-                                    // DSTORE 10
-                                    // ALOAD 0
-                                    // GETFIELD net/minecraft/entity/projectile/FishingBobberEntity.angler : Lnet/minecraft/entity/player/PlayerEntity;
-                                    // INVOKEVIRTUAL net/minecraft/entity/player/PlayerEntity.getPosZ ()D
-                                    // ALOAD 0
-                                    // INVOKEVIRTUAL net/minecraft/entity/projectile/FishingBobberEntity.getPosZ ()D
-                                    // DSUB
-                                    oldInstructions.insert(instructions[19], addZList)
-                                    // DSTORE 14
-                                    // ...
+                                // ...
+                                // INVOKEVIRTUAL net/minecraft/entity/projectile/FishingBobberEntity.getPosZ ()D
+                                // DSUB
+                                // DSTORE 14
+                                oldInstructions.insert(oldInstructions.get(i+2), offsetAnglerPosition)
+                                // ...
 
-                                    logTransformSuccess("function handleHookRetraction", "net.minecraft.entity.projectile.FishingBobberEntity")
-                                    success = true
+                                logTransformSuccess("function handleHookRetraction", "net.minecraft.entity.projectile.FishingBobberEntity")
+                                success = true
 
-                                    break
-                                }
+                                break
                             }
                         }
 
                         if (!success)
-                            logTransformError("function handleHookRetraction", "net.minecraft.entity.projectile.FishingBobberEntity", "Unable to find injection points")
+                            logTransformError("function handleHookRetraction", "net.minecraft.entity.projectile.FishingBobberEntity", "Unable to find injection point")
 
                     } catch (exception) {
                         logTransformError("function handleHookRetraction", "net.minecraft.entity.projectile.FishingBobberEntity", exception.message)
@@ -1076,119 +1029,33 @@ function initializeCoreMod() {
                         var oldInstructions = bringInHookedEntity.instructions
                         var success = false
 
-                        for (var i = 0; i < oldInstructions.size() - 18; i++) {
-                            var instruction = oldInstructions.get(i)
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            if (checkMethodInsn(oldInstructions.get(i), Opcodes.INVOKESPECIAL, "net/minecraft/util/math/Vec3d", "<init>", "(DDD)V")) {
+                                var offsetBringInPosition = new InsnList()
 
-                            if (checkVarInsn(instruction, Opcodes.ALOAD, 0)) {
-                                var instructions = [instruction]
+                                offsetBringInPosition.add(new VarInsnNode(Opcodes.ALOAD, 0)) // this Lnet/minecraft/entity/projectile/FishingBobberEntity;
+                                offsetBringInPosition.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "offsetVectorWithAngler",
+                                    "(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/entity/projectile/FishingBobberEntity;)Lnet/minecraft/util/math/Vec3d;",
+                                    false
+                                ))
 
-                                for (var k = 1; k < 18; k++)
-                                    instructions.push(oldInstructions.get(i + k))
+                                // ...
+                                // INVOKESPECIAL net/minecraft/util/math/Vec3d.<init> (DDD)V
+                                oldInstructions.insert(oldInstructions.get(i), offsetBringInPosition)
+                                // ...
 
-                                if (checkObfuscatedFieldInsn(instructions[1], Opcodes.GETFIELD, "net/minecraft/entity/projectile/FishingBobberEntity", "angler", "field_146042_b", "Lnet/minecraft/entity/player/PlayerEntity;")
-                                        && checkObfuscatedMethodInsn(instructions[2], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getPosX", "func_226277_ct_", "()D")
-                                        && checkVarInsn(instructions[3], Opcodes.ALOAD, 0) && checkObfuscatedMethodInsn(instructions[4], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/projectile/FishingBobberEntity", "getPosX", "func_226277_ct_", "()D")
-                                        && checkInsn(instructions[5], Opcodes.DSUB)
+                                logTransformSuccess("function bringInHookedEntity", "net.minecraft.entity.projectile.FishingBobberEntity")
+                                success = true
 
-                                        && checkVarInsn(instructions[6], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[7], Opcodes.GETFIELD, "net/minecraft/entity/projectile/FishingBobberEntity", "angler", "field_146042_b", "Lnet/minecraft/entity/player/PlayerEntity;")
-                                        && checkObfuscatedMethodInsn(instructions[8], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getPosY", "func_226278_cu_", "()D")
-                                        && checkVarInsn(instructions[9], Opcodes.ALOAD, 0) && checkObfuscatedMethodInsn(instructions[10], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/projectile/FishingBobberEntity", "getPosY", "func_226278_cu_", "()D")
-                                        && checkInsn(instructions[11], Opcodes.DSUB)
-
-                                        && checkVarInsn(instructions[12], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[13], Opcodes.GETFIELD, "net/minecraft/entity/projectile/FishingBobberEntity", "angler", "field_146042_b", "Lnet/minecraft/entity/player/PlayerEntity;")
-                                        && checkObfuscatedMethodInsn(instructions[14], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getPosZ", "func_226281_cx_", "()D")
-                                        && checkVarInsn(instructions[15], Opcodes.ALOAD, 0) && checkObfuscatedMethodInsn(instructions[16], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/projectile/FishingBobberEntity", "getPosZ", "func_226281_cx_", "()D")
-                                        && checkInsn(instructions[17], Opcodes.DSUB)) {
-                                    var getVectorList = new InsnList()
-                                    var vectorIndex = bringInHookedEntity.maxLocals
-                                    var addXList = new InsnList()
-                                    var addYList = new InsnList()
-                                    var addZList = new InsnList()
-
-                                    getVectorList.add(new VarInsnNode(Opcodes.ALOAD, 0))
-                                    getVectorList.add(new MethodInsnNode(
-                                        Opcodes.INVOKESTATIC,
-                                        "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                        "getAngler",
-                                        "(Lnet/minecraft/entity/projectile/FishingBobberEntity;)Lnet/minecraft/entity/player/PlayerEntity;",
-                                        false
-                                    ))
-                                    getVectorList.add(new MethodInsnNode(
-                                        Opcodes.INVOKESTATIC,
-                                        "com/epiphany/isawedthisplayerinhalf/Offsetter",
-                                        "getOffsets",
-                                        "(Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/math/Vec3d;",
-                                        false
-                                    ))
-                                    getVectorList.add(new VarInsnNode(Opcodes.ASTORE, vectorIndex))
-
-
-                                    addXList.add(new VarInsnNode(Opcodes.ALOAD, vectorIndex))
-                                    addXList.add(new MethodInsnNode(
-                                        Opcodes.INVOKESTATIC,
-                                        "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                        "getVectorX",
-                                        "(Lnet/minecraft/util/math/Vec3d;)D",
-                                        false
-                                    ))
-                                    addXList.add(new InsnNode(Opcodes.DADD))
-
-                                    addYList.add(new VarInsnNode(Opcodes.ALOAD, vectorIndex))
-                                    addYList.add(new MethodInsnNode(
-                                        Opcodes.INVOKESTATIC,
-                                        "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                        "getVectorY",
-                                        "(Lnet/minecraft/util/math/Vec3d;)D",
-                                        false
-                                    ))
-                                    addYList.add(new InsnNode(Opcodes.DADD))
-
-                                    addZList.add(new VarInsnNode(Opcodes.ALOAD, vectorIndex))
-                                    addZList.add(new MethodInsnNode(
-                                        Opcodes.INVOKESTATIC,
-                                        "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                        "getVectorZ",
-                                        "(Lnet/minecraft/util/math/Vec3d;)D",
-                                        false
-                                    ))
-                                    addZList.add(new InsnNode(Opcodes.DADD))
-
-
-                                    // ...
-                                    oldInstructions.insertBefore(instructions[5], getVectorList)
-                                    // ALOAD 0
-                                    // GETFIELD net/minecraft/entity/projectile/FishingBobberEntity.angler : Lnet/minecraft/entity/player/PlayerEntity;
-                                    // INVOKEVIRTUAL net/minecraft/entity/player/PlayerEntity.getPosX ()D
-                                    // ALOAD 0
-                                    // INVOKEVIRTUAL net/minecraft/entity/projectile/FishingBobberEntity.getPosX ()D
-                                    // DSUB
-                                    oldInstructions.insert(instructions[5], addXList)
-                                    // ALOAD 0
-                                    // GETFIELD net/minecraft/entity/projectile/FishingBobberEntity.angler : Lnet/minecraft/entity/player/PlayerEntity;
-                                    // INVOKEVIRTUAL net/minecraft/entity/player/PlayerEntity.getPosY ()D
-                                    // ALOAD 0
-                                    // INVOKEVIRTUAL net/minecraft/entity/projectile/FishingBobberEntity.getPosY ()D
-                                    // DSUB
-                                    oldInstructions.insert(instructions[11], addYList)
-                                    // ALOAD 0
-                                    // GETFIELD net/minecraft/entity/projectile/FishingBobberEntity.angler : Lnet/minecraft/entity/player/PlayerEntity;
-                                    // INVOKEVIRTUAL net/minecraft/entity/player/PlayerEntity.getPosZ ()D
-                                    // ALOAD 0
-                                    // INVOKEVIRTUAL net/minecraft/entity/projectile/FishingBobberEntity.getPosZ ()D
-                                    // DSUB
-                                    oldInstructions.insert(instructions[17], addZList)
-                                    // ...
-
-                                    logTransformSuccess("function bringInHookedEntity", "net.minecraft.entity.projectile.FishingBobberEntity")
-                                    success = true
-
-                                    break
-                                }
+                                break
                             }
                         }
 
                         if (!success)
-                            logTransformError("function bringInHookedEntity", "net.minecraft.entity.projectile.FishingBobberEntity", "Unable to find injection points")
+                            logTransformError("function bringInHookedEntity", "net.minecraft.entity.projectile.FishingBobberEntity", "Unable to find injection point")
 
                     } catch (exception) {
                         logTransformError("function bringInHookedEntity", "net.minecraft.entity.projectile.FishingBobberEntity", exception.message)
@@ -1202,7 +1069,7 @@ function initializeCoreMod() {
         },
 
         /**
-         * Allows players to break far away blocks. TODO
+         * Allows players to break far away blocks.
          */
         "PlayerInteractionManager": {
             "target": {
@@ -1219,145 +1086,77 @@ function initializeCoreMod() {
                         var oldInstructions = func_225416_a.instructions
                         var success = false
 
-                        // Puts in offset to fishing line position.
-                        for (var i = 0; i < oldInstructions.size() - 38; i++) {
-                            var instruction = oldInstructions.get(i)
-
-                            if (checkVarInsn(instruction, Opcodes.ALOAD, 0)) {
-                                var instructions = [instruction]
-
-                                for (var k = 1; k < 38; k++) {
-                                    var potentialInstruction = oldInstructions.get(i + k)
-
-                                    if (potentialInstruction.getOpcode() !== -1)
-                                        instructions.push(potentialInstruction)
-                                }
-
-                                if (checkObfuscatedFieldInsn(instructions[1], Opcodes.GETFIELD, "net/minecraft/server/management/PlayerInteractionManager", "player", "field_73090_b", "Lnet/minecraft/entity/player/ServerPlayerEntity;")
-                                        && checkObfuscatedMethodInsn(instructions[2], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/ServerPlayerEntity", "getPosX", "func_226277_ct_", "()D")
-                                        && checkVarInsn(instructions[3], Opcodes.ALOAD, 1) && checkObfuscatedMethodInsn(instructions[4], Opcodes.INVOKEVIRTUAL, "net/minecraft/util/math/BlockPos", "getX", "func_177958_n", "()I")
-                                        && checkInsn(instructions[5], Opcodes.I2D) && checkLdcInsn(instructions[6], 0.5) && checkInsn(instructions[7], Opcodes.DADD)
-                                        && checkInsn(instructions[8], Opcodes.DSUB) && checkVarInsn(instructions[9], Opcodes.DSTORE, 5)
-
-                                        && checkVarInsn(instructions[10], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[11], Opcodes.GETFIELD, "net/minecraft/server/management/PlayerInteractionManager", "player", "field_73090_b", "Lnet/minecraft/entity/player/ServerPlayerEntity;")
-                                        && checkObfuscatedMethodInsn(instructions[12], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/ServerPlayerEntity", "getPosY", "func_226278_cu_", "()D")
-                                        && checkVarInsn(instructions[13], Opcodes.ALOAD, 1) && checkObfuscatedMethodInsn(instructions[14], Opcodes.INVOKEVIRTUAL, "net/minecraft/util/math/BlockPos", "getY", "func_177956_o", "()I")
-                                        && checkInsn(instructions[15], Opcodes.I2D) && checkLdcInsn(instructions[16], 0.5) && checkInsn(instructions[17], Opcodes.DADD)
-                                        && checkInsn(instructions[18], Opcodes.DSUB) && checkLdcInsn(instructions[19], 1.5) && checkInsn(instructions[20], Opcodes.DADD)
-                                        && checkVarInsn(instructions[21], Opcodes.DSTORE, 7)
-
-                                        && checkVarInsn(instructions[22], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[23], Opcodes.GETFIELD, "net/minecraft/server/management/PlayerInteractionManager", "player", "field_73090_b", "Lnet/minecraft/entity/player/ServerPlayerEntity;")
-                                        && checkObfuscatedMethodInsn(instructions[24], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/ServerPlayerEntity", "getPosZ", "func_226281_cx_", "()D")
-                                        && checkVarInsn(instructions[25], Opcodes.ALOAD, 1) && checkObfuscatedMethodInsn(instructions[26], Opcodes.INVOKEVIRTUAL, "net/minecraft/util/math/BlockPos", "getZ", "func_177952_p", "()I")
-                                        && checkInsn(instructions[27], Opcodes.I2D) && checkLdcInsn(instructions[28], 0.5) && checkInsn(instructions[29], Opcodes.DADD)
-                                        && checkInsn(instructions[30], Opcodes.DSUB) && checkVarInsn(instructions[31], Opcodes.DSTORE, 9)) {
-                                    var getVectorList = new InsnList()
-                                    var addXList = new InsnList()
-                                    var addYList = new InsnList()
-                                    var addZList = new InsnList()
+                        for (var i = 0; i <= oldInstructions.size() - 7; i++) {
+                            if (checkVarInsn(oldInstructions.get(i), Opcodes.ALOAD, 1) && checkObfuscatedMethodInsn(oldInstructions.get(i+1), Opcodes.INVOKEVIRTUAL, "net/minecraft/util/math/BlockPos", "getZ", "func_177952_p", "()I")
+                                    && checkInsn(oldInstructions.get(i+2), Opcodes.I2D) && checkLdcInsn(oldInstructions.get(i+3), 0.5) && checkInsn(oldInstructions.get(i+4), Opcodes.DADD)
+                                    && checkInsn(oldInstructions.get(i+5), Opcodes.DSUB) && checkVarInsn(oldInstructions.get(i+6), Opcodes.DSTORE, 9)) {
+                                var offsetPlayerPosition = new InsnList()
 
 
-                                    getVectorList.add(new VarInsnNode(Opcodes.ALOAD, 0))
-                                    getVectorList.add(new MethodInsnNode(
-                                        Opcodes.INVOKESTATIC,
-                                        "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                        "getPlayerFromManager",
-                                        "(Lnet/minecraft/server/management/PlayerInteractionManager;)Lnet/minecraft/entity/player/ServerPlayerEntity;",
-                                        false
-                                    ))
-                                    getVectorList.add(new MethodInsnNode(
-                                        Opcodes.INVOKESTATIC,
-                                        "com/epiphany/isawedthisplayerinhalf/Offsetter",
-                                        "getOffsets",
-                                        "(Lnet/minecraft/entity/player/PlayerEntity;)Lnet/minecraft/util/math/Vec3d;",
-                                        false
-                                    ))
-                                    getVectorList.add(new InsnNode(Opcodes.DUP))
-                                    getVectorList.add(new InsnNode(Opcodes.DUP))
+                                offsetPlayerPosition.add(new VarInsnNode(Opcodes.ALOAD, 0)) // this Lnet/minecraft/server/management/PlayerInteractionManager;
+                                offsetPlayerPosition.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "getOffsetsFromManager",
+                                    "(Lnet/minecraft/server/management/PlayerInteractionManager;)Lnet/minecraft/util/math/Vec3d;",
+                                    false
+                                ))
 
-                                    addXList.add(new InsnNode(Opcodes.DUP2_X1))
-                                    addXList.add(new InsnNode(Opcodes.POP2))
-                                    addXList.add(new MethodInsnNode(
-                                        Opcodes.INVOKESTATIC,
-                                        "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                        "getVectorX",
-                                        "(Lnet/minecraft/util/math/Vec3d;)D",
-                                        false
-                                    ))
-                                    addXList.add(new InsnNode(Opcodes.DADD))
+                                offsetPlayerPosition.add(new InsnNode(Opcodes.DUP))
+                                offsetPlayerPosition.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "getVectorX",
+                                    "(Lnet/minecraft/util/math/Vec3d;)D",
+                                    false
+                                ))
+                                offsetPlayerPosition.add(new VarInsnNode(Opcodes.DLOAD, 5)) // d0 D
+                                offsetPlayerPosition.add(new InsnNode(Opcodes.DADD))
+                                offsetPlayerPosition.add(new VarInsnNode(Opcodes.DSTORE, 5)) // d0 D
 
-                                    addYList.add(new InsnNode(Opcodes.DUP2_X1))
-                                    addYList.add(new InsnNode(Opcodes.POP2))
-                                    addYList.add(new MethodInsnNode(
-                                        Opcodes.INVOKESTATIC,
-                                        "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                        "getVectorY",
-                                        "(Lnet/minecraft/util/math/Vec3d;)D",
-                                        false
-                                    ))
-                                    addYList.add(new InsnNode(Opcodes.DADD))
+                                offsetPlayerPosition.add(new InsnNode(Opcodes.DUP))
+                                offsetPlayerPosition.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "getVectorY",
+                                    "(Lnet/minecraft/util/math/Vec3d;)D",
+                                    false
+                                ))
+                                offsetPlayerPosition.add(new VarInsnNode(Opcodes.DLOAD, 7)) // d1 D
+                                offsetPlayerPosition.add(new InsnNode(Opcodes.DADD))
+                                offsetPlayerPosition.add(new VarInsnNode(Opcodes.DSTORE, 7)) // d1 D
 
-                                    addZList.add(new InsnNode(Opcodes.DUP2_X1))
-                                    addZList.add(new InsnNode(Opcodes.POP2))
-                                    addZList.add(new MethodInsnNode(
-                                        Opcodes.INVOKESTATIC,
-                                        "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                        "getVectorZ",
-                                        "(Lnet/minecraft/util/math/Vec3d;)D",
-                                        false
-                                    ))
-                                    addZList.add(new InsnNode(Opcodes.DADD))
+                                offsetPlayerPosition.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "getVectorZ",
+                                    "(Lnet/minecraft/util/math/Vec3d;)D",
+                                    false
+                                ))
+                                offsetPlayerPosition.add(new VarInsnNode(Opcodes.DLOAD, 9)) // d2 D
+                                offsetPlayerPosition.add(new InsnNode(Opcodes.DADD))
+                                offsetPlayerPosition.add(new VarInsnNode(Opcodes.DSTORE, 9)) // d2 D
 
 
-                                    // ...
-                                    oldInstructions.insertBefore(instructions[0], getVectorList)
-                                    // ALOAD 0
-                                    // GETFIELD net/minecraft/server/management/PlayerInteractionManager.player : Lnet/minecraft/entity/player/ServerPlayerEntity;
-                                    //INVOKEVIRTUAL net/minecraft/entity/player/ServerPlayerEntity.getPosX ()D
-                                    // ALOAD 1
-                                    // INVOKEVIRTUAL net/minecraft/util/math/BlockPos.getX ()I
-                                    // I2D
-                                    // LDC 0.5
-                                    // DADD
-                                    // DSUB
-                                    oldInstructions.insert(instructions[8], addXList)
-                                    // DSTORE 5
-                                    // ALOAD 0
-                                    // GETFIELD net/minecraft/server/management/PlayerInteractionManager.player : Lnet/minecraft/entity/player/ServerPlayerEntity;
-                                    // INVOKEVIRTUAL net/minecraft/entity/player/ServerPlayerEntity.getPosY ()D
-                                    // ALOAD 1
-                                    // INVOKEVIRTUAL net/minecraft/util/math/BlockPos.getY ()I
-                                    // I2D
-                                    // LDC 0.5
-                                    // DADD
-                                    // DSUB
-                                    // LDC 1.5
-                                    // DADD
-                                    oldInstructions.insert(instructions[20], addYList)
-                                    // DSTORE 7
-                                    // ALOAD 0
-                                    // GETFIELD net/minecraft/server/management/PlayerInteractionManager.player : Lnet/minecraft/entity/player/ServerPlayerEntity;
-                                    // INVOKEVIRTUAL net/minecraft/entity/player/ServerPlayerEntity.getPosZ ()D
-                                    // ALOAD 1
-                                    // INVOKEVIRTUAL net/minecraft/util/math/BlockPos.getZ ()I
-                                    // I2D
-                                    // LDC 0.5
-                                    // DADD
-                                    // DSUB
-                                    oldInstructions.insert(instructions[30], addZList)
-                                    // DSTORE 9
-                                    // ...
+                                // ...
+                                // INVOKEVIRTUAL net/minecraft/util/math/BlockPos.getZ ()I
+                                // I2D
+                                // LDC 0.5
+                                // DADD
+                                // DSUB
+                                // DSTORE 9
+                                oldInstructions.insert(oldInstructions.get(i+6), offsetPlayerPosition)
+                                // ...
 
-                                    logTransformSuccess("function func_225416_a", "net.minecraft.server.management.PlayerInteractionManager")
-                                    success = true
+                                logTransformSuccess("function func_225416_a", "net.minecraft.server.management.PlayerInteractionManager")
+                                success = true
 
-                                    break
-                                }
+                                break
                             }
                         }
 
                         if (!success)
-                            logTransformError("function func_225416_a", "net.minecraft.server.management.PlayerInteractionManager", "Unable to find injection points")
+                            logTransformError("function func_225416_a", "net.minecraft.server.management.PlayerInteractionManager", "Unable to find injection point")
 
                     } catch (exception) {
                         logTransformError("function func_225416_a", "net.minecraft.server.management.PlayerInteractionManager", exception.message)
@@ -1424,7 +1223,7 @@ function initializeCoreMod() {
                         }
 
                         if (!success) {
-                            logTransformError("function updateLeashedState", "net.minecraft.entity.CreatureEntity", "Unable to find primary injection points")
+                            logTransformError("function updateLeashedState", "net.minecraft.entity.CreatureEntity", "Unable to find primary injection point")
                             return classNode
 
                         } else
@@ -1452,7 +1251,7 @@ function initializeCoreMod() {
                         }
 
                         if (!success) {
-                            logTransformError("function updateLeashedState", "net.minecraft.entity.CreatureEntity", "Unable to find secondary injection points")
+                            logTransformError("function updateLeashedState", "net.minecraft.entity.CreatureEntity", "Unable to find secondary injection point")
                             return classNode
 
                         } else
@@ -1579,7 +1378,7 @@ function initializeCoreMod() {
                         }
 
                         if (!success) {
-                            logTransformError("function updateLeashedState", "net.minecraft.entity.CreatureEntity", "Unable to find tertiary injection points")
+                            logTransformError("function updateLeashedState", "net.minecraft.entity.CreatureEntity", "Unable to find tertiary injection point")
                             return classNode
 
                         } else
@@ -1693,7 +1492,7 @@ function initializeCoreMod() {
                             logTransformSuccess("function updateLeashedState", "net.minecraft.entity.CreatureEntity")
 
                         } else
-                            logTransformError("function updateLeashedState", "net.minecraft.entity.CreatureEntity", "Unable to find the fourth set of injection points")
+                            logTransformError("function updateLeashedState", "net.minecraft.entity.CreatureEntity", "Unable to find the fourth set of injection point")
 
                     } catch (exception) {
                         logTransformError("function updateLeashedState", "net.minecraft.entity.CreatureEntity", exception.message)
@@ -1707,7 +1506,7 @@ function initializeCoreMod() {
         },
 
         /**
-         * Modifies the rendering of leashes. TODO
+         * Modifies the rendering of leashes.
          */
         "MobRenderer": {
             "target": {
@@ -1723,182 +1522,75 @@ function initializeCoreMod() {
                     try {
                         var oldInstructions = renderLeash.instructions
                         var success = false
-                        var vectorIndex = renderLeash.maxLocals
 
-                        // Modifies the x-component of the leash render position.
-                        for (var i = 0; i < oldInstructions.size() - 7; i++) {
-                            var instruction = oldInstructions.get(i)
-
-                            if (checkVarInsn(instruction, Opcodes.FLOAD, 2)) {
-                                var instructions = [instruction]
-
-                                for (var k = 1; k < 7; k++)
-                                    instructions.push(oldInstructions.get(i + k))
-
-                                if (checkInsn(instructions[1], Opcodes.F2D) && checkVarInsn(instructions[2], Opcodes.ALOAD, 5) && checkObfuscatedFieldInsn(instructions[3], Opcodes.GETFIELD, "net/minecraft/entity/Entity", "prevPosX", "field_70169_q", "D")
-                                        && checkVarInsn(instructions[4], Opcodes.ALOAD, 5) && checkObfuscatedMethodInsn(instructions[5], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosX", "func_226277_ct_", "()D")
-                                        && checkObfuscatedMethodInsn(instructions[6], Opcodes.INVOKESTATIC, "net/minecraft/util/math/MathHelper", "lerp", "func_219803_d", "(DDD)D")) {
-                                    var getVectorList = new InsnList()
-                                    var addXList = new InsnList()
+                        for (var i = 0; i <= oldInstructions.size() - 4; i++) {
+                            if (checkVarInsn(oldInstructions.get(i), Opcodes.DLOAD, 16) && checkInsn(oldInstructions.get(i+1), Opcodes.DMUL) && checkInsn(oldInstructions.get(i+2), Opcodes.DADD)
+                                    && checkVarInsn(oldInstructions.get(i+3), Opcodes.DSTORE, 22)) {
+                                var offsetLeashRender = new InsnList()
 
 
-                                    getVectorList.add(new VarInsnNode(Opcodes.ALOAD, 5))
-                                    getVectorList.add(new MethodInsnNode(
-                                        Opcodes.INVOKESTATIC,
-                                        "com/epiphany/isawedthisplayerinhalf/Offsetter",
-                                        "getOffsets",
-                                        "(Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/math/Vec3d;",
-                                        false
-                                    ))
-                                    getVectorList.add(new VarInsnNode(Opcodes.ASTORE, vectorIndex))
+                                offsetLeashRender.add(new VarInsnNode(Opcodes.ALOAD, 5))
+                                offsetLeashRender.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                                    "getOffsets",
+                                    "(Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/math/Vec3d;",
+                                    false
+                                ))
 
-                                    addXList.add(new VarInsnNode(Opcodes.ALOAD, vectorIndex))
-                                    addXList.add(new MethodInsnNode(
-                                        Opcodes.INVOKESTATIC,
-                                        "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                        "getVectorX",
-                                        "(Lnet/minecraft/util/math/Vec3d;)D",
-                                        false
-                                    ))
-                                    addXList.add(new InsnNode(Opcodes.DADD))
+                                offsetLeashRender.add(new InsnNode(Opcodes.DUP))
+                                offsetLeashRender.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "getVectorX",
+                                    "(Lnet/minecraft/util/math/Vec3d;)D",
+                                    false
+                                ))
+                                offsetLeashRender.add(new VarInsnNode(Opcodes.DLOAD, 18)) // d6 D
+                                offsetLeashRender.add(new InsnNode(Opcodes.DADD))
+                                offsetLeashRender.add(new VarInsnNode(Opcodes.DSTORE, 18)) // d6 D
+
+                                offsetLeashRender.add(new InsnNode(Opcodes.DUP))
+                                offsetLeashRender.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "getVectorY",
+                                    "(Lnet/minecraft/util/math/Vec3d;)D",
+                                    false
+                                ))
+                                offsetLeashRender.add(new VarInsnNode(Opcodes.DLOAD, 20)) // d7 D
+                                offsetLeashRender.add(new InsnNode(Opcodes.DADD))
+                                offsetLeashRender.add(new VarInsnNode(Opcodes.DSTORE, 20)) // d7 D
+
+                                offsetLeashRender.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "getVectorZ",
+                                    "(Lnet/minecraft/util/math/Vec3d;)D",
+                                    false
+                                ))
+                                offsetLeashRender.add(new VarInsnNode(Opcodes.DLOAD, 22)) // d8 D
+                                offsetLeashRender.add(new InsnNode(Opcodes.DADD))
+                                offsetLeashRender.add(new VarInsnNode(Opcodes.DSTORE, 22)) // d8 D
 
 
-                                    // ...
-                                    oldInstructions.insertBefore(instructions[0], getVectorList)
-                                    // FLOAD 2
-                                    // F2D
-                                    // ALOAD 5
-                                    // GETFIELD net/minecraft/entity/Entity.prevPosX : D
-                                    // ALOAD 5
-                                    // INVOKEVIRTUAL net/minecraft/entity/Entity.getPosX ()D
-                                    // INVOKESTATIC net/minecraft/util/math/MathHelper.lerp (DDD)D
-                                    oldInstructions.insert(instructions[6], addXList)
-                                    // ...
+                                // ...
+                                // DLOAD 16
+                                // DMUL
+                                // DADD
+                                // DSTORE 22
+                                oldInstructions.insert(oldInstructions.get(i+3), offsetLeashRender)
+                                // ...
 
-                                    success = true
-                                    break
-                                }
+                                success = true
+                                logTransformSuccess("function renderLeash", "net.minecraft.client.renderer.entity.MobRenderer")
+
+                                break
                             }
                         }
 
-                        if (!success) {
-                            logTransformError("function renderLeash", "net.minecraft.client.renderer.entity.MobRenderer", "Unable to find primary injection points")
-                            return classNode
-
-                        } else
-                            success = false
-
-
-                        // Modifies the y-component of the leash render position.
-                        for (var i = 0; i < oldInstructions.size() - 15; i++) {
-                            var instruction = oldInstructions.get(i)
-
-                            if (checkVarInsn(instruction, Opcodes.FLOAD, 2)) {
-                                var instructions = [instruction]
-
-                                for (var k = 1; k < 15; k++)
-                                    instructions.push(oldInstructions.get(i + k))
-
-                                if (checkInsn(instructions[1], Opcodes.F2D) && checkVarInsn(instructions[2], Opcodes.ALOAD, 5) && checkObfuscatedFieldInsn(instructions[3], Opcodes.GETFIELD, "net/minecraft/entity/Entity", "prevPosY", "field_70167_r", "D")
-                                        && checkVarInsn(instructions[4], Opcodes.ALOAD, 5) && checkObfuscatedMethodInsn(instructions[5], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getEyeHeight", "func_70047_e", "()F")
-                                        && checkInsn(instructions[6], Opcodes.F2D) && checkLdcInsn(instructions[7], 0.7) && checkInsn(instructions[8], Opcodes.DMUL)
-                                        && checkInsn(instructions[9], Opcodes.DADD)
-
-                                        && checkVarInsn(instructions[10], Opcodes.ALOAD, 5) && checkObfuscatedMethodInsn(instructions[11], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosY", "func_226278_cu_", "()D")
-                                        && checkVarInsn(instructions[12], Opcodes.ALOAD, 5) && checkObfuscatedMethodInsn(instructions[13], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getEyeHeight", "func_70047_e", "()F")
-                                        && checkInsn(instructions[14], Opcodes.F2D)) {
-                                    var addYList = new InsnList()
-
-                                    addYList.add(new VarInsnNode(Opcodes.ALOAD, vectorIndex))
-                                    addYList.add(new MethodInsnNode(
-                                        Opcodes.INVOKESTATIC,
-                                        "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                        "getVectorY",
-                                        "(Lnet/minecraft/util/math/Vec3d;)D",
-                                        false
-                                    ))
-                                    addYList.add(new InsnNode(Opcodes.DADD))
-
-                                    // ...
-                                    // FLOAD 2
-                                    // F2D
-                                    // ALOAD 5
-                                    // GETFIELD net/minecraft/entity/Entity.prevPosY : D
-                                    // ALOAD 5
-                                    // INVOKEVIRTUAL net/minecraft/entity/Entity.getEyeHeight ()F
-                                    // F2D
-                                    // LDC 0.7
-                                    // DMUL
-                                    // DADD
-                                    // ALOAD 5
-                                    // INVOKEVIRTUAL net/minecraft/entity/Entity.getPosY ()D
-                                    // ALOAD 5
-                                    // INVOKEVIRTUAL net/minecraft/entity/Entity.getEyeHeight ()F
-                                    // F2D
-                                    oldInstructions.insert(instructions[14], addYList)
-                                    // ...
-
-                                    success = true
-                                    break
-                                }
-                            }
-                        }
-
-                        if (!success) {
-                            logTransformError("function renderLeash", "net.minecraft.client.renderer.entity.MobRenderer", "Unable to find secondary injection points")
-                            return classNode
-
-                        } else
-                            success = false
-
-
-                        // Modifies the z-component of the leash render position.
-                        for (var i = 0; i < oldInstructions.size() - 7; i++) {
-                            var instruction = oldInstructions.get(i)
-
-                            if (checkVarInsn(instruction, Opcodes.FLOAD, 2)) {
-                                var instructions = [instruction]
-
-                                for (var k = 1; k < 7; k++)
-                                    instructions.push(oldInstructions.get(i + k))
-
-                                if (checkInsn(instructions[1], Opcodes.F2D) && checkVarInsn(instructions[2], Opcodes.ALOAD, 5) && checkObfuscatedFieldInsn(instructions[3], Opcodes.GETFIELD, "net/minecraft/entity/Entity", "prevPosZ", "field_70166_s", "D")
-                                        && checkVarInsn(instructions[4], Opcodes.ALOAD, 5) && checkObfuscatedMethodInsn(instructions[5], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosZ", "func_226281_cx_", "()D")
-                                        && checkObfuscatedMethodInsn(instructions[6], Opcodes.INVOKESTATIC, "net/minecraft/util/math/MathHelper", "lerp", "func_219803_d", "(DDD)D")) {
-                                    var addZList = new InsnList()
-
-                                    addZList.add(new VarInsnNode(Opcodes.ALOAD, vectorIndex))
-                                    addZList.add(new MethodInsnNode(
-                                        Opcodes.INVOKESTATIC,
-                                        "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                        "getVectorZ",
-                                        "(Lnet/minecraft/util/math/Vec3d;)D",
-                                        false
-                                    ))
-                                    addZList.add(new InsnNode(Opcodes.DADD))
-
-                                    // ...
-                                    // FLOAD 2
-                                    // F2D
-                                    // ALOAD 5
-                                    // GETFIELD net/minecraft/entity/Entity.prevPosZ : D
-                                    // ALOAD 5
-                                    // INVOKEVIRTUAL net/minecraft/entity/Entity.getPosZ ()D
-                                    // INVOKESTATIC net/minecraft/util/math/MathHelper.lerp (DDD)D
-                                    oldInstructions.insert(instructions[6], addZList)
-                                    // ...
-
-                                    success = true
-                                    break
-                                }
-                            }
-                        }
-
-                        if (success) {
-                            logTransformSuccess("function renderLeash", "net.minecraft.client.renderer.entity.MobRenderer")
-
-                        } else
-                            logTransformError("function renderLeash", "net.minecraft.client.renderer.entity.MobRenderer", "Unable to find tertiary injection points")
+                        if (!success)
+                            logTransformError("function renderLeash", "net.minecraft.client.renderer.entity.MobRenderer", "Unable to find injection point")
 
                     } catch (exception) {
                         logTransformError("function renderLeash", "net.minecraft.client.renderer.entity.MobRenderer", exception.message)
@@ -1912,8 +1604,7 @@ function initializeCoreMod() {
         },
 
         /**
-         * Makes entities look at the offset position of players. TODO
-         * TODO Make randomly swap between body and offset one.
+         * Makes entities look at the offset position of players randomly, resulting in them shaking their heads 'out of confusion.'
          */
         "LookAtGoal": {
             "target": {
@@ -1929,105 +1620,62 @@ function initializeCoreMod() {
                         var oldInstructions = tick.instructions
                         var success = false
 
-                        // Puts in offset to fishing line position.
-                        for (var i = 0; i < oldInstructions.size() - 9; i++) {
-                            var instruction = oldInstructions.get(i)
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            if (checkObfuscatedMethodInsn(oldInstructions.get(i), Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/ai/controller/LookController", "setLookPosition", "func_220679_a", "(DDD)V")) {
+                                var offsetLookAtPosition = new InsnList()
 
-                            if (checkVarInsn(instruction, Opcodes.ALOAD, 0)) {
-                                var instructions = [instruction]
+                                // 50% chance to set the position to be looked at to the player's offset one.
+                                offsetLookAtPosition.add(new VarInsnNode(Opcodes.ALOAD, 0))
+                                offsetLookAtPosition.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "applyLookAtOffsetsRandomly",
+                                    "(DDDLnet/minecraft/entity/ai/goal/LookAtGoal;)Lnet/minecraft/util/math/Vec3d;",
+                                    false
+                                ))
+                                // Unpacks Vec3d.
+                                offsetLookAtPosition.add(new InsnNode(Opcodes.DUP))
+                                offsetLookAtPosition.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "getVectorX",
+                                    "(Lnet/minecraft/util/math/Vec3d;)D",
+                                    false
+                                ))
+                                offsetLookAtPosition.add(new InsnNode(Opcodes.DUP2_X1))
+                                offsetLookAtPosition.add(new InsnNode(Opcodes.POP2))
+                                offsetLookAtPosition.add(new InsnNode(Opcodes.DUP))
+                                offsetLookAtPosition.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "getVectorY",
+                                    "(Lnet/minecraft/util/math/Vec3d;)D",
+                                    false
+                                ))
+                                offsetLookAtPosition.add(new InsnNode(Opcodes.DUP2_X1))
+                                offsetLookAtPosition.add(new InsnNode(Opcodes.POP2))
+                                offsetLookAtPosition.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "getVectorZ",
+                                    "(Lnet/minecraft/util/math/Vec3d;)D",
+                                    false
+                                ))
 
-                                for (var k = 1; k < 9; k++)
-                                    instructions.push(oldInstructions.get(i + k))
+                                // ...
+                                oldInstructions.insertBefore(oldInstructions.get(i), offsetLookAtPosition)
+                                // INVOKEVIRTUAL net/minecraft/entity/ai/controller/LookController.setLookPosition (DDD)V
+                                // ...
 
-                                if (checkObfuscatedFieldInsn(instructions[1], Opcodes.GETFIELD, "net/minecraft/entity/ai/goal/LookAtGoal", "closestEntity", "field_75334_a", "Lnet/minecraft/entity/Entity;")
-                                        && checkObfuscatedMethodInsn(instructions[2], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosX", "func_226277_ct_", "()D")
+                                success = true
+                                logTransformSuccess("function tick", "net.minecraft.entity.ai.goal.LookAtGoal")
 
-                                        && checkVarInsn(instructions[3], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[4], Opcodes.GETFIELD, "net/minecraft/entity/ai/goal/LookAtGoal", "closestEntity", "field_75334_a", "Lnet/minecraft/entity/Entity;")
-                                        && checkObfuscatedMethodInsn(instructions[5], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosYEye", "func_226280_cw_", "()D")
-
-                                        && checkVarInsn(instructions[6], Opcodes.ALOAD, 0) && checkObfuscatedFieldInsn(instructions[7], Opcodes.GETFIELD, "net/minecraft/entity/ai/goal/LookAtGoal", "closestEntity", "field_75334_a", "Lnet/minecraft/entity/Entity;")
-                                        && checkObfuscatedMethodInsn(instructions[8], Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/Entity", "getPosZ", "func_226281_cx_", "()D")) {
-                                    var getVectorList = new InsnList()
-                                    var addXList = new InsnList()
-                                    var addYList = new InsnList()
-                                    var addZList = new InsnList()
-                                    var vectorIndex = tick.maxLocals
-
-
-                                    getVectorList.add(new VarInsnNode(Opcodes.ALOAD, 0))
-                                    getVectorList.add(new MethodInsnNode(
-                                        Opcodes.INVOKESTATIC,
-                                        "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                        "getClosestEntity",
-                                        "(Lnet/minecraft/entity/ai/goal/LookAtGoal;)Lnet/minecraft/entity/Entity;",
-                                        false
-                                    ))
-                                    getVectorList.add(new MethodInsnNode(
-                                        Opcodes.INVOKESTATIC,
-                                        "com/epiphany/isawedthisplayerinhalf/Offsetter",
-                                        "getOffsets",
-                                        "(Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/math/Vec3d;",
-                                        false
-                                    ))
-                                    getVectorList.add(new VarInsnNode(Opcodes.ASTORE, vectorIndex))
-
-                                    addXList.add(new VarInsnNode(Opcodes.ALOAD, vectorIndex))
-                                    addXList.add(new MethodInsnNode(
-                                        Opcodes.INVOKESTATIC,
-                                        "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                        "getVectorX",
-                                        "(Lnet/minecraft/util/math/Vec3d;)D",
-                                        false
-                                    ))
-                                    addXList.add(new InsnNode(Opcodes.DADD))
-
-                                    addYList.add(new VarInsnNode(Opcodes.ALOAD, vectorIndex))
-                                    addYList.add(new MethodInsnNode(
-                                        Opcodes.INVOKESTATIC,
-                                        "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                        "getVectorY",
-                                        "(Lnet/minecraft/util/math/Vec3d;)D",
-                                        false
-                                    ))
-                                    addYList.add(new InsnNode(Opcodes.DADD))
-
-                                    addZList.add(new VarInsnNode(Opcodes.ALOAD, vectorIndex))
-                                    addZList.add(new MethodInsnNode(
-                                        Opcodes.INVOKESTATIC,
-                                        "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                        "getVectorZ",
-                                        "(Lnet/minecraft/util/math/Vec3d;)D",
-                                        false
-                                    ))
-                                    addZList.add(new InsnNode(Opcodes.DADD))
-
-
-                                    oldInstructions.insertBefore(instructions[0], getVectorList)
-                                    // ALOAD 0
-                                    // GETFIELD net/minecraft/entity/ai/goal/LookAtGoal.closestEntity : Lnet/minecraft/entity/Entity;
-                                    // INVOKEVIRTUAL net/minecraft/entity/Entity.getPosX ()D
-                                    oldInstructions.insert(instructions[2], addXList)
-                                    // ALOAD 0
-                                    // GETFIELD net/minecraft/entity/ai/goal/LookAtGoal.closestEntity : Lnet/minecraft/entity/Entity;
-                                    // INVOKEVIRTUAL net/minecraft/entity/Entity.getPosYEye ()D
-                                    oldInstructions.insert(instructions[5], addYList)
-                                    // ALOAD 0
-                                    // GETFIELD net/minecraft/entity/ai/goal/LookAtGoal.closestEntity : Lnet/minecraft/entity/Entity;
-                                    // INVOKEVIRTUAL net/minecraft/entity/Entity.getPosZ ()D
-                                    oldInstructions.insert(instructions[8], addZList)
-                                    // ...
-
-                                    success = true
-                                    break
-                                }
+                                break
                             }
                         }
 
-                        if (success) {
-                            logTransformSuccess("function tick", "net.minecraft.entity.ai.goal.LookAtGoal")
-
-                        } else
-                            logTransformError("function tick", "net.minecraft.entity.ai.goal.LookAtGoal", "Unable to find injection points")
+                        if (!success)
+                            logTransformError("function tick", "net.minecraft.entity.ai.goal.LookAtGoal", "Unable to find injection point")
 
                     } catch (exception) {
                         logTransformError("function tick", "net.minecraft.entity.ai.goal.LookAtGoal", exception.message)
@@ -2733,8 +2381,8 @@ function initializeCoreMod() {
                                     "(Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/math/Vec3d;",
                                     false
                                 ))
-                                offsetKnockback.add(new InsnNode(Opcodes.DUP))
 
+                                offsetKnockback.add(new InsnNode(Opcodes.DUP))
                                 offsetKnockback.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
                                     "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",

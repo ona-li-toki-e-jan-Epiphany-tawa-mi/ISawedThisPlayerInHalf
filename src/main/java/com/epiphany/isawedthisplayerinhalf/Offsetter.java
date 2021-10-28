@@ -34,45 +34,6 @@ public class Offsetter {
     public static final HashMap<UUID, Vec3d> playerOffsetMap = new HashMap<>();
 
     /**
-     * Sets the initial offset for the client.
-     */
-    @OnlyIn(Dist.CLIENT)
-    @SubscribeEvent
-    public static void onJoinServer(ClientPlayerNetworkEvent.LoggedInEvent loggedInEvent) {
-        ClientPlayerEntity player = loggedInEvent.getPlayer();
-
-        if (player != null) {
-            Vec3d offsets = Config.getOffsets();
-
-            setOffsets(player, offsets);
-
-            if (player.world.isRemote)
-                Networker.modChannel.sendToServer(new SetOffsetPacket(player, offsets));
-        }
-    }
-
-    /**
-     * Clears the offset maps when the client leaves a server.
-     */
-    @OnlyIn(Dist.CLIENT)
-    @SubscribeEvent
-    public static void onLeaveServer(ClientPlayerNetworkEvent.LoggedOutEvent loggedOutEvent) {
-        playerOffsetMap.clear();
-        RenderingOffsetter.renderingOffsetsMap.clear();
-    }
-
-    /**
-     * Removes players from the offset map when they leave.
-     */
-    @OnlyIn(Dist.DEDICATED_SERVER)
-    @SubscribeEvent
-    public static void onPlayerLeaveServer(PlayerEvent.PlayerLoggedOutEvent playerLoggedOutEvent) {
-        playerOffsetMap.remove(playerLoggedOutEvent.getPlayer().getUniqueID());
-    }
-
-
-
-    /**
      * Gets the offsets a player has.
      *
      * @param player The player to get the offsets from.
@@ -119,22 +80,59 @@ public class Offsetter {
 
 
     /**
+     * Sets the initial offset for the client.
+     */
+    @OnlyIn(Dist.CLIENT)
+    @SubscribeEvent
+    public static void onJoinServer(ClientPlayerNetworkEvent.LoggedInEvent loggedInEvent) {
+        ClientPlayerEntity player = loggedInEvent.getPlayer();
+
+        if (player != null) {
+            Vec3d offsets = Config.getOffsets();
+
+            setOffsets(player, offsets);
+
+            if (player.world.isRemote)
+                Networker.modChannel.sendToServer(new SetOffsetPacket(player, offsets));
+        }
+    }
+
+    /**
+     * Clears the offset maps when the client leaves a server.
+     */
+    @OnlyIn(Dist.CLIENT)
+    @SubscribeEvent
+    public static void onLeaveServer(ClientPlayerNetworkEvent.LoggedOutEvent loggedOutEvent) {
+        playerOffsetMap.clear();
+        RenderingOffsetter.renderingOffsetsMap.clear();
+    }
+
+    /**
+     * Removes players from the offset map when they leave.
+     */
+    @OnlyIn(Dist.DEDICATED_SERVER)
+    @SubscribeEvent
+    public static void onPlayerLeaveServer(PlayerEvent.PlayerLoggedOutEvent playerLoggedOutEvent) {
+        playerOffsetMap.remove(playerLoggedOutEvent.getPlayer().getUniqueID());
+    }
+
+
+
+    /**
      * Offsets the position of thrown items.
      */
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void offsetDroppedItem(ItemTossEvent itemTossEvent) {
-        if (!itemTossEvent.isCanceled()) {
-            Vec3d offsets = getOffsets(itemTossEvent.getPlayer());
+        Vec3d offsets = getOffsets(itemTossEvent.getPlayer());
 
-            if (!offsets.equals(Vec3d.ZERO)) {
-                ItemEntity itemEntity = itemTossEvent.getEntityItem();
+        if (!offsets.equals(Vec3d.ZERO)) {
+            ItemEntity itemEntity = itemTossEvent.getEntityItem();
 
-                itemTossEvent.getEntityItem().setPosition(
-                        itemEntity.getPosX() + offsets.x,
-                        itemEntity.getPosY() + offsets.y,
-                        itemEntity.getPosZ() + offsets.z
-                );
-            }
+            itemTossEvent.getEntityItem().setPosition(
+                    itemEntity.getPosX() + offsets.x,
+                    itemEntity.getPosY() + offsets.y,
+                    itemEntity.getPosZ() + offsets.z
+            );
         }
     }
 
@@ -165,13 +163,11 @@ public class Offsetter {
 
 
 
-
-
     /**
      * In-game config options implemented via chat "commands."
      */
     @OnlyIn(Dist.CLIENT)
-    @SubscribeEvent(priority = EventPriority.LOWEST)
+    @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = true)
     public static void onPlayerChat(ClientChatEvent clientChatEvent) {
         String message = clientChatEvent.getOriginalMessage().toLowerCase();
         String[] possibleCommand = message.split(" ");

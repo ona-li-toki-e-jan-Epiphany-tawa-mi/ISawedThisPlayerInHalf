@@ -17,6 +17,9 @@ for(LivingEntity livingentity : this.world.getEntitiesWithinAABB(LivingEntity.cl
     }
 }
 */
+// TODO Look more into LookAtGoal.
+// TODO Have passive mobs follow bait towards a player's offset position.
+// TODO Firework crossbows need to be offset.
 
 // TODO (MAYBE) Make class transformers more compatible with other mods.
 
@@ -33,8 +36,6 @@ public class ISawedThisPlayerInHalf {
 
     @SubscribeEvent
     public static void doClientStuff(final FMLClientSetupEvent fmlClientSetupEvent) {
-        MinecraftForge.EVENT_BUS.register(RenderingOffsetter.class);
-
         Config.onEnable();
         RenderingOffsetter.replacePlayerRenderers();
     }

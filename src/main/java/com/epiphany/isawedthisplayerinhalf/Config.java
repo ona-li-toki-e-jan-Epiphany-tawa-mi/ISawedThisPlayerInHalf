@@ -12,6 +12,8 @@ import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.io.File;
 
+// TODO Field 'offsets' is unnecessary.
+
 /**
  * Deals with configuration data for the mod.
  */

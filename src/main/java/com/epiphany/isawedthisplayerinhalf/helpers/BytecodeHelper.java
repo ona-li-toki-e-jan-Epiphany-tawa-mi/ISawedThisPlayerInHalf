@@ -17,12 +17,17 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.lang.reflect.Field;
+import java.util.Random;
 
 /**
+ * TODO Redo this docstring once done with refactor.
+ * TODO Prune methods in this when refactor is done.
  * Helper class for calling functions and reading values that can't be done in pure bytecode because of obfuscation or other reasons.
  */
+@SuppressWarnings("unused")
 public class BytecodeHelper {
     private static final Field closestEntityField;
+    private static final Random random;
 
     static {
         closestEntityField = ReflectionHelper.getFieldOrNull(LookAtGoal.class, "closestEntity", "field_75334_a");
@@ -30,6 +35,8 @@ public class BytecodeHelper {
 
         if (closestEntityField == null)
             throw new NullPointerException("Unable to find field 'closestEntityField' under names 'closestEntity' and 'field_75334_a'");
+
+        random = new Random();
     }
 
 
@@ -38,6 +45,7 @@ public class BytecodeHelper {
      * Gets the x-coordinate of a vector.
      *
      * @param vector The vector to get the x-coordinate of.
+     *
      * @return The x-coordinate of the given vector.
      */
     public static double getVectorX(Vec3d vector) {
@@ -48,6 +56,7 @@ public class BytecodeHelper {
      * Gets the y-coordinate of a vector.
      *
      * @param vector The vector to get the y-coordinate of.
+     *
      * @return The y-coordinate of the given vector.
      */
     public static double getVectorY(Vec3d vector) {
@@ -58,6 +67,7 @@ public class BytecodeHelper {
      * Gets the z-coordinate of a vector.
      *
      * @param vector The vector to get the z-coordinate of.
+     *
      * @return The z-coordinate of the given vector.
      */
     public static double getVectorZ(Vec3d vector) {
@@ -68,6 +78,7 @@ public class BytecodeHelper {
      * Gets the owner of a fishing bobber.
      *
      * @param fishingBobberEntity The fishing bobber to get the angler of.
+     *
      * @return The angler.
      */
     public static PlayerEntity getAngler(FishingBobberEntity fishingBobberEntity) {
@@ -78,6 +89,7 @@ public class BytecodeHelper {
      * Gets the player an interaction manager contains.
      *
      * @param playerInteractionManager The interaction manager to get the player from.
+     *
      * @return The player in the interaction manager.
      */
     public static ServerPlayerEntity getPlayerFromManager(PlayerInteractionManager playerInteractionManager) {
@@ -88,6 +100,7 @@ public class BytecodeHelper {
      * Gets the entity that the look at goal is focused on.
      *
      * @param lookAtGoal The look at goal to get the closest entity of.
+     *
      * @return The closest entity that the look at goal is focused on.
      */
     public static Entity getClosestEntity(LookAtGoal lookAtGoal) {
@@ -99,6 +112,7 @@ public class BytecodeHelper {
      *
      * @param axisAlignedBB The axis aligned bounding box to offset.
      * @param offset The offset to apply.
+     *
      * @return A copy of the axis aligned bounding box, for chaining.
      */
     public static AxisAlignedBB offsetAABB(AxisAlignedBB axisAlignedBB, Vec3d offset) {
@@ -198,6 +212,36 @@ public class BytecodeHelper {
         Vec3d offsets = Offsetter.getOffsets(player);
 
         return !offsets.equals(Vec3d.ZERO) ? entity.getDistanceSq(player.getPositionVec().add(offsets)) : entity.getDistanceSq(player);
+    }
+
+    /**
+     * Gets The offsets of the player than an interaction manager contains.
+     *
+     * @param playerInteractionManager The interaction manager to get the offsets from.
+     *
+     * @return The offsets of the player in the interaction manager.
+     */
+    public static Vec3d getOffsetsFromManager(PlayerInteractionManager playerInteractionManager) {
+        return Offsetter.getOffsets(playerInteractionManager.player);
+    }
+
+    public static Vec3d applyLookAtOffsetsRandomly(double x, double y, double z, LookAtGoal lookAtGoal) {
+        Vec3d offsets = Offsetter.getOffsets(getClosestEntity(lookAtGoal));
+
+        if (offsets.equals(Vec3d.ZERO) || random.nextBoolean())
+            return new Vec3d(x, y, z);
+
+        return new Vec3d(x + offsets.x, y + offsets.y, z + offsets.z);
+    }
+
+    public static Vec3d getAnglerOffsets(FishingBobberEntity fishingBobberEntity) {
+        PlayerEntity angler = fishingBobberEntity.getAngler();
+
+        return angler != null ? Offsetter.getOffsets(fishingBobberEntity.getAngler()) : Vec3d.ZERO;
+    }
+
+    public static Vec3d offsetVectorWithAngler(Vec3d vec3d, FishingBobberEntity fishingBobberEntity) {
+        return vec3d.add(getAnglerOffsets(fishingBobberEntity));
     }
 
 
