@@ -21,8 +21,6 @@ for(LivingEntity livingentity : this.world.getEntitiesWithinAABB(LivingEntity.cl
 // TODO Have passive mobs follow bait towards a player's offset position.
 // TODO Firework crossbows need to be offset.
 
-// TODO (MAYBE) Make class transformers more compatible with other mods.
-
 @Mod("swdthsplyrnhlf")
 public class ISawedThisPlayerInHalf {
     public static final String MOD_ID = "swdthsplyrnhlf";
