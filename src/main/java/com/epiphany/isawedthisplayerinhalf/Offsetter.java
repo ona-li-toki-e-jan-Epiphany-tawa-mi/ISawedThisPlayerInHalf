@@ -136,31 +136,6 @@ public class Offsetter {
         }
     }
 
-    /**
-     * Gets the corrected distance from an entity to the player.
-     *
-     * @param entity1 The entity to use for the first position.
-     * @param entity2 The entity to use for the second position.
-     *
-     * @return The distance between the first entity and second entity.
-     */
-    public static float modifiedGetDistance(Entity entity1, Entity entity2) {
-        return entity2 instanceof PlayerEntity ? (float) Math.sqrt(BytecodeHelper.modifiedGetDistanceSq(entity1, (PlayerEntity) entity2)) :
-                entity1.getDistance(entity2);
-    }
-
-    /**
-     * Creates a new BlockPos from an entity's position with offset.
-     *
-     * @param entity The entity to get the position from.
-     *
-     * @return The position of the entity.
-     */
-    public static BlockPos modifiedBlockPos(Entity entity) {
-        Vec3d offsets = getOffsets(entity);
-        return !offsets.equals(Vec3d.ZERO) ? new BlockPos(entity.getPositionVec().add(offsets)) : new BlockPos(entity);
-    }
-
 
 
     /**
