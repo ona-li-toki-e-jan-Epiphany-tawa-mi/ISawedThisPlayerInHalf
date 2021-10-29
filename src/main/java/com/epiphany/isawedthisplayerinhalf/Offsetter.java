@@ -1,6 +1,5 @@
 package com.epiphany.isawedthisplayerinhalf;
 
-import com.epiphany.isawedthisplayerinhalf.helpers.BytecodeHelper;
 import com.epiphany.isawedthisplayerinhalf.networking.Networker;
 import com.epiphany.isawedthisplayerinhalf.networking.SetOffsetPacket;
 import com.epiphany.isawedthisplayerinhalf.rendering.RenderingOffsetter;
@@ -11,7 +10,6 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.api.distmarker.Dist;

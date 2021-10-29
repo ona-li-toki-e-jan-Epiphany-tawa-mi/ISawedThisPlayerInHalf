@@ -8,12 +8,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.LookAtGoal;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -22,9 +20,8 @@ import java.lang.reflect.Field;
 import java.util.Random;
 
 /**
- * TODO Redo this docstring once done with refactor.
- * TODO Prune methods in this when refactor is done.
- * Helper class for calling functions and reading values that can't be done in pure bytecode because of obfuscation or other reasons.
+ * Helper class for calling functions and accessing fields that can't be done in pure bytecode thanks to obfuscation,
+ *  and for moving as much code into Java as possible to increase maintainability.
  */
 @SuppressWarnings("unused")
 public class BytecodeHelper {
@@ -34,7 +31,6 @@ public class BytecodeHelper {
     static {
         closestEntityField = ReflectionHelper.getFieldOrNull(LookAtGoal.class, "closestEntity", "field_75334_a");
         ReflectionHelper.makeAccessible(closestEntityField);
-
         if (closestEntityField == null)
             throw new NullPointerException("Unable to find field 'closestEntityField' under names 'closestEntity' and 'field_75334_a'");
 
@@ -76,98 +72,61 @@ public class BytecodeHelper {
         return vector.z;
     }
 
+
     /**
-     * Gets the owner of a fishing bobber.
+     * Checks if a player is offset.
      *
-     * @param fishingBobberEntity The fishing bobber to get the angler of.
+     * @param playerEntity The player to check for offsets.
      *
-     * @return The angler.
+     * @return Whether the player has offsets.
      */
-    public static PlayerEntity getAngler(FishingBobberEntity fishingBobberEntity) {
-        return fishingBobberEntity.getAngler();
+    public static boolean isPlayerOffset(PlayerEntity playerEntity) {
+        return Offsetter.getOffsets(playerEntity).equals(Vec3d.ZERO);
     }
 
     /**
-     * Gets the player an interaction manager contains.
+     * Gets the offsets of an entity divided by the scalar value.
      *
-     * @param playerInteractionManager The interaction manager to get the player from.
-     *
-     * @return The player in the interaction manager.
-     */
-    public static ServerPlayerEntity getPlayerFromManager(PlayerInteractionManager playerInteractionManager) {
-        return playerInteractionManager.player;
-    }
-
-    /**
-     * Gets the entity that the look at goal is focused on.
-     *
-     * @param lookAtGoal The look at goal to get the closest entity of.
-     *
-     * @return The closest entity that the look at goal is focused on.
-     */
-    public static Entity getClosestEntity(LookAtGoal lookAtGoal) {
-        return (Entity) ReflectionHelper.getFieldOrDefault(closestEntityField, lookAtGoal, null);
-    }
-
-    /**
-     * Offsets the position of an axis aligned bounding box.
-     *
-     * @param axisAlignedBB The axis aligned bounding box to offset.
-     * @param offset The offset to apply.
-     *
-     * @return A copy of the axis aligned bounding box, for chaining.
-     */
-    public static AxisAlignedBB offsetAABB(AxisAlignedBB axisAlignedBB, Vec3d offset) {
-        return axisAlignedBB.offset(offset);
-    }
-
-    /**
-     * Gets the zero vector from the Vec3d class.
-     *
-     * @return The zero vector.
-     */
-    public static Vec3d getZeroVector() {
-        return Vec3d.ZERO;
-    }
-
-
-
-    /**
-     * Offsets a vector with the offsets of an entity.
-     *
-     * @param vec3d The vector to offset.
      * @param entity The entity to get the offsets from.
+     * @param inverseScalar The value to divide the resulting offsets with.
      *
-     * @return The offset vector.
+     * @return The inversely scaled offsets of the entity.
      */
-    public static Vec3d offsetVector(Vec3d vec3d, Entity entity) {
+    public static Vec3d getOffsetsInverselyScaled(Entity entity, float inverseScalar) {
         Vec3d offsets = Offsetter.getOffsets(entity);
 
-       return !offsets.equals(Vec3d.ZERO) ? vec3d.add(offsets) : vec3d;
-    }
+        if (!offsets.equals(Vec3d.ZERO)) {
+            inverseScalar = 1 / inverseScalar;
+            return offsets.mul(inverseScalar, inverseScalar, inverseScalar);
 
-    public static AxisAlignedBB offsetAxisAlignedBB(AxisAlignedBB axisAlignedBB, Entity entity) {
-        Vec3d offsets = Offsetter.getOffsets(entity);
-
-        return !offsets.equals(Vec3d.ZERO) ? axisAlignedBB.offset(offsets) : axisAlignedBB;
+        } else
+            return offsets;
     }
 
     /**
-     * Offsets a projectile based on the offset of its shooter.
+     * Gets the offsets of the player that an interaction manager contains.
      *
-     * @param projectile The projectile to offset the position of.
-     * @param shooter The shooter of the projectile.
+     * @param playerInteractionManager The interaction manager to get the offsets from.
+     *
+     * @return The offsets of the player in the interaction manager.
      */
-    public static void offsetProjectile(Entity projectile, LivingEntity shooter) {
-        Vec3d offsets = Offsetter.getOffsets((PlayerEntity) shooter);
-
-        if (!offsets.equals(Vec3d.ZERO))
-            projectile.setPosition(
-                    projectile.getPosX() + offsets.x,
-                    projectile.getPosY() + offsets.y,
-                    projectile.getPosZ() + offsets.z
-            );
+    public static Vec3d getOffsetsFromManager(PlayerInteractionManager playerInteractionManager) {
+        return Offsetter.getOffsets(playerInteractionManager.player);
     }
+
+    /**
+     * Gets the offsets of the angler of the fishing bobber.
+     *
+     * @param fishingBobberEntity The fishing bobber to get the angler with which to get the offsets from.
+     *
+     * @return The offsets of the angler.
+     */
+    public static Vec3d getAnglerOffsets(FishingBobberEntity fishingBobberEntity) {
+        PlayerEntity angler = fishingBobberEntity.getAngler();
+
+        return angler != null ? Offsetter.getOffsets(fishingBobberEntity.getAngler()) : Vec3d.ZERO;
+    }
+
 
     /**
      * Gets the corrected distance squared from a player to a point.
@@ -188,53 +147,58 @@ public class BytecodeHelper {
         return dx * dx + dy * dy + dz * dz;
     }
 
-    public static boolean isPlayerOffset(PlayerEntity playerEntity) {
-        return Offsetter.getOffsets(playerEntity).equals(Vec3d.ZERO);
-    }
-
     /**
-     * TODO Prune parameter types.
-     * Gets the corrected distance squared from an entity to the player.
+     * Gets the corrected distance squared from an entity to an entity with offsets.
      *
      * @param entity The entity to use for the first position.
-     * @param player The player to use for the second position.
+     * @param offsetEntity The entity with offsets to use for the second position.
      *
-     * @return The distance, squared, between the entity and the player.
+     * @return The distance, squared, between the entity and the other one.
      */
-    public static double modifiedGetDistanceSq(Entity entity, PlayerEntity player) {
-        Vec3d offsets = Offsetter.getOffsets(player);
+    public static double modifiedGetDistanceSq(Entity entity, Entity offsetEntity) {
+        Vec3d offsets = Offsetter.getOffsets(offsetEntity);
 
-        return !offsets.equals(Vec3d.ZERO) ? entity.getDistanceSq(player.getPositionVec().add(offsets)) : entity.getDistanceSq(player);
+        return !offsets.equals(Vec3d.ZERO) ? entity.getDistanceSq(offsetEntity.getPositionVec().add(offsets)) : entity.getDistanceSq(offsetEntity);
     }
 
     /**
-     * Gets The offsets of the player than an interaction manager contains.
+     * Gets the corrected distance from an entity to the player.
      *
-     * @param playerInteractionManager The interaction manager to get the offsets from.
+     * @param entity1 The entity to use for the first position.
+     * @param entity2 The entity to use for the second position.
      *
-     * @return The offsets of the player in the interaction manager.
+     * @return The distance between the first entity and second entity.
      */
-    public static Vec3d getOffsetsFromManager(PlayerInteractionManager playerInteractionManager) {
-        return Offsetter.getOffsets(playerInteractionManager.player);
+    public static float modifiedGetDistance(Entity entity1, Entity entity2) {
+        return (float) Math.sqrt(BytecodeHelper.modifiedGetDistanceSq(entity1, entity2));
     }
 
-    public static Vec3d applyLookAtOffsetsRandomly(double x, double y, double z, LookAtGoal lookAtGoal) {
-        Vec3d offsets = Offsetter.getOffsets(getClosestEntity(lookAtGoal));
 
-        if (offsets.equals(Vec3d.ZERO) || random.nextBoolean())
-            return new Vec3d(x, y, z);
 
-        return new Vec3d(x + offsets.x, y + offsets.y, z + offsets.z);
+    /**
+     * Offsets a vector with the offsets of an entity.
+     *
+     * @param vector The vector to offset.
+     * @param entity The entity to get the offsets from.
+     *
+     * @return The offset vector.
+     */
+    public static Vec3d offsetVector(Vec3d vector, Entity entity) {
+        Vec3d offsets = Offsetter.getOffsets(entity);
+
+       return !offsets.equals(Vec3d.ZERO) ? vector.add(offsets) : vector;
     }
 
-    public static Vec3d getAnglerOffsets(FishingBobberEntity fishingBobberEntity) {
-        PlayerEntity angler = fishingBobberEntity.getAngler();
-
-        return angler != null ? Offsetter.getOffsets(fishingBobberEntity.getAngler()) : Vec3d.ZERO;
-    }
-
-    public static Vec3d offsetVectorWithAngler(Vec3d vec3d, FishingBobberEntity fishingBobberEntity) {
-        return vec3d.add(getAnglerOffsets(fishingBobberEntity));
+    /**
+     * Offsets a vector using the offsets from the angler of a fishing bobber.
+     *
+     * @param vector The vector to offset.
+     * @param fishingBobberEntity The fishing bobber to get the angler with which to get the offsets.
+     *
+     * @return The offset vector
+     */
+    public static Vec3d offsetVectorWithAngler(Vec3d vector, FishingBobberEntity fishingBobberEntity) {
+        return vector.add(getAnglerOffsets(fishingBobberEntity));
     }
 
     /**
@@ -252,27 +216,55 @@ public class BytecodeHelper {
     }
 
     /**
-     * Gets the corrected distance from an entity to the player.
+     * Offsets an axis aligned bounding box with the offsets from an entity.
      *
-     * @param entity1 The entity to use for the first position.
-     * @param entity2 The entity to use for the second position.
+     * @param axisAlignedBB The bounding box to offset.
+     * @param entity The entity to get the offsets from.
      *
-     * @return The distance between the first entity and second entity.
+     * @return The offset axis aligned bounding box.
      */
-    public static float modifiedGetDistance(Entity entity1, Entity entity2) {
-        return entity2 instanceof PlayerEntity ? (float) Math.sqrt(BytecodeHelper.modifiedGetDistanceSq(entity1, (PlayerEntity) entity2)) :
-                entity1.getDistance(entity2);
-    }
-
-    public static Vec3d getOffsetsInverselyScaled(Entity entity, float inverseScalar) {
+    public static AxisAlignedBB offsetAxisAlignedBB(AxisAlignedBB axisAlignedBB, Entity entity) {
         Vec3d offsets = Offsetter.getOffsets(entity);
 
-        if (!offsets.equals(Vec3d.ZERO)) {
-            inverseScalar = 1 / inverseScalar;
-            return offsets.mul(inverseScalar, inverseScalar, inverseScalar);
+        return !offsets.equals(Vec3d.ZERO) ? axisAlignedBB.offset(offsets) : axisAlignedBB;
+    }
 
-        } else
-            return offsets;
+
+    /**
+     * Offsets a projectile based on the offset of its shooter.
+     *
+     * @param projectile The projectile to offset the position of.
+     * @param shooter The shooter of the projectile.
+     */
+    public static void offsetProjectile(Entity projectile, LivingEntity shooter) {
+        Vec3d offsets = Offsetter.getOffsets((PlayerEntity) shooter);
+
+        if (!offsets.equals(Vec3d.ZERO))
+            projectile.setPosition(
+                    projectile.getPosX() + offsets.x,
+                    projectile.getPosY() + offsets.y,
+                    projectile.getPosZ() + offsets.z
+            );
+    }
+
+    /**
+     * Randomly switches the target location of a LookAtGoal between the closet entity's original and offset bodies.
+     *
+     * @param x The x-position of the targeted entity.
+     * @param y The y-position of the targeted entity.
+     * @param z The z-position of the targeted entity.
+     * @param lookAtGoal The LookAtGoal to randomly offset.
+     *
+     * @return Either a zero vector or the entity's offsets.
+     */
+    public static Vec3d applyLookAtOffsetsRandomly(double x, double y, double z, LookAtGoal lookAtGoal) {
+        Entity closestEntity = (Entity) ReflectionHelper.getFieldOrDefault(closestEntityField, lookAtGoal, null);
+        Vec3d offsets = Offsetter.getOffsets(closestEntity);
+
+        if (offsets.equals(Vec3d.ZERO) || random.nextBoolean())
+            return new Vec3d(x, y, z);
+
+        return new Vec3d(x + offsets.x, y + offsets.y, z + offsets.z);
     }
 
 

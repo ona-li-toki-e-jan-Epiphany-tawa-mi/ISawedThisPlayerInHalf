@@ -12,8 +12,6 @@ import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.io.File;
 
-// TODO Field 'offsets' is unnecessary.
-
 /**
  * Deals with configuration data for the mod.
  */
@@ -22,7 +20,6 @@ public class Config {
     private static final ForgeConfigSpec clientConfig;
 
     static final ForgeConfigSpec.DoubleValue offsetX, offsetY, offsetZ;
-    private static Vec3d offsets;
     private static final ForgeConfigSpec.BooleanValue a;
     private static boolean b;
 
@@ -48,7 +45,6 @@ public class Config {
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, clientConfig);
         loadConfig(FMLPaths.CONFIGDIR.get().resolve("swdthsplyrnhlf-client.toml").toString());
 
-        offsets = new Vec3d(offsetX.get(), offsetY.get(), offsetZ.get());
         b=a.get();
     }
 
@@ -70,7 +66,7 @@ public class Config {
      * @return The offsets.
      */
     public static Vec3d getOffsets() {
-        return offsets;
+        return new Vec3d(offsetX.get(), offsetY.get(), offsetZ.get());
     }
 
     /**
@@ -84,8 +80,6 @@ public class Config {
         offsetX.set(x);
         offsetY.set(y);
         offsetZ.set(z);
-
-        offsets = new Vec3d(x, y, z);
     }
 
     static void a(){boolean c=!a.get();a.set(c);b=c;}public static boolean b(){return b;}
