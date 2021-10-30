@@ -39,8 +39,8 @@ public class Offsetter {
      * @return The offsets a player has.
      */
     public static Vec3d getOffsets(PlayerEntity player) {
-        UUID playerUUID = player.getUniqueID();
-        return playerOffsetMap.containsKey(playerUUID) ? playerOffsetMap.get(playerUUID) : new Vec3d(0, 0, 0);
+        Vec3d offsets = playerOffsetMap.get(player.getUniqueID());
+        return offsets != null ? offsets : Vec3d.ZERO;
     }
 
     /**
@@ -51,7 +51,7 @@ public class Offsetter {
      * @return The offsets a entity has.
      */
     public static Vec3d getOffsets(Entity entity) {
-        return entity instanceof PlayerEntity ? getOffsets((PlayerEntity) entity) : new Vec3d(0, 0, 0);
+        return entity instanceof PlayerEntity ? getOffsets((PlayerEntity) entity) : Vec3d.ZERO;
     }
 
     /**

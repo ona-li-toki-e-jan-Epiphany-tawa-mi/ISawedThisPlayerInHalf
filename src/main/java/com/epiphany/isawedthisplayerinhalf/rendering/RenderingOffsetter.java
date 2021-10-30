@@ -14,8 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-// TODO Theres a bug with the offset position rendering short of where it should be, inaccuracy scales with distance.
-
 /**
  * Contains various functions to offset the rendering of players.
  */
@@ -59,7 +57,6 @@ public class RenderingOffsetter {
     }
 
 
-
     /**
      * Calculates and assigns rendering offset information to a player.
      *
@@ -67,13 +64,15 @@ public class RenderingOffsetter {
      * @param offsets The physical offsets of the player's body.
      */
     public static void setOffsets(UUID playerUUID, Vec3d offsets) {
+        final double physicalToModelCoordinates = 17.0660750427;
+
         float xOffset, yOffset, zOffset;
         float yawOffset;
 
         if (!offsets.equals(Vec3d.ZERO)) {
-            xOffset = (float) (offsets.x * 16);
-            yOffset = (float) (offsets.y * -16);
-            zOffset = (float) (offsets.z * 16);
+            xOffset = (float) (offsets.x * physicalToModelCoordinates);
+            yOffset = (float) (offsets.y * -physicalToModelCoordinates);
+            zOffset = (float) (offsets.z * physicalToModelCoordinates);
             // Angle needs to be multiplied by two for whatever reason.
             yawOffset = (float) (Math.atan2(-offsets.z, offsets.x) * 2);
 
