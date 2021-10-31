@@ -8,8 +8,12 @@ var VarInsnNode = Java.type("org.objectweb.asm.tree.VarInsnNode")
 
 
 
+/**
+ * Forces the game to account for the player's offsets in it's calculations.
+ */
 // TODO Find a way to make a copy of method and class nodes so that when transforms fail the unmodified one can be returned.
 // TODO Find an automatic way to minify this file when making a jar.
+// TODO Move strings into variables.
 
 
 
@@ -162,7 +166,7 @@ function logMessage(loggingLevel, message) {
         return
 
     var currentDate = new Date()
-    print("[" + currentDate.getHours() + ":" + currentDate.getMinutes() + ":" + currentDate.getSeconds() + "] [PlayerSplitCore/" +
+    print("[" + currentDate.getHours() + ":" + currentDate.getMinutes() + ":" + currentDate.getSeconds() + "] [ISawedThisPlayerInHalf/PlayerOffsetterCore/" +
         loggingLevel.name + "]: " + message)
 }
 
@@ -2016,10 +2020,10 @@ function initializeCoreMod() {
                                     ))
                                 doubleCheckFrustum.add(skipToReturn)
 
-                                //...
+                                // ...
                                 // INVOKEVIRTUAL net/minecraft/client/renderer/culling/ClippingHelperImpl.isBoundingBoxInFrustum (Lnet/minecraft/util/math/AxisAlignedBB;)Z
                                 oldInstructions.insert(instruction, doubleCheckFrustum)
-                                //...
+                                // ...
 
                                 success = true
                                 logTransformSuccess("second area of function shouldRender", "net.minecraft.client.renderer.entity.EntityRenderer")

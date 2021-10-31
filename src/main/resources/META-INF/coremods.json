@@ -1,4 +1,5 @@
 {
-  "player_split_core": "player_split_core.js",
-  "aaaaa": "aaaaa.js"
+  "ISawedThisPlayerInHalf SplitPlayerCore": "transformers/PlayerOffsetterCore.js",
+  "ISawedThisPlayerInHalf EventInjectorCore": "transformers/EventInjectorCore.js",
+  "ISawedThisPlayerInHalf aaaaa": "transformers/aaaaa.js"
 }

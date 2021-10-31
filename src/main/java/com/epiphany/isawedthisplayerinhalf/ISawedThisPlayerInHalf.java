@@ -2,6 +2,8 @@ package com.epiphany.isawedthisplayerinhalf;
 
 import com.epiphany.isawedthisplayerinhalf.networking.Networker;
 import com.epiphany.isawedthisplayerinhalf.rendering.RenderingOffsetter;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -21,7 +23,10 @@ for(LivingEntity livingentity : this.world.getEntitiesWithinAABB(LivingEntity.cl
 // TODO Have passive mobs follow bait towards a player's offset position.
 // TODO Firework crossbows need to be offset.
 
+// TODO (MAYBE) Combine shared code in ModifiedBipedModel and ModifiedPlayerModel.
 // TODO Clean up logo.
+
+// TODO (MAYBE) Expose an API for other mods to interact with this one.
 
 @Mod("swdthsplyrnhlf")
 public class ISawedThisPlayerInHalf {
@@ -34,8 +39,9 @@ public class ISawedThisPlayerInHalf {
         Networker.registerPackets();
     }
 
+    @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
-    public static void doClientStuff(final FMLClientSetupEvent fmlClientSetupEvent) {
+    public static void onClientSetup(final FMLClientSetupEvent fmlClientSetupEvent) {
         Config.onEnable();
         RenderingOffsetter.replacePlayerRenderers();
     }

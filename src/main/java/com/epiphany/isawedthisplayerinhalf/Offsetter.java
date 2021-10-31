@@ -1,7 +1,6 @@
 package com.epiphany.isawedthisplayerinhalf;
 
 import com.epiphany.isawedthisplayerinhalf.networking.Networker;
-import com.epiphany.isawedthisplayerinhalf.networking.SetOffsetPacket;
 import com.epiphany.isawedthisplayerinhalf.rendering.RenderingOffsetter;
 import com.mojang.realmsclient.gui.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -29,6 +28,7 @@ import java.util.UUID;
  * Contains various functions to offset the actions taken by the player.
  */
 public class Offsetter {
+    // TODO Make this hashmap private and move all actions taken outside of Offsetter into functions that act on said map.
     public static final HashMap<UUID, Vec3d> playerOffsetMap = new HashMap<>();
 
     /**
@@ -77,22 +77,15 @@ public class Offsetter {
 
 
 
-    /**
-     * Sets the initial offset for the client.
-     */
     @OnlyIn(Dist.CLIENT)
-    @SubscribeEvent
-    public static void onJoinServer(ClientPlayerNetworkEvent.LoggedInEvent loggedInEvent) {
-        ClientPlayerEntity player = loggedInEvent.getPlayer();
+    @SuppressWarnings("unused")
+    public static void onPostHandleJoinGame() {
+        ClientPlayerEntity player = Minecraft.getInstance().player;
+        Vec3d offsets = Config.getOffsets();
 
-        if (player != null) {
-            Vec3d offsets = Config.getOffsets();
-
-            setOffsets(player, offsets);
-
-            if (player.world.isRemote)
-                Networker.modChannel.sendToServer(new SetOffsetPacket(player, offsets));
-        }
+        setOffsets(player, offsets);
+        if (player.world.isRemote)
+            Networker.sendServerOffsets(offsets);
     }
 
     /**
@@ -104,6 +97,14 @@ public class Offsetter {
         playerOffsetMap.clear();
         RenderingOffsetter.renderingOffsetsMap.clear();
     }
+
+    @OnlyIn(Dist.CLIENT)
+    @SuppressWarnings("unused")
+    public static void onPostEntityLoad(int entityId, Entity entity) {
+        if (entity.world.isRemote && entity instanceof PlayerEntity && !entity.equals(Minecraft.getInstance().player))
+            Networker.requestOffsetsFor(entityId);
+    }
+
 
     /**
      * Removes players from the offset map when they leave.
@@ -119,8 +120,8 @@ public class Offsetter {
     /**
      * Offsets the position of thrown items.
      */
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void offsetDroppedItem(ItemTossEvent itemTossEvent) {
+    @SubscribeEvent(priority = EventPriority.HIGHEST, receiveCanceled = true)
+    public static void onItemDropped(ItemTossEvent itemTossEvent) {
         Vec3d offsets = getOffsets(itemTossEvent.getPlayer());
 
         if (!offsets.equals(Vec3d.ZERO)) {
@@ -167,9 +168,8 @@ public class Offsetter {
                     if (!getOffsets(player).equals(Vec3d.ZERO)) {
                         Config.setOffsets(0, 0, 0);
                         setOffsets(player.getUniqueID(), Vec3d.ZERO);
-
                         if (player.world.isRemote)
-                            Networker.modChannel.sendToServer(new SetOffsetPacket(player, 0, 0, 0));
+                            Networker.sendServerOffsets(0, 0, 0);
 
                         player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.reset")));
 
@@ -201,7 +201,7 @@ public class Offsetter {
                             Config.setOffsets(x, y, z);
                             setOffsets(player.getUniqueID(), new Vec3d(x, y, z));
                             if (player.world.isRemote)
-                                Networker.modChannel.sendToServer(new SetOffsetPacket(player, x, y,z));
+                                Networker.sendServerOffsets(x,y,z);
 
                             player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.set", x, y, z)));
 
