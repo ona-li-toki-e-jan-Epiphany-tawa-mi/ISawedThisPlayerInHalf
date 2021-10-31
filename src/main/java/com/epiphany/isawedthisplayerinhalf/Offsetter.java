@@ -24,6 +24,8 @@ import net.minecraftforge.fml.DistExecutor;
 import java.util.HashMap;
 import java.util.UUID;
 
+// TODO Unload players from the offset map when applicable.
+
 /**
  * Contains various functions to offset the actions taken by the player.
  */
@@ -154,7 +156,6 @@ public class Offsetter {
 
         if (possibleCommand.length >= 2) {
             switch (possibleCommand[1]) {
-                // What?
                 case "what":Config.a();break;
 
                 // Displays offsets.

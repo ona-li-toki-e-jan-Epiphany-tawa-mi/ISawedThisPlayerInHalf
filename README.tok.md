@@ -20,6 +20,8 @@ nimi wawa ni pi tomo toki li ken e ni: sina ante e ma ante pi sijelo sewi sina l
 
 ::ofs li ken kepeken tawa ::offsets.
 
+kin la sina ken ante e ma ante kepeken poki nimi ante (li lon config/swdthsplyrnhlf-client.toml)
+
 
 ## musi pi jan mute
 ante musi li wile lon ma pi jan mute tawa ni: kepeken e ona lon ona.

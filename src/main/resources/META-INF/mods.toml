@@ -5,7 +5,7 @@ issueTrackerURL="https://github.com/ona-li-toki-e-jan-Epiphany-tawa-mi/ISawedThi
 # A list of mods - how many allowed here is determined by the individual mod loader
 [[mods]] #mandatory
 modId="swdthsplyrnhlf"
-version="1.15.2-0.2.1-A"
+version="1.15.2-0.3.0-A"
 displayName="I Sawed This Player In Half!"
 # A URL to query for updates for this mod. See the JSON update specification <here>
 # updateJSONURL="http://myurl.me/" #optional
@@ -15,7 +15,8 @@ credits="Forge, Mojang, my parents, and the apple I ate 5 minutes ago. Oh, and P
 authors="ona li toki e jan Epiphany tawa mi"
 description='''
     To demonstrate the power of memes, I sawed this player in half!
-This mod splits the upper and lower halves of the player's body.
+
+This mod splits the upper and lower halves of the player's body, giving you control of where the upper half goes.
 
 Inspiration: https://www.youtube.com/watch?v=QS2GsxZ3d1M
 '''
