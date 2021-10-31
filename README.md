@@ -10,7 +10,7 @@ This mod splits apart the player, freeing the torso from the legs.
 
   
 ## How to Use
-These chat commands allow you to control offsets in-game.
+These chat commands allow you to control your offsets, the new position of the torso, in-game.
 
 * Help: **::offsets help**
 * Set offsets: **::offsets set \<x> \<y> \<z>**
@@ -18,6 +18,8 @@ These chat commands allow you to control offsets in-game.
 * Print out offsets: **::offsets get**
 
 ::ofs can be used in place of ::offsets.
+
+Offsets can also be modified using the config file (in config/swdthsplyrnhlf-client.toml)
 
 
 ## Multiplayer

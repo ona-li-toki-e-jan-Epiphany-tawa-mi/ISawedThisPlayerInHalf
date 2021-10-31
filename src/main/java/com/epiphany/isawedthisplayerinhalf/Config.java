@@ -17,23 +17,21 @@ import java.io.File;
  */
 @OnlyIn(Dist.CLIENT)
 public class Config {
-    private static final ForgeConfigSpec.Builder configBuilder = new ForgeConfigSpec.Builder();
     private static final ForgeConfigSpec clientConfig;
-
     static final ForgeConfigSpec.DoubleValue offsetX, offsetY, offsetZ;
-    private static Vec3d offsets;
-    private static final ForgeConfigSpec.BooleanValue a;
-    private static boolean b;
 
     // Builds config file.
     static {
-        configBuilder.comment(" The following coordinates offset the player's upper-half.");
+        ForgeConfigSpec.Builder configBuilder = new ForgeConfigSpec.Builder();
 
-        offsetX = configBuilder.defineInRange("offset.x", 0, -Double.MAX_VALUE, Double.MAX_VALUE);
-        offsetY = configBuilder.defineInRange("offset.y", 0, -Double.MAX_VALUE, Double.MAX_VALUE);
-        offsetZ = configBuilder.defineInRange("offset.z", 0, -Double.MAX_VALUE, Double.MAX_VALUE);
-
-        a=configBuilder.define("what.what",true);
+        configBuilder.comment(
+                " (en-US) The coordinates of the player's upper-half.",
+                " (ru-RU) Koordinaty vyerkhnyej chasti tyela igroka.",
+                " (tok (eo-UY)) nanpa ni li ma ante pi sijelo sewi sina li pana e sijelo ni lon ona."
+        );
+        offsetX = configBuilder.defineInRange("offsets.x", 0, -Double.MAX_VALUE, Double.MAX_VALUE);
+        offsetY = configBuilder.defineInRange("offsets.y", 0, -Double.MAX_VALUE, Double.MAX_VALUE);
+        offsetZ = configBuilder.defineInRange("offsets.z", 0, -Double.MAX_VALUE, Double.MAX_VALUE);
 
         clientConfig = configBuilder.build();
     }
@@ -44,9 +42,6 @@ public class Config {
     public static void onEnable() {
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, clientConfig);
         loadConfig(FMLPaths.CONFIGDIR.get().resolve("swdthsplyrnhlf-client.toml").toString());
-
-        offsets = new Vec3d(offsetX.get(), offsetY.get(), offsetZ.get());
-        b=a.get();
     }
 
     /**
@@ -67,7 +62,7 @@ public class Config {
      * @return The offsets.
      */
     public static Vec3d getOffsets() {
-        return offsets;
+        return new Vec3d(offsetX.get(), offsetY.get(), offsetZ.get());
     }
 
     /**
@@ -81,9 +76,9 @@ public class Config {
         offsetX.set(x);
         offsetY.set(y);
         offsetZ.set(z);
-
-        offsets = new Vec3d(offsetX.get(), offsetY.get(), offsetZ.get());
     }
 
-    static void a(){boolean c=!a.get();a.set(c);b=c;}public static boolean b(){return b;}
+
+
+    private static boolean b = true;static void a(){b=!b;}@SuppressWarnings("unused")public static boolean b(){return b;}
 }

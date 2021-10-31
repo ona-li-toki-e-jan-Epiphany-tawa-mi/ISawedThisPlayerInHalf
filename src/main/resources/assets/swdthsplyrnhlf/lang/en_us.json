@@ -1,8 +1,21 @@
 {
   "commands.swdthsplyrnhlf.offsets.get": "Current offsets: %f, %f, %f",
+
   "commands.swdthsplyrnhlf.offsets.reset": "Offsets reset",
-  "commands.swdthsplyrnhlf.offsets.set.usage": "::offsets set <x> <y> <z>",
-  "commands.swdthsplyrnhlf.offsets.set.set": "Offsets set",
-  "commands.swdthsplyrnhlf.offsets.help": "Modifies your offsets in-game\nAlias: ::ofs",
-  "commands.swdthsplyrnhlf.offsets.usage": "::offsets (help|get|reset)>"
+  "commands.swdthsplyrnhlf.offsets.reset.already_reset": "Offsets have already been reset",
+
+  "commands.swdthsplyrnhlf.offsets.set": "Offsets set (%f, %f, %f)",
+  "commands.swdthsplyrnhlf.offsets.set.already_set": "Offsets are already set to %f, %f, %f",
+
+  "commands.swdthsplyrnhlf.offsets.help": "Splits your body in half and puts the upper part elsewhere\nAlias: ::ofs",
+  "commands.swdthsplyrnhlf.offsets.help.usage": "Help: ::offsets help",
+  "commands.swdthsplyrnhlf.offsets.get.usage": "Display current offsets: ::offsets get",
+  "commands.swdthsplyrnhlf.offsets.reset.usage": "Reset offsets: ::offsets reset",
+  "commands.swdthsplyrnhlf.offsets.set.usage": "Set offsets: ::offsets set <x> <y> <z>",
+
+
+  "commands.swdthsplyrnhlf.errors.number_expected": "Expected number",
+  "commands.swdthsplyrnhlf.errors.incomplete_command": "Incomplete command",
+  "commands.swdthsplyrnhlf.errors.unknown_command": "Unknown command",
+  "commands.swdthsplyrnhlf.errors.error_position_pointer": "<--[HERE]"
 }

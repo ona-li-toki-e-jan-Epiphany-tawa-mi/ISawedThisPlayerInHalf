@@ -1,22 +1,17 @@
 package com.epiphany.isawedthisplayerinhalf.rendering;
 
-import com.epiphany.isawedthisplayerinhalf.Offsetter;
 import com.epiphany.isawedthisplayerinhalf.helpers.ReflectionHelper;
+import com.epiphany.isawedthisplayerinhalf.rendering.modfiedRendering.ModifiedPlayerRenderer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
-import net.minecraft.client.renderer.ActiveRenderInfo;
+import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
-import net.minecraft.client.renderer.entity.model.PlayerModel;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.RenderPlayerEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -24,86 +19,70 @@ import java.util.UUID;
  */
 @OnlyIn(Dist.CLIENT)
 public class RenderingOffsetter {
-    public static final HashMap<UUID, PlayerRendererWrapper> wrappedRendererMap = new HashMap<>();
-    private static final Field renderer;
-    private static final Field smallArms;
+    public static final HashMap<UUID, RenderingOffsets> renderingOffsetsMap = new HashMap<>();
+
+    private static final Field skinMapField;
+    private static final Field playerRendererField;
 
     static {
-        renderer = ReflectionHelper.getFieldOrNull(RenderPlayerEvent.class, "renderer");
-        ReflectionHelper.makeAccessible(renderer);
+        skinMapField = ReflectionHelper.getFieldOrNull(EntityRendererManager.class, "skinMap", "field_178636_l");
+        ReflectionHelper.makeAccessible(skinMapField);
+        playerRendererField = ReflectionHelper.getFieldOrNull(EntityRendererManager.class, "playerRenderer", "field_178637_m");
+        ReflectionHelper.makeAccessible(playerRendererField);
 
-        smallArms = ReflectionHelper.getFieldOrNull(PlayerModel.class, "smallArms", "field_178735_y");
-        ReflectionHelper.makeAccessible(renderer);
+        if (skinMapField == null)
+            throw new NullPointerException("Unable to find field 'skinMapField' under names 'skinMap' and 'field_178636_l'");
+        if (playerRendererField == null)
+            throw new NullPointerException("Unable to find field 'playerRendererField' under names 'playerRenderer' and 'field_178637_m'");
     }
 
 
 
     /**
-     * Gets whether or not the arm of the player should be rendered.
-     * Used for the first person renderer.
-     *
-     * @return Whether or not the arm of the player should be rendered.
+     * Replaces the two player renderers in EntityRendererManager with modified variants that render the split player models.
      */
-    public static boolean shouldRenderHand() {
-        return Offsetter.getOffsets(Minecraft.getInstance().player).equals(Vec3d.ZERO);
-    }
+    public static void replacePlayerRenderers() {
+        EntityRendererManager entityRendererManager = Minecraft.getInstance().getRenderManager();
+        Map<String, PlayerRenderer> skinMap = (Map<String, PlayerRenderer>) ReflectionHelper.getFieldOrDefault(skinMapField, entityRendererManager, null);
 
-    /**
-     * Gets whether or not the game is in third-person.
-     * Overrides normal behavior if the player has an offset.
-     *
-     * @param activeRenderInfo The active render info of the calling renderer.
-     *
-     * @return Whether or not the game is in third-person.
-     */
-    public static boolean modifiedIsThirdPerson(ActiveRenderInfo activeRenderInfo) {
-        return !Offsetter.getOffsets(Minecraft.getInstance().player).equals(Vec3d.ZERO) || activeRenderInfo.isThirdPerson();
+        if (skinMap != null) {
+            PlayerRenderer newDefaultRenderer = new ModifiedPlayerRenderer(entityRendererManager, false);
+
+            skinMap.replace("default", newDefaultRenderer);
+            skinMap.replace("slim", new ModifiedPlayerRenderer(entityRendererManager, true));
+            ReflectionHelper.setField(playerRendererField, entityRendererManager, newDefaultRenderer);
+
+        } else
+            throw new NullPointerException("Unable to acquire value of field 'skinMap' from EntityRendererManager");
     }
 
 
-
     /**
-     * Intercepts normal player-rendering and replaces it with the modified form.
+     * Calculates and assigns rendering offset information to a player.
+     *
+     * @param playerUUID The UUID of the player to set the offsets for.
+     * @param offsets The physical offsets of the player's body.
      */
-    @SubscribeEvent(priority=EventPriority.HIGHEST)
-    public static void onPlayerPreRender(RenderPlayerEvent.Pre renderPlayerEvent) {
-        if (!renderPlayerEvent.isCanceled()) {
-            PlayerEntity player = renderPlayerEvent.getPlayer();
+    public static void setOffsets(UUID playerUUID, Vec3d offsets) {
+        final double physicalToModelCoordinates = 17.0660750427;
 
-            // Only renders with a custom model if the player has an offset.
-            if (!Offsetter.getOffsets(player).equals(Vec3d.ZERO)) {
-                UUID playerUUID = player.getUniqueID();
-                PlayerRendererWrapper wrappedRenderer;
+        float xOffset, yOffset, zOffset;
+        float yawOffset;
 
-                // Gets the renderer to be used instead of the normal one.
-                if (!wrappedRendererMap.containsKey(playerUUID)) {
-                    PlayerRenderer playerRenderer = renderPlayerEvent.getRenderer();
-                    PlayerModel<AbstractClientPlayerEntity> playerModel = playerRenderer.getEntityModel();
-                    boolean useSmallArms = (boolean) ReflectionHelper.getFieldOrDefault(smallArms, playerModel, false);
+        if (!offsets.equals(Vec3d.ZERO)) {
+            xOffset = (float) (offsets.x * physicalToModelCoordinates);
+            yOffset = (float) (offsets.y * -physicalToModelCoordinates);
+            zOffset = (float) (offsets.z * physicalToModelCoordinates);
+            // Angle needs to be multiplied by two for whatever reason.
+            yawOffset = (float) (Math.atan2(-offsets.z, offsets.x) * 2);
 
-                    wrappedRenderer = new PlayerRendererWrapper(playerRenderer.getRenderManager(), useSmallArms, Offsetter.getOffsets(player));
-                    wrappedRendererMap.put(playerUUID, wrappedRenderer);
-
-                } else
-                    wrappedRenderer = wrappedRendererMap.get(playerUUID);
-
-                // Swaps out renderers, renders modified player model.
-                wrappedRenderer.render((AbstractClientPlayerEntity) renderPlayerEvent.getPlayer(), renderPlayerEvent.getEntity().rotationYaw, renderPlayerEvent.getPartialRenderTick(), renderPlayerEvent.getMatrixStack(), renderPlayerEvent.getBuffers(), renderPlayerEvent.getLight());
-                ReflectionHelper.setField(renderer, renderPlayerEvent, wrappedRenderer.wrappedRenderer);
-
-                renderPlayerEvent.setCanceled(true);
-            }
+        } else {
+            xOffset = 0;
+            yOffset = 0;
+            zOffset = 0;
+            yawOffset = 0;
         }
-    }
 
-    /**
-     * Swaps out normal renderer for the modified one.
-     */
-    @SubscribeEvent(priority=EventPriority.HIGHEST)
-    public static void onPlayerPostRender(RenderPlayerEvent.Post renderPlayerEvent) {
-        UUID playerUUID = renderPlayerEvent.getPlayer().getUniqueID();
-
-        if (wrappedRendererMap.containsKey(playerUUID))
-            ReflectionHelper.setField(renderer, renderPlayerEvent, wrappedRendererMap.get(playerUUID).wrappedRenderer);
+        renderingOffsetsMap.put(playerUUID, new RenderingOffsets(xOffset, yOffset, zOffset, yawOffset));
     }
 }
