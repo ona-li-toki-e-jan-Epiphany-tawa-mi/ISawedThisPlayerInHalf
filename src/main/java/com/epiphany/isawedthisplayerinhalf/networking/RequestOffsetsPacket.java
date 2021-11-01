@@ -24,7 +24,7 @@ public class RequestOffsetsPacket implements IPacket {
      *
      * @param playerEntityId The entity id of the player.
      */
-    public RequestOffsetsPacket(int playerEntityId) {
+    RequestOffsetsPacket(int playerEntityId) {
         this.playerID = playerEntityId;
     }
 
@@ -55,7 +55,7 @@ public class RequestOffsetsPacket implements IPacket {
                 Entity requestedPlayer = sender.world.getEntityByID(playerID);
 
                 if (requestedPlayer instanceof PlayerEntity) {
-                    Vec3d offsets = Offsetter.playerOffsetMap.get(requestedPlayer.getUniqueID());
+                    Vec3d offsets = Offsetter.getOffsetsOrNull((PlayerEntity) requestedPlayer);
 
                     if (offsets != null)
                         Networker.modChannel.send(PacketDistributor.PLAYER.with(() -> sender), new SetOffsetsPacket((PlayerEntity) requestedPlayer, offsets));

@@ -42,7 +42,7 @@ public class ISawedThisPlayerInHalf {
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public static void onClientSetup(final FMLClientSetupEvent fmlClientSetupEvent) {
-        Config.onEnable();
+        Config.enable();
         RenderingOffsetter.replacePlayerRenderers();
     }
 }

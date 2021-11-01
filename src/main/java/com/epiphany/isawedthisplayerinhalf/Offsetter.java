@@ -21,25 +21,26 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.UUID;
 
 /**
  * Contains various functions to offset the actions taken by the player.
  */
 public class Offsetter {
-    // TODO Make this hashmap private and move all actions taken outside of Offsetter into functions that act on said map.
-    public static final HashMap<UUID, Vec3d> playerOffsetMap = new HashMap<>();
+    private static final HashMap<UUID, Vec3d> playerOffsetMap = new HashMap<>();
 
     /**
      * Gets the offsets a player has.
      *
-     * @param player The player to get the offsets from.
+     * @param playerEntity The player to get the offsets from.
      *
      * @return The offsets a player has.
      */
-    public static Vec3d getOffsets(PlayerEntity player) {
-        Vec3d offsets = playerOffsetMap.get(player.getUniqueID());
+    public static Vec3d getOffsets(PlayerEntity playerEntity) {
+        Vec3d offsets = playerOffsetMap.get(playerEntity.getUniqueID());
         return offsets != null ? offsets : Vec3d.ZERO;
     }
 
@@ -48,35 +49,50 @@ public class Offsetter {
      *
      * @param entity The entity to get the offsets from.
      *
-     * @return The offsets a entity has.
+     * @return The offsets an entity has.
      */
     public static Vec3d getOffsets(Entity entity) {
         return entity instanceof PlayerEntity ? getOffsets((PlayerEntity) entity) : Vec3d.ZERO;
     }
 
     /**
-     * Sets the offsets for the given player.
+     * Returns the offsets a player has, or null, if they do not have any.
      *
-     * @param playerUUID The UUID of the player to set the offsets of.
-     * @param offsets The offsets to set to the player.
+     * @param playerEntity The player to get the offsets of.
+     *
+     * @return The offsets of the player, or null.
      */
-    public static void setOffsets(UUID playerUUID, Vec3d offsets) {
-        playerOffsetMap.put(playerUUID, offsets);
-        DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> RenderingOffsetter.setOffsets(playerUUID, offsets));
+    public static Vec3d getOffsetsOrNull(PlayerEntity playerEntity) {
+        return playerOffsetMap.get(playerEntity.getUniqueID());
+    }
+
+    /**
+     * Returns an unmodifiable set containing the UUIDs of the players that have offsets.
+     *
+     * @return A set containing the UUIDs of offset players.
+     */
+    public static Set<UUID> getOffsetPlayerUUIDs() {
+        return Collections.unmodifiableSet(playerOffsetMap.keySet());
     }
 
     /**
      * Sets the offsets for the given player.
      *
-     * @param player The player to set the offsets of.
+     * @param playerEntity The player to set the offsets of.
      * @param offsets The offsets to set to the player.
      */
-    public static void setOffsets(PlayerEntity player, Vec3d offsets) {
-        setOffsets(player.getUniqueID(), offsets);
+    public static void setOffsets(PlayerEntity playerEntity, Vec3d offsets) {
+        UUID playerUUID = playerEntity.getUniqueID();
+
+        playerOffsetMap.put(playerUUID, offsets);
+        DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> RenderingOffsetter.setOffsets(playerEntity, offsets));
     }
 
 
 
+    /**
+     * Loads the clients offsets when the world loads. And, if on a dedicated server, sends them to it.
+     */
     @OnlyIn(Dist.CLIENT)
     @SuppressWarnings("unused")
     public static void onPostHandleJoinGame() {
@@ -95,9 +111,15 @@ public class Offsetter {
     @SubscribeEvent
     public static void onLeaveServer(ClientPlayerNetworkEvent.LoggedOutEvent loggedOutEvent) {
         playerOffsetMap.clear();
-        RenderingOffsetter.renderingOffsetsMap.clear();
+        RenderingOffsetter.clearAllOffsets();
     }
 
+    /**
+     * Request the offsets of players that are being loaded from the server.
+     *
+     * @param entityId The entity id the entity.
+     * @param entity The entity being loaded.
+     */
     @OnlyIn(Dist.CLIENT)
     @SuppressWarnings("unused")
     public static void onPostEntityLoad(int entityId, Entity entity) {
@@ -117,7 +139,7 @@ public class Offsetter {
             UUID playerUUID = entity.getUniqueID();
 
             playerOffsetMap.remove(playerUUID);
-            RenderingOffsetter.renderingOffsetsMap.remove(playerUUID);
+            RenderingOffsetter.unsetOffsets(playerUUID);
         }
     }
 
@@ -151,8 +173,6 @@ public class Offsetter {
         }
     }
 
-
-
     /**
      * In-game config options implemented via chat "commands."
      */
@@ -174,15 +194,17 @@ public class Offsetter {
 
                 // Displays offsets.
                 case "get":
+                    Vec3d offsets = Config.getOffsets();
+
                     player.sendMessage(new StringTextComponent(I18n.format("commands.swdthsplyrnhlf.offsets.get",
-                            Config.offsetX.get(), Config.offsetY.get(), Config.offsetZ.get())));
+                            offsets.x, offsets.y, offsets.z)));
                     break;
 
                 // Resets the offsets for the player and notifies the server.
                 case "reset":
                     if (!getOffsets(player).equals(Vec3d.ZERO)) {
                         Config.setOffsets(0, 0, 0);
-                        setOffsets(player.getUniqueID(), Vec3d.ZERO);
+                        setOffsets(player, Vec3d.ZERO);
                         if (player.world.isRemote)
                             Networker.sendServerOffsets(0, 0, 0);
 
@@ -214,7 +236,7 @@ public class Offsetter {
                             }
 
                             Config.setOffsets(x, y, z);
-                            setOffsets(player.getUniqueID(), new Vec3d(x, y, z));
+                            setOffsets(player, new Vec3d(x, y, z));
                             if (player.world.isRemote)
                                 Networker.sendServerOffsets(x,y,z);
 

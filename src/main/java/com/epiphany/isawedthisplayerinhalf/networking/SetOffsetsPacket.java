@@ -16,6 +16,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 // TODO Check out what returning false does for packet handling.
+// TODO Move from using vec3d to 3 doubles.
 
 /**
  * A packet used for sending a player's offsets.
@@ -30,7 +31,7 @@ public class SetOffsetsPacket implements IPacket {
      * @param player The player whose offsets are being sent.
      * @param offsets The offsets to be set to the player.
      */
-    public SetOffsetsPacket(PlayerEntity player, Vec3d offsets) {
+    SetOffsetsPacket(PlayerEntity player, Vec3d offsets) {
         this.playerID = player.getEntityId();
         this.offsets = offsets;
     }
@@ -75,13 +76,14 @@ public class SetOffsetsPacket implements IPacket {
                     ServerPlayerEntity sender = context.getSender();
 
                     if (sender != null) {
+                        Offsetter.setOffsets(sender, this.offsets);
+
+
                         UUID senderUUID = sender.getUniqueID();
                         PlayerList playerList = sender.getServer().getPlayerList();
 
-                        Offsetter.setOffsets(senderUUID, this.offsets);
-
                         // Routes packet to the other players on the server with the mod.
-                        for (UUID otherPlayerUUID : Offsetter.playerOffsetMap.keySet()) {
+                        for (UUID otherPlayerUUID : Offsetter.getOffsetPlayerUUIDs()) {
                             if (otherPlayerUUID.equals(senderUUID))
                                 continue;
 

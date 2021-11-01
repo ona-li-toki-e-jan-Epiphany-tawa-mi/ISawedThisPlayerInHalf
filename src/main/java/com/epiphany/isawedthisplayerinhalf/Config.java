@@ -12,13 +12,15 @@ import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.io.File;
 
+// TODO Move static initialization into onEnable.
+
 /**
  * Deals with configuration data for the mod.
  */
 @OnlyIn(Dist.CLIENT)
 public class Config {
     private static final ForgeConfigSpec clientConfig;
-    static final ForgeConfigSpec.DoubleValue offsetX, offsetY, offsetZ;
+    private static final ForgeConfigSpec.DoubleValue offsetX, offsetY, offsetZ;
 
     // Builds config file.
     static {
@@ -39,7 +41,7 @@ public class Config {
     /**
      * Loads in config data.
      */
-    public static void onEnable() {
+    public static void enable() {
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, clientConfig);
         loadConfig(FMLPaths.CONFIGDIR.get().resolve("swdthsplyrnhlf-client.toml").toString());
     }
@@ -54,6 +56,7 @@ public class Config {
         configFile.load();
         clientConfig.setConfig(configFile);
     }
+
 
 
     /**
