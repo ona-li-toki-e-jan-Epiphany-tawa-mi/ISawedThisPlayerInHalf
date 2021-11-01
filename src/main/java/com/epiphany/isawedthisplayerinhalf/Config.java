@@ -12,18 +12,34 @@ import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.io.File;
 
-// TODO Move static initialization into onEnable.
+// TODO Look into adding a config menu in the mode menu.
+// TODO Check out to see if config translation can be displayed depending on client locale.
+// TODO Move from "swdthsplyrnhlf-client.toml" to "isawedthisplayerinhalf-client.toml" in next release.
 
 /**
  * Deals with configuration data for the mod.
  */
 @OnlyIn(Dist.CLIENT)
 public class Config {
-    private static final ForgeConfigSpec clientConfig;
-    private static final ForgeConfigSpec.DoubleValue offsetX, offsetY, offsetZ;
+    private static ForgeConfigSpec.DoubleValue offsetX, offsetY, offsetZ;
 
-    // Builds config file.
-    static {
+    /**
+     * Sets up config file and loads in data if it already exits.
+     */
+    public static void enable() {
+        final String configFileName = "swdthsplyrnhlf-client.toml";
+
+        ForgeConfigSpec configSpecification = buildConfig();
+        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, configSpecification);
+        loadConfigFile(FMLPaths.CONFIGDIR.get().resolve(configFileName).toString(), configSpecification);
+    }
+
+    /**
+     * Builds the specification of what the config file should contain.
+     *
+     * @return The config file specification.
+     */
+    public static ForgeConfigSpec buildConfig() {
         ForgeConfigSpec.Builder configBuilder = new ForgeConfigSpec.Builder();
 
         configBuilder.comment(
@@ -35,26 +51,19 @@ public class Config {
         offsetY = configBuilder.defineInRange("offsets.y", 0, -Double.MAX_VALUE, Double.MAX_VALUE);
         offsetZ = configBuilder.defineInRange("offsets.z", 0, -Double.MAX_VALUE, Double.MAX_VALUE);
 
-        clientConfig = configBuilder.build();
-    }
-
-    /**
-     * Loads in config data.
-     */
-    public static void enable() {
-        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, clientConfig);
-        loadConfig(FMLPaths.CONFIGDIR.get().resolve("swdthsplyrnhlf-client.toml").toString());
+        return configBuilder.build();
     }
 
     /**
      * Loads in the config file from the given path.
      *
      * @param path The path to the config file.
+     * @param configSpecification The config file specification.
      */
-    private static void loadConfig(String path) {
+    private static void loadConfigFile(String path, ForgeConfigSpec configSpecification) {
         CommentedFileConfig configFile = CommentedFileConfig.builder(new File(path)).sync().autosave().writingMode(WritingMode.REPLACE).build();
         configFile.load();
-        clientConfig.setConfig(configFile);
+        configSpecification.setConfig(configFile);
     }
 
 
