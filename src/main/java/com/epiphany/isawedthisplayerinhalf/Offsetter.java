@@ -24,8 +24,6 @@ import net.minecraftforge.fml.DistExecutor;
 import java.util.HashMap;
 import java.util.UUID;
 
-// TODO Unload players from the offset map when applicable.
-
 /**
  * Contains various functions to offset the actions taken by the player.
  */
@@ -103,8 +101,24 @@ public class Offsetter {
     @OnlyIn(Dist.CLIENT)
     @SuppressWarnings("unused")
     public static void onPostEntityLoad(int entityId, Entity entity) {
-        if (entity.world.isRemote && entity instanceof PlayerEntity && !entity.equals(Minecraft.getInstance().player))
+        if (entity instanceof PlayerEntity && entity.world.isRemote && !entity.equals(Minecraft.getInstance().player))
             Networker.requestOffsetsFor(entityId);
+    }
+
+    /**
+     * Unloads players from the offset map when they are being unloaded from the world.
+     *
+     * @param entity The entity being unloaded.
+     */
+    @OnlyIn(Dist.CLIENT)
+    @SuppressWarnings("unused")
+    public static void onEntityUnload(Entity entity) {
+        if (entity instanceof PlayerEntity && entity.world.isRemote && !entity.equals(Minecraft.getInstance().player)) {
+            UUID playerUUID = entity.getUniqueID();
+
+            playerOffsetMap.remove(playerUUID);
+            RenderingOffsetter.renderingOffsetsMap.remove(playerUUID);
+        }
     }
 
 

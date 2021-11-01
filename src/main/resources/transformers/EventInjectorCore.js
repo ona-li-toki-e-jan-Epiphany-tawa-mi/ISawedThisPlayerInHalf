@@ -174,6 +174,7 @@ function initializeCoreMod() {
 
         /**
          * Calls event listeners after an entity is assigned its entity id.
+         * Calls event listeners when an entity is being unloaded.
          */
         "ClientWorld": {
             "target": {
@@ -182,6 +183,7 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
+                // Calls event listeners after an entity is assigned its entity id.
                 var addEntityImpl = findObfuscatedMethodWithSignature(classNode, "addEntityImpl", "func_217424_b", "(ILnet/minecraft/entity/Entity;)V")
 
                 if (addEntityImpl !== null) {
@@ -226,6 +228,36 @@ function initializeCoreMod() {
 
                 } else
                     logTransformError("function addEntityImpl", "net.minecraft.client.world.ClientWorld", "Unable to find function to transform")
+
+                // Calls event listeners when an entity is being unloaded.
+                var removeEntity = findObfuscatedMethodWithSignature(classNode, "removeEntity", "func_217414_d", "(Lnet/minecraft/entity/Entity;)V")
+
+                if (removeEntity !== null) {
+                    try {
+                        var callListeners = new InsnList()
+
+                        callListeners.add(new VarInsnNode(Opcodes.ALOAD, 1)) // entityIn Lnet/minecraft/entity/Entity;
+                        callListeners.add(new MethodInsnNode(
+                            Opcodes.INVOKESTATIC,
+                            "com/epiphany/isawedthisplayerinhalf/Offsetter",
+                            "onEntityUnload",
+                            "(Lnet/minecraft/entity/Entity;)V",
+                            false
+                        ))
+
+                        // METHOD START.
+                        removeEntity.instructions.insert(callListeners)
+                        // ...
+
+                        logTransformSuccess("function removeEntity", "net.minecraft.client.world.ClientWorld")
+
+
+                    } catch (exception) {
+                        logTransformError("function removeEntity", "net.minecraft.client.world.ClientWorld", exception.message)
+                    }
+
+                } else
+                    logTransformError("function removeEntity", "net.minecraft.client.world.ClientWorld", "Unable to find function to transform")
 
                 return classNode
             }
