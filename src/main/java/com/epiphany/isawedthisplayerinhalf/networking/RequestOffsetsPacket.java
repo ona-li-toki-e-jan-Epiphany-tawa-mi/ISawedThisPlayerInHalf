@@ -58,7 +58,7 @@ public class RequestOffsetsPacket implements IPacket {
                     Vec3d offsets = Offsetter.getOffsetsOrNull((PlayerEntity) requestedPlayer);
 
                     if (offsets != null)
-                        Networker.modChannel.send(PacketDistributor.PLAYER.with(() -> sender), new SetOffsetsPacket((PlayerEntity) requestedPlayer, offsets));
+                        Networker.modChannel.send(PacketDistributor.PLAYER.with(() -> sender), new SetOffsetsPacket((PlayerEntity) requestedPlayer, offsets.x, offsets.y, offsets.z));
                 }
             }
         }));

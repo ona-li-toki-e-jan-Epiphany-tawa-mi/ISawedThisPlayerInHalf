@@ -15,15 +15,12 @@ import net.minecraftforge.fml.network.PacketDistributor;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-// TODO Check out what returning false does for packet handling.
-// TODO Move from using vec3d to 3 doubles.
-
 /**
  * A packet used for sending a player's offsets.
  */
 public class SetOffsetsPacket implements IPacket {
     private final int playerID;
-    private final Vec3d offsets;
+    private final double xOffset, yOffset, zOffset;
 
     /**
      * Creates a new SetOffsetsPacket.
@@ -31,9 +28,11 @@ public class SetOffsetsPacket implements IPacket {
      * @param player The player whose offsets are being sent.
      * @param offsets The offsets to be set to the player.
      */
-    SetOffsetsPacket(PlayerEntity player, Vec3d offsets) {
+    SetOffsetsPacket(PlayerEntity player, double xOffset, double yOffset, double zOffset) {
         this.playerID = player.getEntityId();
-        this.offsets = offsets;
+        this.xOffset = xOffset;
+        this.yOffset = yOffset;
+        this.zOffset = zOffset;
     }
 
     /**
@@ -43,15 +42,17 @@ public class SetOffsetsPacket implements IPacket {
      */
     public SetOffsetsPacket(PacketBuffer packetBuffer) {
         this.playerID = packetBuffer.readInt();
-        this.offsets = new Vec3d(packetBuffer.readDouble(), packetBuffer.readDouble(), packetBuffer.readDouble());
+        this.xOffset = packetBuffer.readDouble();
+        this.yOffset = packetBuffer.readDouble();
+        this.zOffset = packetBuffer.readDouble();
     }
 
     @Override
     public void toBytes(PacketBuffer packetBuffer) {
         packetBuffer.writeInt(this.playerID);
-        packetBuffer.writeDouble(this.offsets.x);
-        packetBuffer.writeDouble(this.offsets.y);
-        packetBuffer.writeDouble(this.offsets.z);
+        packetBuffer.writeDouble(this.xOffset);
+        packetBuffer.writeDouble(this.yOffset);
+        packetBuffer.writeDouble(this.zOffset);
     }
 
 
@@ -66,7 +67,7 @@ public class SetOffsetsPacket implements IPacket {
                     Entity possiblePlayer = Minecraft.getInstance().world.getEntityByID(this.playerID);
 
                     if (possiblePlayer instanceof PlayerEntity && !possiblePlayer.equals(Minecraft.getInstance().player))
-                        Offsetter.setOffsets((PlayerEntity) possiblePlayer, this.offsets);
+                        Offsetter.setOffsets((PlayerEntity) possiblePlayer, new Vec3d(this.xOffset, this.yOffset, this.zOffset));
 
                     return true;
                 },
@@ -76,7 +77,7 @@ public class SetOffsetsPacket implements IPacket {
                     ServerPlayerEntity sender = context.getSender();
 
                     if (sender != null) {
-                        Offsetter.setOffsets(sender, this.offsets);
+                        Offsetter.setOffsets(sender, new Vec3d(this.xOffset, this.yOffset, this.zOffset));
 
 
                         UUID senderUUID = sender.getUniqueID();
