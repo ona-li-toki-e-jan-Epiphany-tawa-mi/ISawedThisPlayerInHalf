@@ -34,4 +34,4 @@
 
 
 ## Благодарности
-Спасибо [PhoenixSC](https://www.youtube.com/c/PhnixhamstaSC "Канал PhoenixSC на Ютубе") за [идею для мода.](https://www.youtube.com/watch?v=QS2GsxZ3d1M "I Separated the Player's Body in Half in Minecraft - PhoenixSC")
+[PhoenixSC](https://www.youtube.com/c/PhnixhamstaSC "Канал PhoenixSC на Ютубе") - [идея для мода.](https://www.youtube.com/watch?v=QS2GsxZ3d1M "I Separated the Player's Body in Half in Minecraft - PhoenixSC")

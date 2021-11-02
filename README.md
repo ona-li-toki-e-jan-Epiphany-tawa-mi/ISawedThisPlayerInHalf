@@ -33,4 +33,4 @@ I would **_not_** recommend using this on a server that does not have the mod.
 
 
 ## Credits
-Thanks to [PhoenixSC](https://www.youtube.com/c/PhnixhamstaSC "PhoenixSC's YouTube channel") for the [mod idea.](https://www.youtube.com/watch?v=QS2GsxZ3d1M "I Separated the Player's Body in Half in Minecraft - PhoenixSC")
+[PhoenixSC](https://www.youtube.com/c/PhnixhamstaSC "PhoenixSC's YouTube channel") - [mod idea.](https://www.youtube.com/watch?v=QS2GsxZ3d1M "I Separated the Player's Body in Half in Minecraft - PhoenixSC")

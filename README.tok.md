@@ -34,4 +34,4 @@ kin la kepeken e ni lon ma pi jan mute pi ante musi ni ala li **_ike._**
 
 
 ## jan suli
-[jan PhoenixSC](https://www.youtube.com/c/PhnixhamstaSC "lipu JuTu (YouTube) PhoenixSC") o, pona tawa [sona pi pali pi ante ni.](https://www.youtube.com/watch?v=QS2GsxZ3d1M "I Separated the Player's Body in Half in Minecraft - PhoenixSC")
+[jan PhoenixSC](https://www.youtube.com/c/PhnixhamstaSC "lipu JuTu (YouTube) PhoenixSC") - [sona pi pali pi ante ni.](https://www.youtube.com/watch?v=QS2GsxZ3d1M "I Separated the Player's Body in Half in Minecraft - PhoenixSC")
