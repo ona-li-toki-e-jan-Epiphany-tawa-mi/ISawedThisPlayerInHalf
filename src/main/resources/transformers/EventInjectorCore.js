@@ -107,6 +107,11 @@ function logTransformSuccess(functionName, fullClassName) {
     logMessage(LoggingLevel.DEBUG, "Successfully transformed " + functionName + " in " + fullClassName)
 }
 
+var ErrorMessages = {
+    injectionPointNotFound: "Unable to find injection point",
+    functionNotFound: "Unable to find function to transform"
+}
+
 /**
  * Logs that a transform was not successful, showing the function that was being transformed, the host class's name, and what went wrong.
  *
@@ -131,7 +136,10 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
+                var classPath = "net.minecraft.client.network.play.ClientPlayNetHandler"
+
                 var handleJoinGame = findObfuscatedMethodWithSignature(classNode, "handleJoinGame", "func_147282_a", "(Lnet/minecraft/network/play/server/SJoinGamePacket;)V")
+                var functionName = "function handleJoinGame"
 
                 if (handleJoinGame !== null) {
                     try {
@@ -152,21 +160,21 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("function handleJoinGame", "net.minecraft.client.network.play.ClientPlayNetHandler")
+                                logTransformSuccess(functionName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("function handleJoinGame", "net.minecraft.client.network.play.ClientPlayNetHandler", "Unable to find injection point")
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("function handleJoinGame", "net.minecraft.client.network.play.ClientPlayNetHandler", exception.message)
+                        logTransformError(functionName, classPath, exception.message)
                     }
 
                 } else
-                    logTransformError("function handleJoinGame", "net.minecraft.client.network.play.ClientPlayNetHandler", "Unable to find function to transform")
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
 
                 return classNode
             }
@@ -183,8 +191,11 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
+                var classPath = "net.minecraft.client.world.ClientWorld"
+
                 // Calls event listeners after an entity is assigned its entity id.
                 var addEntityImpl = findObfuscatedMethodWithSignature(classNode, "addEntityImpl", "func_217424_b", "(ILnet/minecraft/entity/Entity;)V")
+                var functionName = "function addEntityImpl"
 
                 if (addEntityImpl !== null) {
                     try {
@@ -213,24 +224,25 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("function addEntityImpl", "net.minecraft.client.world.ClientWorld")
+                                logTransformSuccess(functionName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("function addEntityImpl", "net.minecraft.client.world.ClientWorld", "Unable to find injection point")
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("function addEntityImpl", "net.minecraft.client.world.ClientWorld", exception.message)
+                        logTransformError(functionName, classPath, exception.message)
                     }
 
                 } else
-                    logTransformError("function addEntityImpl", "net.minecraft.client.world.ClientWorld", "Unable to find function to transform")
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
 
                 // Calls event listeners when an entity is being unloaded.
                 var removeEntity = findObfuscatedMethodWithSignature(classNode, "removeEntity", "func_217414_d", "(Lnet/minecraft/entity/Entity;)V")
+                functionName = "function removeEntity"
 
                 if (removeEntity !== null) {
                     try {
@@ -249,15 +261,15 @@ function initializeCoreMod() {
                         removeEntity.instructions.insert(callListeners)
                         // ...
 
-                        logTransformSuccess("function removeEntity", "net.minecraft.client.world.ClientWorld")
+                        logTransformSuccess(functionName, classPath)
 
 
                     } catch (exception) {
-                        logTransformError("function removeEntity", "net.minecraft.client.world.ClientWorld", exception.message)
+                        logTransformError(functionName, classPath, exception.message)
                     }
 
                 } else
-                    logTransformError("function removeEntity", "net.minecraft.client.world.ClientWorld", "Unable to find function to transform")
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
 
                 return classNode
             }

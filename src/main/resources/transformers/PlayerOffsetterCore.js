@@ -13,7 +13,6 @@ var VarInsnNode = Java.type("org.objectweb.asm.tree.VarInsnNode")
  */
 // TODO Find a way to make a copy of method and class nodes so that when transforms fail the unmodified one can be returned.
 // TODO Find an automatic way to minify this file when making a jar.
-// TODO Move strings into variables.
 
 
 
@@ -180,6 +179,11 @@ function logTransformSuccess(functionName, fullClassName) {
     logMessage(LoggingLevel.DEBUG, "Successfully transformed " + functionName + " in " + fullClassName)
 }
 
+var ErrorMessages = {
+    injectionPointNotFound: "Unable to find injection point",
+    functionNotFound: "Unable to find function to transform"
+}
+
 /**
  * Logs that a transform was not successful, showing the function that was being transformed, the host class's name, and what went wrong.
  *
@@ -204,7 +208,10 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
+                var classPath = "net.minecraft.entity.Entity"
+
                 var pick = findObfuscatedMethodWithSignature(classNode, "pick", "func_213324_a", "(DFZ)Lnet/minecraft/util/math/RayTraceResult;")
+                var functionName = "function pick"
 
                 if (pick !== null) {
                     try {
@@ -231,21 +238,21 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("function pick", "net.minecraft.entity.Entity")
+                                logTransformSuccess(functionName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("function pick", "net.minecraft.entity.Entity", "Unable to find injection point")
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("function pick", "net.minecraft.entity.Entity", exception.message)
+                        logTransformError(functionName, classPath, exception.message)
                     }
 
                 } else
-                    logTransformError("function pick", "net.minecraft.entity.Entity", "Unable to find function to transform")
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
 
                 return classNode
             }
@@ -261,8 +268,11 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
+                var classPath = "net.minecraft.entity.LivingEntity"
+
                 var attackEntityFrom = findObfuscatedMethodWithSignature(classNode, "attackEntityFrom", "func_70097_a",
                     "(Lnet/minecraft/util/DamageSource;F)Z")
+                var functionName = "function attackEntityFrom"
 
                 if (attackEntityFrom !== null) {
                     try {
@@ -320,21 +330,21 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("function attackEntityFrom", "net.minecraft.entity.LivingEntity")
+                                logTransformSuccess(functionName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("function attackEntityFrom", "net.minecraft.entity.LivingEntity", "Unable to find injection point")
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("function attackEntityFrom", "net.minecraft.entity.LivingEntity", exception.message)
+                        logTransformError(functionName, classPath, exception.message)
                     }
 
                 } else
-                    logTransformError("function attackEntityFrom", "net.minecraft.entity.LivingEntity", "Unable to function to transform")
+                    logTransformError(functionName, classPath, "Unable to function to transform")
 
                 return classNode
             }
@@ -351,12 +361,16 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
+                var classPath = "net.minecraft.entity.CreatureEntity"
+
                 var updateLeashedState = findObfuscatedMethodWithSignature(classNode, "updateLeashedState", "func_110159_bB", "()V")
+                var functionName = "function updateLeashedState"
 
                 if (updateLeashedState !== null) {
                     var oldInstructions = updateLeashedState.instructions
 
                     // Modifies home position set for leashes.
+                    var areaName = "first area of " + functionName
                     try {
                         var success = false
 
@@ -379,20 +393,21 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("first area of function updateLeashedState", "net.minecraft.entity.CreatureEntity")
+                                logTransformSuccess(areaName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("first area of function updateLeashedState", "net.minecraft.entity.CreatureEntity", "Unable to find injection point")
+                            logTransformError(areaName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("first area of function updateLeashedState", "net.minecraft.entity.CreatureEntity", exception.message)
+                        logTransformError(areaName, classPath, exception.message)
                     }
 
                     // Modifies distance calculation for leashes.
+                    areaName = "second area of " + functionName
                     try {
                         var success = false
 
@@ -428,20 +443,21 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("second area of function updateLeashedState", "net.minecraft.entity.CreatureEntity")
+                                logTransformSuccess(areaName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("second area of function updateLeashedState", "net.minecraft.entity.CreatureEntity", "Unable to find injection point")
+                            logTransformError(areaName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("second area of function updateLeashedState", "net.minecraft.entity.CreatureEntity", exception.message)
+                        logTransformError(areaName, classPath, exception.message)
                     }
 
                     // Modifies pull position for leashes.
+                    areaName = "third area of " + functionName
                     try {
                         var success = false
 
@@ -509,20 +525,21 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("third area of function updateLeashedState", "net.minecraft.entity.CreatureEntity")
+                                logTransformSuccess(areaName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("third area of function updateLeashedState", "net.minecraft.entity.CreatureEntity", "Unable to find injection point")
+                            logTransformError(areaName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("third area of function updateLeashedState", "net.minecraft.entity.CreatureEntity", exception.message)
+                        logTransformError(areaName, classPath, exception.message)
                     }
 
                     // Modifies AI move behavior when leashed.
+                    areaName = "fourth area of " + functionName
                     try {
                         var success = false
 
@@ -545,21 +562,21 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("fourth area of function updateLeashedState", "net.minecraft.entity.CreatureEntity")
+                                logTransformSuccess(areaName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("fourth area of  function updateLeashedState", "net.minecraft.entity.CreatureEntity", "Unable to find injection point")
+                            logTransformError(areaName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("fourth area of function updateLeashedState", "net.minecraft.entity.CreatureEntity", exception.message)
+                        logTransformError(areaName, classPath, exception.message)
                     }
 
                 } else
-                    logTransformError("function updateLeashedState", "net.minecraft.entity.CreatureEntity", "Unable to find function to transform")
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
 
                 return classNode
             }
@@ -575,7 +592,10 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
+                var classPath = "net.minecraft.entity.projectile.AbstractArrowEntity"
+
                 var init = findMethodWithSignature(classNode, "<init>", "(Lnet/minecraft/entity/EntityType;Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/world/World;)V")
+                var functionName = "constructor"
 
                 if (init !== null) {
                     try {
@@ -603,21 +623,21 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("constructor", "net.minecraft.entity.projectile.AbstractArrowEntity")
+                                logTransformSuccess(functionName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("constructor", "net.minecraft.entity.projectile.AbstractArrowEntity", "Unable to find injection point")
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("constructor", "net.minecraft.entity.projectile.AbstractArrowEntity", exception.message)
+                        logTransformError(functionName, classPath, exception.message)
                     }
 
                 } else
-                    logTransformError("constructor", "net.minecraft.entity.projectile.AbstractArrowEntity", "Unable to find function to transform")
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
 
                 return classNode
             }
@@ -633,7 +653,10 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
+                var classPath = "net.minecraft.entity.projectile.ThrowableEntity"
+
                 var init = findMethodWithSignature(classNode, "<init>", "(Lnet/minecraft/entity/EntityType;Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/world/World;)V")
+                var functionName = "constructor"
 
                 if (init !== null) {
                     try {
@@ -661,21 +684,21 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("constructor", "net.minecraft.entity.projectile.ThrowableEntity")
+                                logTransformSuccess(functionName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("constructor", "net.minecraft.entity.projectile.ThrowableEntity", "Unable to find injection point")
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("constructor", "net.minecraft.entity.projectile.ThrowableEntity", exception.message)
+                        logTransformError(functionName, classPath, exception.message)
                     }
 
                 } else
-                    logTransformError("constructor", "net.minecraft.entity.projectile.ThrowableEntity", "Unable to find function to transform")
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
 
                 return classNode
             }
@@ -692,8 +715,11 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
+                var classPath = "net.minecraft.entity.projectile.FishingBobberEntity"
+
                 // Corrects player-bobber distance calculation.
                 var shouldStopFishing = findObfuscatedMethodWithSignature(classNode, "shouldStopFishing", "func_190625_o", "()Z")
+                var functionName = "function shouldStopFishing"
 
                 if (shouldStopFishing !== null) {
                     try {
@@ -724,26 +750,27 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("function shouldStopFishing", "net.minecraft.entity.projectile.FishingBobberEntity")
+                                logTransformSuccess(functionName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("function shouldStopFishing", "net.minecraft.entity.projectile.FishingBobberEntity", "Unable to find injection point")
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("function shouldStopFishing", "net.minecraft.entity.projectile.FishingBobberEntity", exception.message)
+                        logTransformError(functionName, classPath, exception.message)
                     }
 
                 } else
-                    logTransformError("function shouldStopFishing", "net.minecraft.entity.projectile.FishingBobberEntity", "Unable to find function to transform")
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
 
 
                 // Offsets the destination of reeled-in items.
                 var handleHookRetraction = findObfuscatedMethodWithSignature(classNode, "handleHookRetraction", "func_146034_e",
                     "(Lnet/minecraft/item/ItemStack;)I")
+                functionName = "function handleHookRetraction"
 
                 if (handleHookRetraction !== null) {
                     try {
@@ -807,7 +834,7 @@ function initializeCoreMod() {
                                 oldInstructions.insert(oldInstructions.get(i+2), offsetAnglerPosition)
                                 // ...
 
-                                logTransformSuccess("function handleHookRetraction", "net.minecraft.entity.projectile.FishingBobberEntity")
+                                logTransformSuccess(functionName, classPath)
                                 success = true
 
                                 break
@@ -815,18 +842,19 @@ function initializeCoreMod() {
                         }
 
                         if (!success)
-                            logTransformError("function handleHookRetraction", "net.minecraft.entity.projectile.FishingBobberEntity", "Unable to find injection point")
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("function handleHookRetraction", "net.minecraft.entity.projectile.FishingBobberEntity", exception.message)
+                        logTransformError(functionName, classPath, exception.message)
                     }
 
                 } else
-                    logTransformError("function handleHookRetraction", "net.minecraft.entity.projectile.FishingBobberEntity", "Unable to find function to transform")
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
 
 
                 // Offsets the destination of reeled-in entities and Entities.
                 var bringInHookedEntity = findObfuscatedMethodWithSignature(classNode, "bringInHookedEntity", "func_184527_k", "()V")
+                functionName = "function bringInHookedEntity"
 
                 if (bringInHookedEntity !== null) {
                     try {
@@ -851,7 +879,7 @@ function initializeCoreMod() {
                                 oldInstructions.insert(oldInstructions.get(i), offsetBringInPosition)
                                 // ...
 
-                                logTransformSuccess("function bringInHookedEntity", "net.minecraft.entity.projectile.FishingBobberEntity")
+                                logTransformSuccess(functionName, classPath)
                                 success = true
 
                                 break
@@ -859,14 +887,14 @@ function initializeCoreMod() {
                         }
 
                         if (!success)
-                            logTransformError("function bringInHookedEntity", "net.minecraft.entity.projectile.FishingBobberEntity", "Unable to find injection point")
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("function bringInHookedEntity", "net.minecraft.entity.projectile.FishingBobberEntity", exception.message)
+                        logTransformError(functionName, classPath, exception.message)
                     }
 
                 } else
-                    logTransformError("function bringInHookedEntity", "net.minecraft.entity.projectile.FishingBobberEntity", "Unable to find function to transform")
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
 
                 return classNode
             }
@@ -882,8 +910,11 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
+                var classPath = "net.minecraft.entity.item.minecart.ContainerMinecartEntity"
+
                 var isUsableByPlayer = findObfuscatedMethodWithSignature(classNode, "isUsableByPlayer", "func_70300_a",
                     "(Lnet/minecraft/entity/player/PlayerEntity;)Z")
+                var functionName = "function isUsableByPlayer"
 
                 if (isUsableByPlayer !== null) {
                     try {
@@ -915,21 +946,21 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("function isUsableByPlayer", "net.minecraft.entity.item.minecart.ContainerMinecartEntity")
+                                logTransformSuccess(functionName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("function isUsableByPlayer", "net.minecraft.entity.item.minecart.ContainerMinecartEntity", "Unable to find injection point")
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("function isUsableByPlayer", "net.minecraft.entity.item.minecart.ContainerMinecartEntity", exception.message)
+                        logTransformError(functionName, classPath, exception.message)
                     }
 
                 } else
-                    logTransformError("function isUsableByPlayer", "net.minecraft.entity.item.minecart.ContainerMinecartEntity", "Unable to find function to transform")
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
 
                 return classNode
             }
@@ -937,7 +968,7 @@ function initializeCoreMod() {
 
 
         /**
-         * Makes entities look at the offset position of players randomly, resulting in them shaking their heads 'out of confusion.'
+         * Makes entities look at the offset position of players randomly, resulting in them shaking their heads "out of confusion."
          */
         "LookAtGoal": {
             "target": {
@@ -946,7 +977,10 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
+                var classPath = "net.minecraft.entity.ai.goal.LookAtGoal"
+
                 var tick = findObfuscatedMethodWithSignature(classNode, "tick", "func_75246_d", "()V")
+                var functionName = "function tick"
 
                 if (tick !== null) {
                     try {
@@ -1001,21 +1035,21 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("function tick", "net.minecraft.entity.ai.goal.LookAtGoal")
+                                logTransformSuccess(functionName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("function tick", "net.minecraft.entity.ai.goal.LookAtGoal", "Unable to find injection point")
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("function tick", "net.minecraft.entity.ai.goal.LookAtGoal", exception.message)
+                        logTransformError(functionName, classPath, exception.message)
                     }
 
                 } else
-                    logTransformError("function tick", "net.minecraft.entity.ai.goal.LookAtGoal", "Unable to find function to transform")
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
 
                 return classNode
             }
@@ -1032,8 +1066,11 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
+                var classPath = "net.minecraft.inventory.container.Container"
+
                 var lambda$isWithinUsableDistance$0 = findObfuscatedMethodWithSignature(classNode, "lambda$isWithinUsableDistance$0",
                     "lambda$func_216963_a$0", "(Lnet/minecraft/block/Block;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)Ljava/lang/Boolean;")
+                var functionName = "function lambda$isWithinUsableDistance$0"
 
                 if (lambda$isWithinUsableDistance$0 !== null) {
                     try {
@@ -1064,21 +1101,21 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("function lambda$isWithinUsableDistance$0", "net.minecraft.inventory.container.Container")
+                                logTransformSuccess(functionName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("function lambda$isWithinUsableDistance$0", "net.minecraft.inventory.container.Container", "Unable to find injection point")
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("function lambda$isWithinUsableDistance$0", "net.minecraft.inventory.container.Container", exception.message)
+                        logTransformError(functionName, classPath, exception.message)
                     }
 
                 } else
-                    logTransformError("function lambda$isWithinUsableDistance$0", "net.minecraft.inventory.container.Container", "Unable to find function to transform")
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
 
                 return classNode
             }
@@ -1094,8 +1131,11 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
+                var classPath = "net.minecraft.tileentity.LockableLootTileEntity"
+
                 var isUsableByPlayer = findObfuscatedMethodWithSignature(classNode, "isUsableByPlayer", "func_70300_a",
                     "(Lnet/minecraft/entity/player/PlayerEntity;)Z")
+                var functionName = "function isUsableByPlayer"
 
                 if (isUsableByPlayer !== null) {
                     try {
@@ -1126,21 +1166,21 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("function isUsableByPlayer", "net.minecraft.tileentity.LockableLootTileEntity")
+                                logTransformSuccess(functionName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("function isUsableByPlayer", "net.minecraft.tileentity.LockableLootTileEntity", "Unable to find injection point")
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("function isUsableByPlayer", "net.minecraft.tileentity.LockableLootTileEntity", exception.message)
+                        logTransformError(functionName, classPath, exception.message)
                     }
 
                 } else
-                    logTransformError("function isUsableByPlayer", "net.minecraft.tileentity.LockableLootTileEntity", "Unable to find function to transform")
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
 
                 return classNode
             }
@@ -1156,7 +1196,10 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
+                var classPath = "net.minecraft.tileentity.EnderChestTileEntity"
+
                 var canBeUsed = findObfuscatedMethodWithSignature(classNode, "canBeUsed", "func_145971_a", "(Lnet/minecraft/entity/player/PlayerEntity;)Z")
+                var functionName = "function canBeUsed"
 
                 if (canBeUsed !== null) {
                     try {
@@ -1187,21 +1230,21 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("function canBeUsed", "net.minecraft.tileentity.EnderChestTileEntity")
+                                logTransformSuccess(functionName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("function canBeUsed", "net.minecraft.tileentity.EnderChestTileEntity", "Unable to find injection point")
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("function canBeUsed", "net.minecraft.tileentity.EnderChestTileEntity", exception.message)
+                        logTransformError(functionName, classPath, exception.message)
                     }
 
                 } else
-                    logTransformError("function canBeUsed", "net.minecraft.tileentity.EnderChestTileEntity", "Unable to find function to transform")
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
 
                 return classNode
             }
@@ -1217,8 +1260,11 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
+                var classPath = "net.minecraft.tileentity.LecternTileEntity$1"
+
                 var isUsableByPlayer = findObfuscatedMethodWithSignature(classNode, "isUsableByPlayer", "func_70300_a",
                     "(Lnet/minecraft/entity/player/PlayerEntity;)Z")
+                var functionName = "function isUsableByPlayer"
 
                 if (isUsableByPlayer !== null) {
                     try {
@@ -1249,21 +1295,21 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("function isUsableByPlayer", "net.minecraft.tileentity.LecternTileEntity")
+                                logTransformSuccess(functionName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("function isUsableByPlayer", "net.minecraft.tileentity.LecternTileEntity", "Unable to find injection point")
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("function isUsableByPlayer", "net.minecraft.tileentity.LecternTileEntity", exception.message)
+                        logTransformError(functionName, classPath, exception.message)
                     }
 
                 } else
-                    logTransformError("function isUsableByPlayer", "net.minecraft.tileentity.LecternTileEntity", "Unable to find function to transform")
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
 
                 return classNode
             }
@@ -1279,8 +1325,11 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
+                var classPath = "net.minecraft.tileentity.AbstractFurnaceTileEntity"
+
                 var isUsableByPlayer = findObfuscatedMethodWithSignature(classNode, "isUsableByPlayer", "func_70300_a",
                     "(Lnet/minecraft/entity/player/PlayerEntity;)Z")
+                var functionName = "function isUsableByPlayer"
 
                 if (isUsableByPlayer !== null) {
                     try {
@@ -1311,21 +1360,21 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("function isUsableByPlayer", "net.minecraft.tileentity.AbstractFurnaceTileEntity")
+                                logTransformSuccess(functionName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("function isUsableByPlayer", "net.minecraft.tileentity.AbstractFurnaceTileEntity", "Unable to find injection point")
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("function isUsableByPlayer", "net.minecraft.tileentity.AbstractFurnaceTileEntity", exception.message)
+                        logTransformError(functionName, classPath, exception.message)
                     }
 
                 } else
-                    logTransformError("function isUsableByPlayer", "net.minecraft.tileentity.AbstractFurnaceTileEntity", "Unable to find function to transform")
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
 
                 return classNode
             }
@@ -1341,8 +1390,11 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
+                var classPath = "net.minecraft.tileentity.BrewingStandTileEntity"
+
                 var isUsableByPlayer = findObfuscatedMethodWithSignature(classNode, "isUsableByPlayer", "func_70300_a",
                     "(Lnet/minecraft/entity/player/PlayerEntity;)Z")
+                var functionName = "function isUsableByPlayer"
 
                 if (isUsableByPlayer !== null) {
                     try {
@@ -1373,21 +1425,21 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("function isUsableByPlayer", "net.minecraft.tileentity.BrewingStandTileEntity")
+                                logTransformSuccess(functionName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("function isUsableByPlayer", "net.minecraft.tileentity.BrewingStandTileEntity", "Unable to find injection point")
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("function isUsableByPlayer", "net.minecraft.tileentity.BrewingStandTileEntity", exception.message)
+                        logTransformError(functionName, classPath, exception.message)
                     }
 
                 } else
-                    logTransformError("function isUsableByPlayer", "net.minecraft.tileentity.BrewingStandTileEntity", "Unable to find function to transform")
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
 
                 return classNode
             }
@@ -1404,8 +1456,11 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
+                var classPath = "net.minecraft.item.FishingRodItem"
+
                 var onItemRightClick = findObfuscatedMethodWithSignature(classNode, "onItemRightClick", "func_77659_a",
                     "(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResult;")
+                var functionName = "function onItemRightClick"
 
                 if (onItemRightClick !== null) {
                     try {
@@ -1433,21 +1488,21 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("function onItemRightClick", "net.minecraft.item.FishingRodItem")
+                                logTransformSuccess(functionName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("function onItemRightClick", "net.minecraft.item.FishingRodItem", "Unable to find injection point")
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("function onItemRightClick", "net.minecraft.item.FishingRodItem", exception.message)
+                        logTransformError(functionName, classPath, exception.message)
                     }
 
                 } else
-                    logTransformError("function onItemRightClick", "net.minecraft.item.FishingRodItem", "Unable to find function to transform")
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
 
                 return classNode
             }
@@ -1463,8 +1518,11 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
+                var classPath = "net.minecraft.item.EnderEyeItem"
+
                 var onItemRightClick = findObfuscatedMethodWithSignature(classNode, "onItemRightClick", "func_77659_a",
                     "(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResult;")
+                var functionName = "function onItemRightClick"
 
                 if (onItemRightClick !== null) {
                     try {
@@ -1492,21 +1550,21 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("function onItemRightClick", "net.minecraft.item.EnderEyeItem")
+                                logTransformSuccess(functionName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("function onItemRightClick", "net.minecraft.item.EnderEyeItem", "Unable to find injection point")
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("function onItemRightClick", "net.minecraft.item.EnderEyeItem", exception.message)
+                        logTransformError(functionName, classPath, exception.message)
                     }
 
                 } else
-                    logTransformError("function onItemRightClick", "net.minecraft.item.EnderEyeItem", "Unable to find function to transform")
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
 
                 return classNode
             }
@@ -1523,8 +1581,11 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
+                var classPath = "net.minecraft.server.management.PlayerInteractionManager"
+
                 var func_225416_a = findMethodWithSignature(classNode, "func_225416_a",
                     "(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/network/play/client/CPlayerDiggingPacket$Action;Lnet/minecraft/util/Direction;I)V")
+                var functionName = "function func_225416_a"
 
                 if (func_225416_a !== null) {
                     try {
@@ -1593,7 +1654,7 @@ function initializeCoreMod() {
                                 oldInstructions.insert(oldInstructions.get(i+6), offsetPlayerPosition)
                                 // ...
 
-                                logTransformSuccess("function func_225416_a", "net.minecraft.server.management.PlayerInteractionManager")
+                                logTransformSuccess(functionName, classPath)
                                 success = true
 
                                 break
@@ -1601,14 +1662,14 @@ function initializeCoreMod() {
                         }
 
                         if (!success)
-                            logTransformError("function func_225416_a", "net.minecraft.server.management.PlayerInteractionManager", "Unable to find injection point")
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("function func_225416_a", "net.minecraft.server.management.PlayerInteractionManager", exception.message)
+                        logTransformError(functionName, classPath, exception.message)
                     }
 
                 } else
-                    logTransformError("function func_225416_a", "net.minecraft.server.management.PlayerInteractionManager", "Unable to find function to transform")
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
 
                 return classNode
             }
@@ -1625,9 +1686,12 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
+                var classPath = "net.minecraft.network.play.ServerPlayNetHandler"
+
                 // Allows players to interact with blocks relative to their offsets.
                 var processTryUseItemOnBlock = findObfuscatedMethodWithSignature(classNode, "processTryUseItemOnBlock", "func_184337_a",
                     "(Lnet/minecraft/network/play/client/CPlayerTryUseItemOnBlockPacket;)V")
+                var functionName = "function processTryUseItemOnBlock"
 
                 if (processTryUseItemOnBlock !== null) {
                     try {
@@ -1658,25 +1722,26 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("function processTryUseItemOnBlock", "net.minecraft.network.play.ServerPlayNetHandler")
+                                logTransformSuccess(functionName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("function processTryUseItemOnBlock", "net.minecraft.network.play.ServerPlayNetHandler", "Unable to find injection point")
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("function processTryUseItemOnBlock", "net.minecraft.network.play.ServerPlayNetHandler", exception.message)
+                        logTransformError(functionName, classPath, exception.message)
                     }
 
                 } else
-                    logTransformError("function processTryUseItemOnBlock", "net.minecraft.network.play.ServerPlayNetHandler", "Unable to find function to transform")
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
 
                 // Allows players to interact with entities relative to their offsets.
                 var processUseEntity = findObfuscatedMethodWithSignature(classNode, "processUseEntity", "func_147340_a",
-                                    "(Lnet/minecraft/network/play/client/CUseEntityPacket;)V")
+                    "(Lnet/minecraft/network/play/client/CUseEntityPacket;)V")
+                functionName = "function processUseEntity"
 
                 if (processUseEntity !== null) {
                     try {
@@ -1708,21 +1773,21 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("function processUseEntity", "net.minecraft.network.play.ServerPlayNetHandler")
+                                logTransformSuccess(functionName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("function processUseEntity", "net.minecraft.network.play.ServerPlayNetHandler", "Unable to find injection point")
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("function processUseEntity", "net.minecraft.network.play.ServerPlayNetHandler", exception.message)
+                        logTransformError(functionName, classPath, exception.message)
                     }
 
                 } else
-                    logTransformError("function processUseEntity", "net.minecraft.network.play.ServerPlayNetHandler", "Unable to find function to transform")
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
 
                 return classNode
             }
@@ -1741,12 +1806,16 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
+                var classPath = "net.minecraft.client.renderer.GameRenderer"
+
                 var getMouseOver = findObfuscatedMethodWithSignature(classNode, "getMouseOver", "func_78473_a", "(F)V")
+                var functionName = "function getMouseOver"
 
                 if (getMouseOver !== null) {
                     var oldInstructions = getMouseOver.instructions
 
                     // Adds an offset to the raycast that finds what entity the player is looking at.
+                    var areaName = "first area of " + functionName
                     try {
                         var success = false
 
@@ -1770,20 +1839,21 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("first area of function getMouseOver", "net.minecraft.client.renderer.GameRenderer")
+                                logTransformSuccess(areaName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("function getMouseOver", "net.minecraft.client.renderer.GameRenderer", "Unable to find injection point")
+                            logTransformError(areaName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("first area of function getMouseOver", "net.minecraft.client.renderer.GameRenderer", exception.message)
+                        logTransformError(areaName, classPath, exception.message)
                     }
 
                     // Allows players to interact with entities relative to their offsets.
+                    areaName = "second area of " + functionName
                     try {
                         var success = false
 
@@ -1807,21 +1877,21 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("second area of function getMouseOver", "net.minecraft.client.renderer.GameRenderer")
+                                logTransformSuccess(areaName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("function getMouseOver", "net.minecraft.client.renderer.GameRenderer", "Unable to find injection point")
+                            logTransformError(areaName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("second area of function getMouseOver", "net.minecraft.client.renderer.GameRenderer", exception.message)
+                        logTransformError(areaName, classPath, exception.message)
                     }
 
                 } else
-                    logTransformError("function getMouseOver", "net.minecraft.client.renderer.GameRenderer", "Unable to find function to transform")
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
 
                 return classNode
             }
@@ -1837,8 +1907,11 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
+                var classPath = "net.minecraft.client.renderer.WorldRenderer"
+
                 var updateCameraAndRender = findObfuscatedMethodWithSignature(classNode, "updateCameraAndRender", "func_228426_a_",
                     "(Lcom/mojang/blaze3d/matrix/MatrixStack;FJZLnet/minecraft/client/renderer/ActiveRenderInfo;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/renderer/Matrix4f;)V")
+                var functionName = "function updateCameraAndRender"
 
                 if (updateCameraAndRender !== null) {
                     try {
@@ -1867,21 +1940,21 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("function updateCameraAndRender", "net.minecraft.client.renderer.WorldRenderer")
+                                logTransformSuccess(functionName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("function updateCameraAndRender", "net.minecraft.client.renderer.WorldRenderer", "Unable to find injection point")
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("function updateCameraAndRender", "net.minecraft.client.renderer.WorldRenderer", exception.message)
+                        logTransformError(functionName, classPath, exception.message)
                     }
 
                 } else
-                    logTransformError("function updateCameraAndRender", "net.minecraft.client.renderer.WorldRenderer", "Unable to find function to transform")
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
 
                 return classNode
             }
@@ -1897,8 +1970,11 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
+                var classPath = "net.minecraft.client.renderer.FirstPersonRenderer"
+
                 var renderItemInFirstPerson = findObfuscatedMethodWithSignature(classNode, "renderItemInFirstPerson", "func_228396_a_",
                     "(FLcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer$Impl;Lnet/minecraft/client/entity/player/ClientPlayerEntity;I)V")
+                var functionName = "function renderItemInFirstPerson"
 
                 if (renderItemInFirstPerson !== null) {
                     try {
@@ -1920,14 +1996,14 @@ function initializeCoreMod() {
                         renderItemInFirstPerson.instructions.insert(testSkipRenderFirstPerson)
                         // ...
 
-                        logTransformSuccess("function renderItemInFirstPerson", "net.minecraft.client.renderer.FirstPersonRenderer")
+                        logTransformSuccess(functionName, classPath)
 
                     } catch (exception) {
-                        logTransformError("function renderItemInFirstPerson", "net.minecraft.client.renderer.FirstPersonRenderer", exception.message)
+                        logTransformError(functionName, classPath, exception.message)
                     }
 
                 } else
-                    logTransformError("function renderItemInFirstPerson", "net.minecraft.client.renderer.FirstPersonRenderer", "Unable to find function to transform")
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
 
                 return classNode
             }
@@ -1945,13 +2021,17 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
+                var classPath = "net.minecraft.client.renderer.entity.EntityRenderer"
+
                 var shouldRender = findObfuscatedMethodWithSignature(classNode, "shouldRender", "func_225626_a_",
                     "(Lnet/minecraft/entity/Entity;Lnet/minecraft/client/renderer/culling/ClippingHelperImpl;DDD)Z")
+                var functionName = "function shouldRender"
 
                 if (shouldRender !== null) {
                     var oldInstructions = shouldRender.instructions
 
                     // Checks if the player is in range to render both with the normal and offset positions.
+                    var areaName = "first area of " + functionName
                     try {
                         var success = false
 
@@ -1980,20 +2060,21 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("first area of function shouldRender", "net.minecraft.client.renderer.entity.EntityRenderer")
+                                logTransformSuccess(areaName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("first area of function shouldRender", "net.minecraft.client.renderer.entity.EntityRenderer", "Unable to find injection point")
+                            logTransformError(areaName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("first area of function shouldRender", "net.minecraft.client.renderer.entity.EntityRenderer", exception.message)
+                        logTransformError(areaName, classPath, exception.message)
                     }
 
                     // Runs the frustum check twice so it can account for players' offsets, allowing the offset position to be rendered even when the original position is not in view.
+                    var areaName = "second area of " + functionName
                     try {
                         var success = false
 
@@ -2026,21 +2107,21 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("second area of function shouldRender", "net.minecraft.client.renderer.entity.EntityRenderer")
+                                logTransformSuccess(areaName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("second area of function shouldRender", "net.minecraft.client.renderer.entity.EntityRenderer", "Unable to find injection point")
+                            logTransformError(areaName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("second area of function shouldRender", "net.minecraft.client.renderer.entity.EntityRenderer", exception.message)
+                        logTransformError(areaName, classPath, exception.message)
                     }
 
                 } else
-                    logTransformError("function shouldRender", "net.minecraft.client.renderer.entity.EntityRenderer", "Unable to find function to transform")
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
 
                 return classNode
             }
@@ -2056,8 +2137,11 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
+                var classPath = "net.minecraft.client.renderer.entity.MobRenderer"
+
                 var renderLeash = findObfuscatedMethodWithSignature(classNode, "renderLeash", "func_229118_a_",
                     "(Lnet/minecraft/entity/MobEntity;FLcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;Lnet/minecraft/entity/Entity;)V")
+                var functionName = "function renderLeash"
 
                 if (renderLeash !== null) {
                     try {
@@ -2124,21 +2208,21 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("function renderLeash", "net.minecraft.client.renderer.entity.MobRenderer")
+                                logTransformSuccess(functionName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("function renderLeash", "net.minecraft.client.renderer.entity.MobRenderer", "Unable to find injection point")
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("function renderLeash", "net.minecraft.client.renderer.entity.MobRenderer", exception.message)
+                        logTransformError(functionName, classPath, exception.message)
                     }
 
                 } else
-                    logTransformError("function renderLeash", "net.minecraft.client.renderer.entity.MobRenderer", "Unable to find function to transform")
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
 
                 return classNode
             }
@@ -2155,13 +2239,17 @@ function initializeCoreMod() {
             },
 
             "transformer": function(classNode) {
+                var classPath = "net.minecraft.client.renderer.entity.FishRenderer"
+
                 var render = findObfuscatedMethodWithSignature(classNode, "render", "func_225623_a_",
                     "(Lnet/minecraft/entity/projectile/FishingBobberEntity;FFLcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;I)V")
+                var functionName = "function render"
 
                 if (render !== null) {
                     var oldInstructions = render.instructions
 
                     // Forces third-person fishing line rendering when player is offset.
+                    var areaName = "first area of " + functionName
                     try {
                         var success = false
 
@@ -2214,20 +2302,21 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("first area of function render", "net.minecraft.client.renderer.FishRenderer")
+                                logTransformSuccess(areaName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("first area of function render", "net.minecraft.client.renderer.FishRenderer", "Unable to find injection point")
+                            logTransformError(areaName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (expression) {
-                        logTransformError("first area of function render", "net.minecraft.client.renderer.FishRenderer", exception.message)
+                        logTransformError(areaName, classPath, exception.message)
                     }
 
                     // Puts in offset to fishing line position.
+                    areaName = "second area of " + functionName
                     try {
                         var success = false
 
@@ -2288,21 +2377,21 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
-                                logTransformSuccess("second area of function render", "net.minecraft.client.renderer.FishRenderer")
+                                logTransformSuccess(areaName, classPath)
 
                                 break
                             }
                         }
 
                         if (!success)
-                            logTransformError("second area of function render", "net.minecraft.client.renderer.FishRenderer", "Unable to find injection point")
+                            logTransformError(areaName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
-                        logTransformError("second area of function render", "net.minecraft.client.renderer.FishRenderer", exception.message)
+                        logTransformError(areaName, classPath, exception.message)
                     }
 
                 } else
-                    logTransformError("function render", "net.minecraft.client.renderer.FishRenderer", "Unable to find function to transform")
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
 
                 return classNode
             }
