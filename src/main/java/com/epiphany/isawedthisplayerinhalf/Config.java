@@ -14,7 +14,6 @@ import java.io.File;
 
 // TODO Look into adding a config menu in the mode menu.
 // TODO Check out to see if config translation can be displayed depending on client locale.
-// TODO Move from "swdthsplyrnhlf-client.toml" to "isawedthisplayerinhalf-client.toml" in next release.
 
 /**
  * Deals with configuration data for the mod.
@@ -27,7 +26,7 @@ public class Config {
      * Sets up config file and loads in data if it already exits.
      */
     public static void enable() {
-        final String configFileName = "swdthsplyrnhlf-client.toml";
+        final String configFileName = "isawedthisplayerinhalf-client.toml";
 
         ForgeConfigSpec configSpecification = buildConfig();
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, configSpecification);

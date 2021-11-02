@@ -19,7 +19,7 @@ These chat commands allow you to control your offsets, the new position of the t
 
 ::ofs can be used in place of ::offsets.
 
-Offsets can also be modified using the config file (in config/swdthsplyrnhlf-client.toml)
+Offsets can also be modified using the config file (in config/isawedthisplayerinhalf-client.toml)
 
 
 ## Multiplayer

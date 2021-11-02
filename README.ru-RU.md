@@ -20,7 +20,7 @@
 
 ::ofs может пользоваться против ::offsets.
 
-Также можно изменить смещения файлом конфигурации (в config/swdthsplyrnhlf-client.toml)
+Также можно изменить смещения файлом конфигурации (в config/isawedthisplayerinhalf-client.toml)
 
 
 ## Мультиплеер
