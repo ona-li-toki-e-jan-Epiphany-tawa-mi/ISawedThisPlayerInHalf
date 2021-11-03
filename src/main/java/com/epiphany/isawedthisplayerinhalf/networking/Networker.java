@@ -50,13 +50,13 @@ public class Networker {
     /**
      * Sends the server the offsets to set to the player.
      *
-     * @param x The x-offset to set to the player.
-     * @param y The y-offset to set to the player.
-     * @param z The z-offset to set to the player.
+     * @param xOffset The x-offset to set to the player.
+     * @param yOffset The y-offset to set to the player.
+     * @param zOffset The z-offset to set to the player.
      */
     @OnlyIn(Dist.CLIENT)
     public static void sendServerOffsets(double xOffset, double yOffset, double zOffset) {
-        new SetOffsetsPacket(Minecraft.getInstance().player, xOffset, yOffset, zOffset);
+        modChannel.sendToServer(new SetOffsetsPacket(Minecraft.getInstance().player, xOffset, yOffset, zOffset));
     }
 
     /**
