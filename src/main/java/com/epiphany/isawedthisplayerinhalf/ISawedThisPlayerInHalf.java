@@ -30,6 +30,12 @@ for(LivingEntity livingentity : this.world.getEntitiesWithinAABB(LivingEntity.cl
 
 // TODO (MAYBE) Expose an API for other mods to interact with this one.
 
+/**
+ * This mod splits apart the player, freeing the torso from the legs.
+ *
+ * @see <a href="https://github.com/ona-li-toki-e-jan-Epiphany-tawa-mi/ISawedThisPlayerInHalf">Github repo.</a>
+ * @see <a href="https://www.curseforge.com/minecraft/mc-mods/i-sawed-this-player-in-half">Curseforge page.</a>
+ */
 @Mod("swdthsplyrnhlf")
 public class ISawedThisPlayerInHalf {
     public static final String MOD_ID = "swdthsplyrnhlf";

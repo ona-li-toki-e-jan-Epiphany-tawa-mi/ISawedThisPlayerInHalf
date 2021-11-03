@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 
 /**
  * Interface for enforcing some methods that are needed to register the packet so that it can be used.
- * Classes implementing this will also need a constructor that accepts a PacketBuffer.
+ * Classes implementing this will need a constructor that accepts a PacketBuffer.
  */
 public interface IPacket {
     /**
@@ -18,7 +18,7 @@ public interface IPacket {
     void toBytes(PacketBuffer packetBuffer);
 
     /**
-     * Handles the packet once it arrives from the other side of the network. (Server -> client or client -> server.)
+     * Handles the packet once it arrives from the other side of the network. (Server to client or client to server.)
      */
     void handle(Supplier<NetworkEvent.Context> contextSupplier);
 }
