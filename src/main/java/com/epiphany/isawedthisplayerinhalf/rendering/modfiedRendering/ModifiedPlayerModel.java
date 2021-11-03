@@ -1,6 +1,5 @@
 package com.epiphany.isawedthisplayerinhalf.rendering.modfiedRendering;
 
-import com.epiphany.isawedthisplayerinhalf.helpers.MathConstants;
 import com.epiphany.isawedthisplayerinhalf.rendering.RenderingOffsets;
 import com.epiphany.isawedthisplayerinhalf.rendering.RenderingOffsetter;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
@@ -13,7 +12,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
  * A modified version of PlayerModel for customizing how players are rendered.
  */
 @OnlyIn(Dist.CLIENT)
-public class ModifiedPlayerModel<T extends LivingEntity> extends PlayerModel<T> {
+public class ModifiedPlayerModel<ENTITY_TYPE extends LivingEntity> extends PlayerModel<ENTITY_TYPE> {
     /**
      * Creates a new ModifiedPlayerModel.
      *
@@ -24,7 +23,7 @@ public class ModifiedPlayerModel<T extends LivingEntity> extends PlayerModel<T> 
     }
 
     @Override
-    public void setRotationAngles(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+    public void setRotationAngles(ENTITY_TYPE entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         super.setRotationAngles(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
 
         RenderingOffsets renderingOffsets = RenderingOffsetter.getOffsetsOrNull(entity);
@@ -32,14 +31,13 @@ public class ModifiedPlayerModel<T extends LivingEntity> extends PlayerModel<T> 
         if (renderingOffsets != null)
             if (renderingOffsets.shouldOffsetRender()) {
                 // Creates an angle that cancels out the yaw offset put on by the renderer to make the model stay in place, and then adds in the offset angle.
-                float netYawOffset = MathHelper.lerp(ageInTicks - entity.ticksExisted, entity.prevRenderYawOffset, entity.renderYawOffset)
-                        * MathConstants.degreesToRadians + renderingOffsets.getYawOffset();
+                float netYawOffset = ModifiedModelCommon.calculateNetYawOffset(ageInTicks, entity, renderingOffsets);
 
                 // Rotates offset point into position.
-                float offsetCos = MathHelper.cos(netYawOffset);
                 float offsetSin = MathHelper.sin(netYawOffset);
-                float pointX = renderingOffsets.getXOffset() * offsetCos - renderingOffsets.getZOffset() * offsetSin;
-                float pointZ = renderingOffsets.getXOffset() * offsetSin + renderingOffsets.getZOffset() * offsetCos;
+                float offsetCos = MathHelper.cos(netYawOffset);
+                float pointX = ModifiedModelCommon.calculatePointX(renderingOffsets, offsetSin, offsetCos);
+                float pointZ = ModifiedModelCommon.calculatePointZ(renderingOffsets, offsetSin, offsetCos);
 
                 // Applies offsets.
                 this.bipedHead.rotationPointX = pointX;

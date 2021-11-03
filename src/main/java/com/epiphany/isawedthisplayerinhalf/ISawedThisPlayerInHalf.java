@@ -21,10 +21,8 @@ for(LivingEntity livingentity : this.world.getEntitiesWithinAABB(LivingEntity.cl
 }
 */
 // TODO Look more into LookAtGoal.
-// TODO Have passive mobs follow bait towards a player's offset position.
+// TODO TemptGoal.
 // TODO worldIn.playSound((PlayerEntity)null, shooter.getPosX(), shooter.getPosY(), shooter.getPosZ(), SoundEvents.ITEM_CROSSBOW_SHOOT, SoundCategory.PLAYERS, 1.0F, soundPitch); in CrossbowItem in fireProjectile.
-
-// TODO (MAYBE) Combine shared code in ModifiedBipedModel and ModifiedPlayerModel.
 
 // TODO (MAYBE MAYBE NOT) Expose an API for other mods to interact with this one.
 // TODO (MAYBE MAYBE NOT) Create a compatibility mode jar that injects into general position methods and uses calling class and calling method names to use offsets.
