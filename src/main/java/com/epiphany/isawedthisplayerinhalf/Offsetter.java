@@ -173,6 +173,7 @@ public class Offsetter {
         }
     }
 
+    // TODO (Maybe) add the ability to ::ofs get the offsets of other players.
     /**
      * In-game config options implemented via chat "commands."
      */
@@ -223,10 +224,13 @@ public class Offsetter {
 
                         try {
                             double x = Double.parseDouble(possibleCommand[2]);
+                            if (!Double.isFinite(x)) throw new NumberFormatException();
                             failedParseDouble++;
                             double y = Double.parseDouble(possibleCommand[3]);
+                            if (!Double.isFinite(y)) throw new NumberFormatException();
                             failedParseDouble++;
                             double z = Double.parseDouble(possibleCommand[4]);
+                            if (!Double.isFinite(z)) throw new NumberFormatException();
 
                             Vec3d currentOffsets = getOffsets(player);
                             if (currentOffsets.x == x && currentOffsets.y == y && currentOffsets.z == z) {

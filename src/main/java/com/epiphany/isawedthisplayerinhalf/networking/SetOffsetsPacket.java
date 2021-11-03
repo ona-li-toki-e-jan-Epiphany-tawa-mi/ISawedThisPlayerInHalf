@@ -1,5 +1,6 @@
 package com.epiphany.isawedthisplayerinhalf.networking;
 
+import com.epiphany.isawedthisplayerinhalf.ISawedThisPlayerInHalf;
 import com.epiphany.isawedthisplayerinhalf.Offsetter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -11,6 +12,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.PacketDistributor;
+import org.apache.logging.log4j.Level;
 
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -19,14 +21,16 @@ import java.util.function.Supplier;
  * A packet used for sending a player's offsets.
  */
 public class SetOffsetsPacket implements IPacket {
-    private final int playerID;
+    private int playerID;
     private final double xOffset, yOffset, zOffset;
 
     /**
      * Creates a new SetOffsetsPacket.
      *
      * @param player The player whose offsets are being sent.
-     * @param offsets The offsets to be set to the player.
+     * @param xOffset The x-offset of the player.
+     * @param yOffset The y-offset of the player.
+     * @param zOffset The z-offset of the player.
      */
     SetOffsetsPacket(PlayerEntity player, double xOffset, double yOffset, double zOffset) {
         this.playerID = player.getEntityId();
@@ -64,9 +68,18 @@ public class SetOffsetsPacket implements IPacket {
         context.enqueueWork(() -> DistExecutor.<Boolean>runForDist(
                 // Client-side.
                 () -> () -> {
-                    Entity possiblePlayer = Minecraft.getInstance().world.getEntityByID(this.playerID);
+                    // Security.
+                    // TODO Add translations.
+                    if (!Double.isFinite(this.xOffset) || !Double.isFinite(this.yOffset) || !Double.isFinite(this.zOffset)) {
+                        ISawedThisPlayerInHalf.LOGGER.log(Level.WARN, "Server attempted to send invalid offsets for the player with id " + this.playerID + "! - will not store!");
+                        return false;
+                    }
 
-                    if (possiblePlayer instanceof PlayerEntity && !possiblePlayer.equals(Minecraft.getInstance().player))
+
+                    Minecraft minecraftInstance = Minecraft.getInstance();
+                    Entity possiblePlayer = minecraftInstance.world.getEntityByID(this.playerID);
+
+                    if (possiblePlayer instanceof PlayerEntity && !possiblePlayer.equals(minecraftInstance.player))
                         Offsetter.setOffsets((PlayerEntity) possiblePlayer, new Vec3d(this.xOffset, this.yOffset, this.zOffset));
 
                     return true;
@@ -77,13 +90,27 @@ public class SetOffsetsPacket implements IPacket {
                     ServerPlayerEntity sender = context.getSender();
 
                     if (sender != null) {
+                        // Security.
+                        if (!Double.isFinite(this.xOffset) || !Double.isFinite(this.yOffset) || !Double.isFinite(this.zOffset)) {
+                            ISawedThisPlayerInHalf.LOGGER.log(Level.WARN, "Player " + sender.getName().getString() + " attempted to send invalid offsets! - will not store nor send to clients");
+                            return false;
+                        }
+
+                        int truePlayerID = sender.getEntityId();
+
+                        if (truePlayerID != this.playerID) {
+                            this.playerID = truePlayerID;
+                            ISawedThisPlayerInHalf.LOGGER.log(Level.WARN, "Player " + sender.getName().getString() + " attempted to send offsets using an invalid id! - will use true id instead");
+                        }
+
+
                         Offsetter.setOffsets(sender, new Vec3d(this.xOffset, this.yOffset, this.zOffset));
 
 
+                        // Routes packet to the other players on the server with the mod.
                         UUID senderUUID = sender.getUniqueID();
                         PlayerList playerList = sender.getServer().getPlayerList();
 
-                        // Routes packet to the other players on the server with the mod.
                         for (UUID otherPlayerUUID : Offsetter.getOffsetPlayerUUIDs()) {
                             if (otherPlayerUUID.equals(senderUUID))
                                 continue;

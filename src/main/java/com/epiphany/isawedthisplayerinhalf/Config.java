@@ -14,6 +14,7 @@ import java.io.File;
 
 // TODO Look into adding a config menu in the mode menu.
 // TODO Check out to see if config translation can be displayed depending on client locale.
+// TODO (MAYBE) Add server config that lets admins control kicking and banning when invalid offsets are sent.
 
 /**
  * Deals with configuration data for the mod.
