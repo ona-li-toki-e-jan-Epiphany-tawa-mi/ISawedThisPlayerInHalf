@@ -1570,6 +1570,66 @@ function initializeCoreMod() {
             }
         },
 
+        "CrossbowItem": {
+            "target": {
+                "type": "CLASS",
+                "name": "net.minecraft.item.CrossbowItem"
+            },
+
+            "transformer": function(classNode) {
+                var classPath = "net.minecraft.item.CrossbowItem"
+
+                var fireProjectile = findObfuscatedMethodWithSignature(classNode, "fireProjectile", "func_220016_a",
+                    "(Lnet/minecraft/world/World;Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/util/Hand;Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;FZFFF)V")
+                var functionName = "function fireProjectile"
+
+                if (fireProjectile !== null) {
+                    try {
+                        var oldInstructions = fireProjectile.instructions
+                        var success = false
+
+                        for (var i = 0; i <= oldInstructions.size() - 2; i++) {
+                            if (checkMethodInsn(oldInstructions.get(i), Opcodes.INVOKESPECIAL, "net/minecraft/entity/item/FireworkRocketEntity", "<init>", "(Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;DDDZ)V")
+                                    && checkVarInsn(oldInstructions.get(i+1), Opcodes.ASTORE, 11)) {
+                                var offsetProjectileInstructions = new InsnList()
+
+                                offsetProjectileInstructions.add(new VarInsnNode(Opcodes.ALOAD, 11)) // iprojectile Lnet/minecraft/entity/IProjectile;
+                                offsetProjectileInstructions.add(new VarInsnNode(Opcodes.ALOAD, 1)) // shooter Lnet/minecraft/entity/LivingEntity;
+                                offsetProjectileInstructions.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "offsetProjectile",
+                                    "(Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/LivingEntity;)V",
+                                    false
+                                ))
+
+                                // ...
+                                // INVOKESPECIAL net/minecraft/entity/item/FireworkRocketEntity.<init> (Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;DDDZ)V
+                                // ASTORE 11
+                                oldInstructions.insert(oldInstructions.get(i+1), offsetProjectileInstructions)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(functionName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                return classNode
+            }
+        },
+
 
         /**
          * Allows players to break far away blocks.
