@@ -20,7 +20,7 @@
 
 ::ofs может пользоваться против ::offsets.
 
-Также можно изменить смещения файлом конфигурации (в config/swdthsplyrnhlf-client.toml)
+Также можно изменить смещения файлом конфигурации (в config/isawedthisplayerinhalf-client.toml)
 
 
 ## Мультиплеер
@@ -34,4 +34,4 @@
 
 
 ## Благодарности
-Спасибо [PhoenixSC](https://www.youtube.com/c/PhnixhamstaSC "Канал PhoenixSC на Ютубе") за [идею для мода.](https://www.youtube.com/watch?v=QS2GsxZ3d1M "I Separated the Player's Body in Half in Minecraft - PhoenixSC")
+[PhoenixSC](https://www.youtube.com/c/PhnixhamstaSC "Канал PhoenixSC на Ютубе") - [идея для мода.](https://www.youtube.com/watch?v=QS2GsxZ3d1M "I Separated the Player's Body in Half in Minecraft - PhoenixSC")

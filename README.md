@@ -19,7 +19,7 @@ These chat commands allow you to control your offsets, the new position of the t
 
 ::ofs can be used in place of ::offsets.
 
-Offsets can also be modified using the config file (in config/swdthsplyrnhlf-client.toml)
+Offsets can also be modified using the config file (in config/isawedthisplayerinhalf-client.toml)
 
 
 ## Multiplayer
@@ -33,4 +33,4 @@ I would **_not_** recommend using this on a server that does not have the mod.
 
 
 ## Credits
-Thanks to [PhoenixSC](https://www.youtube.com/c/PhnixhamstaSC "PhoenixSC's YouTube channel") for the [mod idea.](https://www.youtube.com/watch?v=QS2GsxZ3d1M "I Separated the Player's Body in Half in Minecraft - PhoenixSC")
+[PhoenixSC](https://www.youtube.com/c/PhnixhamstaSC "PhoenixSC's YouTube channel") - [mod idea.](https://www.youtube.com/watch?v=QS2GsxZ3d1M "I Separated the Player's Body in Half in Minecraft - PhoenixSC")

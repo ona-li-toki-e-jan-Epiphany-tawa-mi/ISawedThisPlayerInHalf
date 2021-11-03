@@ -20,7 +20,7 @@ nimi wawa ni pi tomo toki li ken e ni: sina ante e ma ante pi sijelo sewi sina l
 
 ::ofs li ken kepeken tawa ::offsets.
 
-kin la sina ken ante e ma ante kepeken poki nimi ante (li lon config/swdthsplyrnhlf-client.toml)
+kin la sina ken ante e ma ante kepeken poki nimi ante (li lon config/isawedthisplayerinhalf-client.toml)
 
 
 ## musi pi jan mute
@@ -34,4 +34,4 @@ kin la kepeken e ni lon ma pi jan mute pi ante musi ni ala li **_ike._**
 
 
 ## jan suli
-[jan PhoenixSC](https://www.youtube.com/c/PhnixhamstaSC "lipu JuTu (YouTube) PhoenixSC") o, pona tawa [sona pi pali pi ante ni.](https://www.youtube.com/watch?v=QS2GsxZ3d1M "I Separated the Player's Body in Half in Minecraft - PhoenixSC")
+[jan PhoenixSC](https://www.youtube.com/c/PhnixhamstaSC "lipu JuTu (YouTube) PhoenixSC") - [sona pi pali pi ante ni.](https://www.youtube.com/watch?v=QS2GsxZ3d1M "I Separated the Player's Body in Half in Minecraft - PhoenixSC")

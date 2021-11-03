@@ -1,35 +1,12 @@
 package com.epiphany.isawedthisplayerinhalf.helpers;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
  * A helper for refection so that the other classes are not a mess of try/catch blocks.
  */
 public class ReflectionHelper {
-    /**
-     * Gets a declared field from a class, or null.
-     *
-     * @param clazz The class to get the field from.
-     * @param fieldName The name of the field to get.
-     *
-     * @return The field with the name fieldName in class clazz.
-     */
-    public static Field getFieldOrNull(Class<?> clazz, String fieldName) {
-        Field field;
-
-        try {
-            field = clazz.getDeclaredField(fieldName);
-
-        } catch (NoSuchFieldException exception) {
-            field = null;
-            exception.printStackTrace();
-        }
-
-        return field;
-    }
-
     /**
      * Gets a declared field from a class, or null.
      *
@@ -69,7 +46,7 @@ public class ReflectionHelper {
      *
      * @return The value stored in the field, or the default value.
      */
-    public static Object getFieldOrDefault(Field field, Object object, Object defaultValue) {
+    public static Object getValueOrDefault(Field field, Object object, Object defaultValue) {
         if (field != null) {
             Object returnValue;
 
@@ -117,65 +94,6 @@ public class ReflectionHelper {
 
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
-            }
-    }
-
-
-
-    /**
-     * Attempts to get a declared method from the given class through reflection.
-     * Returns null if no method is found.
-     *
-     * @param clazz The class the method was declared in.
-     * @param methodName The name of the method.
-     * @param obfuscatedMethodName The obfuscated name of the method.
-     * @param argumentTypes The argument types of the method.
-     *
-     * @return The specified method in the class, or null.
-     */
-    public static Method getMethodOrNull(Class<?> clazz, String methodName, String obfuscatedMethodName, Class<?>... argumentTypes) {
-        Method method;
-
-        try {
-            method = clazz.getDeclaredMethod(methodName, argumentTypes);
-
-        } catch (NoSuchMethodException exception) {
-            try {
-                method = clazz.getDeclaredMethod(obfuscatedMethodName, argumentTypes);
-
-            } catch (NoSuchMethodException innerException) {
-                method = null;
-
-                exception.printStackTrace();
-                innerException.printStackTrace();
-            }
-        }
-
-        return method;
-    }
-
-    /**
-     * Invokes a method.
-     *
-     * @param object The object to invoke the method with.
-     * @param method The method to invoke.
-     * @param methodArguments The arguments to the method.
-     */
-    public static void invokeMethod(Method method, Object object, Object... methodArguments) {
-        if (method != null)
-            try {
-                boolean wasAccessible = method.isAccessible();
-
-                if (!wasAccessible)
-                    method.setAccessible(true);
-
-                method.invoke(object, methodArguments);
-
-                if (!wasAccessible)
-                    method.setAccessible(false);
-
-            } catch (IllegalAccessException | InvocationTargetException exception) {
-                exception.printStackTrace();
             }
     }
 
