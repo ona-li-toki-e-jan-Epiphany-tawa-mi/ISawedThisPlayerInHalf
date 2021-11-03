@@ -2,7 +2,6 @@ package com.epiphany.isawedthisplayerinhalf;
 
 import com.epiphany.isawedthisplayerinhalf.networking.Networker;
 import com.epiphany.isawedthisplayerinhalf.rendering.RenderingOffsetter;
-import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
@@ -27,7 +26,8 @@ for(LivingEntity livingentity : this.world.getEntitiesWithinAABB(LivingEntity.cl
 
 // TODO (MAYBE) Combine shared code in ModifiedBipedModel and ModifiedPlayerModel.
 
-// TODO (MAYBE) Expose an API for other mods to interact with this one.
+// TODO (MAYBE MAYBE NOT) Expose an API for other mods to interact with this one.
+// TODO (MAYBE MAYBE NOT) Create a compatibility mode jar that injects into general position methods and uses calling class and calling method names to use offsets.
 
 /**
  * This mod splits apart the player, freeing the torso from the legs.
