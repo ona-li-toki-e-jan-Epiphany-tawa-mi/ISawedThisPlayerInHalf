@@ -1,7 +1,9 @@
 package com.epiphany.isawedthisplayerinhalf.helpers;
 
 import com.epiphany.isawedthisplayerinhalf.Offsetter;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.culling.ClippingHelperImpl;
 import net.minecraft.entity.Entity;
@@ -229,6 +231,24 @@ public class BytecodeHelper {
         Vec3d offsets = Offsetter.getOffsets(entity);
 
         return !offsets.equals(Vec3d.ZERO) ? axisAlignedBB.offset(offsets) : axisAlignedBB;
+    }
+
+    /**
+     * Offsets the last matrix of a matrix stack with the offsets from a player.
+     *
+     * @param playerEntity The player to get the offsets from.
+     * @param matrixStack The matrix stack to get the matrix to offset from.
+     *
+     * @return The matrix stack.
+     */
+    @OnlyIn(Dist.CLIENT)
+    public static MatrixStack offsetMatrix(AbstractClientPlayerEntity playerEntity, MatrixStack matrixStack) {
+        Vec3d offsets = Offsetter.getOffsets(playerEntity);
+
+        if (!offsets.equals(Vec3d.ZERO))
+            matrixStack.translate(offsets.x, offsets.y, offsets.z);
+
+        return matrixStack;
     }
 
 

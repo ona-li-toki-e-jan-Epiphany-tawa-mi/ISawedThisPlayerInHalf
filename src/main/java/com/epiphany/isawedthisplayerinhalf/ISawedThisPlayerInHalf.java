@@ -2,6 +2,7 @@ package com.epiphany.isawedthisplayerinhalf;
 
 import com.epiphany.isawedthisplayerinhalf.networking.Networker;
 import com.epiphany.isawedthisplayerinhalf.rendering.RenderingOffsetter;
+import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
@@ -12,7 +13,6 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-// TODO Offset player nametags.
 /* TODO Check this function in PlayerEntity.
 for(LivingEntity livingentity : this.world.getEntitiesWithinAABB(LivingEntity.class, targetEntity.getBoundingBox().grow(1.0D, 0.25D, 1.0D))) {
     if (livingentity != this && livingentity != targetEntity && !this.isOnSameTeam(livingentity) && (!(livingentity instanceof ArmorStandEntity) || !((ArmorStandEntity)livingentity).hasMarker()) && this.getDistanceSq(livingentity) < 9.0D) {
@@ -26,7 +26,6 @@ for(LivingEntity livingentity : this.world.getEntitiesWithinAABB(LivingEntity.cl
 // TODO worldIn.playSound((PlayerEntity)null, shooter.getPosX(), shooter.getPosY(), shooter.getPosZ(), SoundEvents.ITEM_CROSSBOW_SHOOT, SoundCategory.PLAYERS, 1.0F, soundPitch); in CrossbowItem in fireProjectile.
 
 // TODO (MAYBE) Combine shared code in ModifiedBipedModel and ModifiedPlayerModel.
-// TODO Clean up logo.
 
 // TODO (MAYBE) Expose an API for other mods to interact with this one.
 

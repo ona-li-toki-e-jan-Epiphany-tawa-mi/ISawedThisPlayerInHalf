@@ -1570,6 +1570,9 @@ function initializeCoreMod() {
             }
         },
 
+        /**
+         * Offsets the firing position of firework rockets.
+         */
         "CrossbowItem": {
             "target": {
                 "type": "CLASS",
@@ -2265,6 +2268,68 @@ function initializeCoreMod() {
                                 // DADD
                                 // DSTORE 22
                                 oldInstructions.insert(oldInstructions.get(i+3), offsetLeashRender)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(functionName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                return classNode
+            }
+        },
+
+        /**
+         * Offsets the display of player names.
+         */
+        "PlayerRenderer": {
+            "target": {
+                "type": "CLASS",
+                "name": "net.minecraft.client.renderer.entity.PlayerRenderer"
+            },
+
+            "transformer": function(classNode) {
+                var classPath = "net.minecraft.client.renderer.entity.PlayerRenderer"
+
+                var renderName = findObfuscatedMethodWithSignature(classNode, "renderName", "func_225629_a_",
+                    "(Lnet/minecraft/client/entity/player/AbstractClientPlayerEntity;Ljava/lang/String;Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;I)V")
+                var functionName = "function renderName"
+
+                if (renderName !== null) {
+                    try {
+                        var oldInstructions = renderName.instructions
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            if (checkObfuscatedMethodInsn(oldInstructions.get(i), Opcodes.INVOKEVIRTUAL, "com/mojang/blaze3d/matrix/MatrixStack", "push",
+                                    "func_227860_a_", "()V")) {
+                                var offsetNameMatrix = new InsnList()
+
+                                offsetNameMatrix.add(new VarInsnNode(Opcodes.ALOAD, 1)) // entityIn Lnet/minecraft/client/entity/player/AbstractClientPlayerEntity;
+                                offsetNameMatrix.add(new VarInsnNode(Opcodes.ALOAD, 3)) // matrixStackIn Lcom/mojang/blaze3d/matrix/MatrixStack;
+                                offsetNameMatrix.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "offsetMatrix",
+                                    "(Lnet/minecraft/client/entity/player/AbstractClientPlayerEntity;Lcom/mojang/blaze3d/matrix/MatrixStack;)Lcom/mojang/blaze3d/matrix/MatrixStack;",
+                                    false
+                                ))
+
+                                // ...
+                                // INVOKEVIRTUAL com/mojang/blaze3d/matrix/MatrixStack.push ()V
+                                oldInstructions.insert(oldInstructions.get(i), offsetNameMatrix)
                                 // ...
 
                                 success = true
