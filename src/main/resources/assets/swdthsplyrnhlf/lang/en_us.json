@@ -17,5 +17,9 @@
   "commands.swdthsplyrnhlf.errors.number_expected": "Expected number",
   "commands.swdthsplyrnhlf.errors.incomplete_command": "Incomplete command",
   "commands.swdthsplyrnhlf.errors.unknown_command": "Unknown command",
-  "commands.swdthsplyrnhlf.errors.error_position_pointer": "<--[HERE]"
+  "commands.swdthsplyrnhlf.errors.error_position_pointer": "<--[HERE]",
+
+
+
+  "network.error.set_offsets.invalid_offsets": "Server attempted to send invalid offsets for the player with id %d! - will not store!"
 }

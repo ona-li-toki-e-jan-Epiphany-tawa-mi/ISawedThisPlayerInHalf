@@ -17,5 +17,9 @@
   "commands.swdthsplyrnhlf.errors.number_expected": "nanpa li wile",
   "commands.swdthsplyrnhlf.errors.incomplete_command": "nimi wawa li pini ala",
   "commands.swdthsplyrnhlf.errors.unknown_command": "nimi wawa li lon ala",
-  "commands.swdthsplyrnhlf.errors.error_position_pointer": "<--[lon ni]"
+  "commands.swdthsplyrnhlf.errors.error_position_pointer": "<--[lon ni]",
+
+
+
+  "network.error.set_offsets.invalid_offsets": "ma pi jan mute li lukin pana e ma ante ike pi jan ante! jan li nanpa %d. - li poki ala e ona!"
 }

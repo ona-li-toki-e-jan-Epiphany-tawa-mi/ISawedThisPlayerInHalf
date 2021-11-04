@@ -21,6 +21,7 @@ import java.util.UUID;
  */
 @OnlyIn(Dist.CLIENT)
 public class RenderingOffsetter {
+    // EntityRendererManager.
     private static final Field FIELD_skinMap;
     private static final Field FIELD_playerRenderer;
 

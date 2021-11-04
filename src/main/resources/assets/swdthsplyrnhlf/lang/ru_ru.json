@@ -17,5 +17,9 @@
   "commands.swdthsplyrnhlf.errors.number_expected": "Ожидалось число",
   "commands.swdthsplyrnhlf.errors.incomplete_command": "Не совершено",
   "commands.swdthsplyrnhlf.errors.unknown_command": "Неизвестная команда",
-  "commands.swdthsplyrnhlf.errors.error_position_pointer": "<--[ЗДЕСЬ]"
+  "commands.swdthsplyrnhlf.errors.error_position_pointer": "<--[ЗДЕСЬ]",
+
+
+
+  "network.error.set_offsets.invalid_offsets": "Сервер попытался отправить неправильные смещения для игрока с кодом %d! - не сохранит!"
 }

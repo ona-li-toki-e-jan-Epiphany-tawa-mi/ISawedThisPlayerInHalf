@@ -33,6 +33,7 @@ public class BytecodeHelper {
     private static final Random RANDOM;
 
     static {
+        // LookAtGoal.
         FIELD_entity = ReflectionHelper.getDeclaredFieldOrNull(LookAtGoal.class, "entity", "field_75332_b");
         ReflectionHelper.makeAccessible(FIELD_entity);
         FIELD_closestEntity = ReflectionHelper.getDeclaredFieldOrNull(LookAtGoal.class, "closestEntity", "field_75334_a");
