@@ -63,7 +63,7 @@ public class SetOffsetsPacket implements IPacket {
 
     @Override
     public void handle(Supplier<NetworkEvent.Context> contextSupplier) {
-        final boolean magicBoolean = true;
+        final boolean MAGIC_BOOLEAN = true;
         NetworkEvent.Context context = contextSupplier.get();
 
         context.enqueueWork(() -> DistExecutor.<Boolean>runForDist(
@@ -73,7 +73,7 @@ public class SetOffsetsPacket implements IPacket {
                     // TODO Add translations.
                     if (!Double.isFinite(this.xOffset) || !Double.isFinite(this.yOffset) || !Double.isFinite(this.zOffset)) {
                         ISawedThisPlayerInHalf.LOGGER.log(Level.WARN, "Server attempted to send invalid offsets for the player with id " + this.playerID + "! - will not store!");
-                        return magicBoolean;
+                        return MAGIC_BOOLEAN;
                     }
 
 
@@ -83,7 +83,7 @@ public class SetOffsetsPacket implements IPacket {
                     if (possiblePlayer instanceof PlayerEntity && !possiblePlayer.equals(minecraftInstance.player))
                         Offsetter.setOffsets((PlayerEntity) possiblePlayer, new Vec3d(this.xOffset, this.yOffset, this.zOffset));
 
-                    return magicBoolean;
+                    return MAGIC_BOOLEAN;
                 },
 
                 // Server-side.
@@ -94,7 +94,7 @@ public class SetOffsetsPacket implements IPacket {
                         // Security.
                         if (!Double.isFinite(this.xOffset) || !Double.isFinite(this.yOffset) || !Double.isFinite(this.zOffset)) {
                             ISawedThisPlayerInHalf.LOGGER.log(Level.WARN, "Player " + sender.getName().getString() + " attempted to send invalid offsets! - will not store nor send to clients");
-                            return magicBoolean;
+                            return MAGIC_BOOLEAN;
                         }
 
                         int truePlayerID = sender.getEntityId();
@@ -121,7 +121,7 @@ public class SetOffsetsPacket implements IPacket {
                         }
                     }
 
-                    return magicBoolean;
+                    return MAGIC_BOOLEAN;
                 }
         ));
 

@@ -18,9 +18,9 @@ public class ModifiedModelCommon {
      * @return The angle required to cancel out the player's offset and rotate the upper body into position.
      */
     static float calculateNetYawOffset(float ageInTicks, LivingEntity entity, RenderingOffsets renderingOffsets) {
-        final float degreesToRadians = (float) (Math.PI / 180.0);
+        final float DEGREES_TO_RADIANS = (float) (Math.PI / 180.0);
 
-        return MathHelper.lerp(ageInTicks - entity.ticksExisted, entity.prevRenderYawOffset, entity.renderYawOffset) * degreesToRadians
+        return MathHelper.lerp(ageInTicks - entity.ticksExisted, entity.prevRenderYawOffset, entity.renderYawOffset) * DEGREES_TO_RADIANS
                 + renderingOffsets.getYawOffset();
     }
 

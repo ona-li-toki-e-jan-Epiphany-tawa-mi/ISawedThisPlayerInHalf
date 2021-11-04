@@ -21,19 +21,19 @@ import java.util.UUID;
  */
 @OnlyIn(Dist.CLIENT)
 public class RenderingOffsetter {
-    private static final Field skinMapField;
-    private static final Field playerRendererField;
+    private static final Field FIELD_skinMap;
+    private static final Field FIELD_playerRenderer;
 
     static {
-        skinMapField = ReflectionHelper.getFieldOrNull(EntityRendererManager.class, "skinMap", "field_178636_l");
-        ReflectionHelper.makeAccessible(skinMapField);
-        playerRendererField = ReflectionHelper.getFieldOrNull(EntityRendererManager.class, "playerRenderer", "field_178637_m");
-        ReflectionHelper.makeAccessible(playerRendererField);
+        FIELD_skinMap = ReflectionHelper.getFieldOrNull(EntityRendererManager.class, "skinMap", "field_178636_l");
+        ReflectionHelper.makeAccessible(FIELD_skinMap);
+        FIELD_playerRenderer = ReflectionHelper.getFieldOrNull(EntityRendererManager.class, "playerRenderer", "field_178637_m");
+        ReflectionHelper.makeAccessible(FIELD_playerRenderer);
 
-        if (skinMapField == null)
-            throw new NullPointerException("Unable to find field 'skinMapField' under names 'skinMap' and 'field_178636_l'");
-        if (playerRendererField == null)
-            throw new NullPointerException("Unable to find field 'playerRendererField' under names 'playerRenderer' and 'field_178637_m'");
+        if (FIELD_skinMap == null)
+            throw new NullPointerException("Unable to find field 'FIELD_skinMap' under names 'skinMap' and 'field_178636_l'");
+        if (FIELD_playerRenderer == null)
+            throw new NullPointerException("Unable to find field 'FIELD_playerRenderer' under names 'playerRenderer' and 'field_178637_m'");
     }
 
     /**
@@ -41,17 +41,14 @@ public class RenderingOffsetter {
      */
     public static void replacePlayerRenderers() {
         EntityRendererManager entityRendererManager = Minecraft.getInstance().getRenderManager();
-        Map<String, PlayerRenderer> skinMap = (Map<String, PlayerRenderer>) ReflectionHelper.getValueOrDefault(skinMapField, entityRendererManager, null);
+        PlayerRenderer newDefaultRenderer = new ModifiedPlayerRenderer(entityRendererManager, false);
 
-        if (skinMap != null) {
-            PlayerRenderer newDefaultRenderer = new ModifiedPlayerRenderer(entityRendererManager, false);
+        Map<String, PlayerRenderer> skinMap = (Map<String, PlayerRenderer>) ReflectionHelper.getValueOrDefault(FIELD_skinMap, entityRendererManager, null);
+        if (skinMap == null) throw new NullPointerException("Unable to get value from 'FIELD_skinMap'");
 
-            skinMap.replace("default", newDefaultRenderer);
-            skinMap.replace("slim", new ModifiedPlayerRenderer(entityRendererManager, true));
-            ReflectionHelper.setField(playerRendererField, entityRendererManager, newDefaultRenderer);
-
-        } else
-            throw new NullPointerException("Unable to acquire value of field 'skinMap' from EntityRendererManager");
+        skinMap.replace("default", newDefaultRenderer);
+        skinMap.replace("slim", new ModifiedPlayerRenderer(entityRendererManager, true));
+        ReflectionHelper.setField(FIELD_playerRenderer, entityRendererManager, newDefaultRenderer);
     }
 
 
@@ -65,15 +62,15 @@ public class RenderingOffsetter {
      * @param offsets The physical offsets of the player's body.
      */
     public static void setOffsets(PlayerEntity playerEntity, Vec3d offsets) {
-        final double physicalToModelCoordinates = 17.0660750427;
+        final double PHYSICAL_TO_RENDERING_COORDINATES = 17.0660750427;
 
         float xOffset, yOffset, zOffset;
         float yawOffset;
 
         if (!offsets.equals(Vec3d.ZERO)) {
-            xOffset = (float) (offsets.x * physicalToModelCoordinates);
-            yOffset = (float) (offsets.y * -physicalToModelCoordinates);
-            zOffset = (float) (offsets.z * physicalToModelCoordinates);
+            xOffset = (float) (offsets.x * PHYSICAL_TO_RENDERING_COORDINATES);
+            yOffset = (float) (offsets.y * -PHYSICAL_TO_RENDERING_COORDINATES);
+            zOffset = (float) (offsets.z * PHYSICAL_TO_RENDERING_COORDINATES);
             // Angle needs to be multiplied by two for whatever reason.
             yawOffset = (float) (Math.atan2(-offsets.z, offsets.x) * 2);
 

@@ -27,11 +27,11 @@ public class Config {
      * Sets up config file and loads in data if it already exits.
      */
     public static void enable() {
-        final String configFileName = "isawedthisplayerinhalf-client.toml";
+        final String CONFIG_FILE_NAME = "isawedthisplayerinhalf-client.toml";
 
         ForgeConfigSpec configSpecification = buildConfig();
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, configSpecification);
-        loadConfigFile(FMLPaths.CONFIGDIR.get().resolve(configFileName).toString(), configSpecification);
+        loadConfigFile(FMLPaths.CONFIGDIR.get().resolve(CONFIG_FILE_NAME).toString(), configSpecification);
     }
 
     /**

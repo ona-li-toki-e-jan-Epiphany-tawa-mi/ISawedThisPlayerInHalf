@@ -21,9 +21,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import java.lang.reflect.Field;
 import java.util.Random;
 
-// TODO Have reflections throw errors when trying to get the values
-// TODO Possibly remove reflections if possible.
-
 /**
  * Helper class for calling functions and accessing fields that can't be done in pure bytecode thanks to obfuscation,
  *  and for moving as much code into Java as possible to increase maintainability.
@@ -294,6 +291,8 @@ public class BytecodeHelper {
      */
     public static Vec3d applyLookAtOffsetsRandomly(double x, double y, double z, LookAtGoal lookAtGoal) {
         Entity closestEntity = (Entity) ReflectionHelper.getValueOrDefault(FIELD_closestEntity, lookAtGoal, null);
+        if (closestEntity == null) throw new NullPointerException("Unable to get value from 'LookAtGoal'");
+
         Vec3d offsets = Offsetter.getOffsets(closestEntity);
 
         if (offsets.equals(Vec3d.ZERO) || RANDOM.nextBoolean())
