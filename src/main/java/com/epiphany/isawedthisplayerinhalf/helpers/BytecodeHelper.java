@@ -33,11 +33,11 @@ public class BytecodeHelper {
     private static final Random RANDOM;
 
     static {
-        FIELD_entity = ReflectionHelper.getFieldOrNull(LookAtGoal.class, "entity", "field_75332_b");
+        FIELD_entity = ReflectionHelper.getDeclaredFieldOrNull(LookAtGoal.class, "entity", "field_75332_b");
         ReflectionHelper.makeAccessible(FIELD_entity);
-        FIELD_closestEntity = ReflectionHelper.getFieldOrNull(LookAtGoal.class, "closestEntity", "field_75334_a");
+        FIELD_closestEntity = ReflectionHelper.getDeclaredFieldOrNull(LookAtGoal.class, "closestEntity", "field_75334_a");
         ReflectionHelper.makeAccessible(FIELD_closestEntity);
-        FIELD_maxDistance = ReflectionHelper.getFieldOrNull(LookAtGoal.class, "maxDistance", "field_75333_c");
+        FIELD_maxDistance = ReflectionHelper.getDeclaredFieldOrNull(LookAtGoal.class, "maxDistance", "field_75333_c");
         ReflectionHelper.makeAccessible(FIELD_maxDistance);
 
         if (FIELD_entity == null)

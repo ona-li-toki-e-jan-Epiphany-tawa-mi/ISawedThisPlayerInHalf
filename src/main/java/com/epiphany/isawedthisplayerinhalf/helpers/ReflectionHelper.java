@@ -3,8 +3,6 @@ package com.epiphany.isawedthisplayerinhalf.helpers;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-// TODO Remove accessibility checks.
-
 /**
  * A helper for refection so that the other classes are not a mess of try/catch blocks.
  */
@@ -18,21 +16,21 @@ public class ReflectionHelper {
      *
      * @return The field with the name fieldName in class clazz.
      */
-    public static Field getFieldOrNull(Class<?> clazz, String fieldName, String obfuscatedFieldName) {
+    public static Field getDeclaredFieldOrNull(Class<?> clazz, String fieldName, String obfuscatedFieldName) {
         Field field;
 
         try {
             field = clazz.getDeclaredField(fieldName);
 
-        } catch (NoSuchFieldException exception) {
+        } catch (NoSuchFieldException noSuchFieldException) {
             try {
                 field = clazz.getDeclaredField(obfuscatedFieldName);
 
-            } catch (NoSuchFieldException innerException) {
+            } catch (NoSuchFieldException innerNoSuchFieldException) {
                 field = null;
 
-                exception.printStackTrace();
-                innerException.printStackTrace();
+                noSuchFieldException.printStackTrace();
+                innerNoSuchFieldException.printStackTrace();
             }
         }
 
@@ -49,29 +47,17 @@ public class ReflectionHelper {
      * @return The value stored in the field, or the default value.
      */
     public static Object getValueOrDefault(Field field, Object object, Object defaultValue) {
-        if (field != null) {
-            Object returnValue;
+        Object returnValue;
 
-            try {
-                boolean wasAccessible = field.isAccessible();
+        try {
+            returnValue = field.get(object);
 
-                if (!wasAccessible)
-                    field.setAccessible(true);
-
-                returnValue = field.get(object);
-
-                if (!wasAccessible)
-                    field.setAccessible(false);
-
-            } catch (IllegalAccessException e) {
-                returnValue = defaultValue;
-                e.printStackTrace();
-            }
-
-            return returnValue;
+        } catch (IllegalAccessException illegalAccessException) {
+            returnValue = defaultValue;
+            illegalAccessException.printStackTrace();
         }
 
-        return defaultValue;
+        return returnValue;
     }
 
     /**
@@ -81,22 +67,13 @@ public class ReflectionHelper {
      * @param object The object to set the field's value to.
      * @param value The value to set to the field.
      */
-    public static void setField(Field field, Object object, Object value) {
-        if (field != null)
-            try {
-                boolean wasAccessible = field.isAccessible();
+    public static void setValue(Field field, Object object, Object value) {
+        try {
+            field.set(object, value);
 
-                if (!wasAccessible)
-                    field.setAccessible(true);
-
-                field.set(object, value);
-
-                if (!wasAccessible)
-                    field.setAccessible(false);
-
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
+        } catch (IllegalAccessException illegalAccessException) {
+            illegalAccessException.printStackTrace();
+        }
     }
 
 

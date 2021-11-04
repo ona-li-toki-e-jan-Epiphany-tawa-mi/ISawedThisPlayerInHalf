@@ -25,9 +25,9 @@ public class RenderingOffsetter {
     private static final Field FIELD_playerRenderer;
 
     static {
-        FIELD_skinMap = ReflectionHelper.getFieldOrNull(EntityRendererManager.class, "skinMap", "field_178636_l");
+        FIELD_skinMap = ReflectionHelper.getDeclaredFieldOrNull(EntityRendererManager.class, "skinMap", "field_178636_l");
         ReflectionHelper.makeAccessible(FIELD_skinMap);
-        FIELD_playerRenderer = ReflectionHelper.getFieldOrNull(EntityRendererManager.class, "playerRenderer", "field_178637_m");
+        FIELD_playerRenderer = ReflectionHelper.getDeclaredFieldOrNull(EntityRendererManager.class, "playerRenderer", "field_178637_m");
         ReflectionHelper.makeAccessible(FIELD_playerRenderer);
 
         if (FIELD_skinMap == null)
@@ -48,7 +48,7 @@ public class RenderingOffsetter {
 
         skinMap.replace("default", newDefaultRenderer);
         skinMap.replace("slim", new ModifiedPlayerRenderer(entityRendererManager, true));
-        ReflectionHelper.setField(FIELD_playerRenderer, entityRendererManager, newDefaultRenderer);
+        ReflectionHelper.setValue(FIELD_playerRenderer, entityRendererManager, newDefaultRenderer);
     }
 
 
