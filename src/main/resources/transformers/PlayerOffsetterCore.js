@@ -11,7 +11,6 @@ var VarInsnNode = Java.type("org.objectweb.asm.tree.VarInsnNode")
 /**
  * Forces the game to account for the player's offsets in it's calculations.
  */
-// TODO Find a way to make a copy of method and class nodes so that when transforms fail the unmodified one can be returned.
 // TODO Find an automatic way to minify this file when making a jar.
 
 
@@ -969,6 +968,7 @@ function initializeCoreMod() {
 
         /**
          * Makes entities look at the offset position of players randomly, resulting in them shaking their heads "out of confusion."
+         * Redoes range check when deciding whether to keep looking at an offset player.
          */
         "LookAtGoal": {
             "target": {
@@ -979,6 +979,7 @@ function initializeCoreMod() {
             "transformer": function(classNode) {
                 var classPath = "net.minecraft.entity.ai.goal.LookAtGoal"
 
+                // Makes entities look at the offset position of players randomly, resulting in them shaking their heads "out of confusion."
                 var tick = findObfuscatedMethodWithSignature(classNode, "tick", "func_75246_d", "()V")
                 var functionName = "function tick"
 
@@ -988,7 +989,8 @@ function initializeCoreMod() {
                         var success = false
 
                         for (var i = 0; i < oldInstructions.size(); i++) {
-                            if (checkObfuscatedMethodInsn(oldInstructions.get(i), Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/ai/controller/LookController", "setLookPosition", "func_220679_a", "(DDD)V")) {
+                            if (checkObfuscatedMethodInsn(oldInstructions.get(i), Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/ai/controller/LookController",
+                                    "setLookPosition", "func_220679_a", "(DDD)V")) {
                                 var offsetLookAtPosition = new InsnList()
 
                                 // 50% chance to set the position to be looked at to the player's offset one.
@@ -1032,6 +1034,53 @@ function initializeCoreMod() {
                                 // ...
                                 oldInstructions.insertBefore(oldInstructions.get(i), offsetLookAtPosition)
                                 // INVOKEVIRTUAL net/minecraft/entity/ai/controller/LookController.setLookPosition (DDD)V
+                                // ...
+
+                                success = true
+                                logTransformSuccess(functionName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                // Redoes range check when deciding whether to keep looking at an offset player.
+                var shouldContinueExecuting = findObfuscatedMethodWithSignature(classNode, "shouldContinueExecuting", "func_75253_b", "()Z")
+                functionName = "function shouldContinueExecuting"
+
+                if (shouldContinueExecuting !== null) {
+                    try {
+                        var oldInstructions = shouldContinueExecuting.instructions
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/MobEntity", "getDistanceSq", "func_70068_e",
+                                    "(Lnet/minecraft/entity/Entity;)D")) {
+                                var redoIsWithinMaxDistance = new InsnList()
+
+                                redoIsWithinMaxDistance.add(new VarInsnNode(Opcodes.ALOAD, 0)) // this Lnet/minecraft/entity/ai/goal/LookAtGoal;
+                                redoIsWithinMaxDistance.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "redoIsWithinMaxDistance",
+                                    "(DLnet/minecraft/entity/ai/goal/LookAtGoal;)D",
+                                    false
+                                ))
+
+                                // ...
+                                // INVOKEVIRTUAL net/minecraft/entity/MobEntity.getDistanceSq (Lnet/minecraft/entity/Entity;)D
+                                oldInstructions.insert(instruction, redoIsWithinMaxDistance)
                                 // ...
 
                                 success = true

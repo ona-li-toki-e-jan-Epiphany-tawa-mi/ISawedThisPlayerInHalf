@@ -21,7 +21,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import java.lang.reflect.Field;
 import java.util.Random;
 
-// Have reflections throw errors when trying to get the values
+// TODO Have reflections throw errors when trying to get the values
+// TODO Possibly remove reflections if possible.
 
 /**
  * Helper class for calling functions and accessing fields that can't be done in pure bytecode thanks to obfuscation,
@@ -29,16 +30,28 @@ import java.util.Random;
  */
 @SuppressWarnings("unused")
 public class BytecodeHelper {
-    private static final Field closestEntityField;
-    private static final Random random;
+    private static final Field FIELD_entity;
+    private static final Field FIELD_closestEntity;
+    private static final Field FIELD_maxDistance;
+    private static final Random RANDOM;
 
     static {
-        closestEntityField = ReflectionHelper.getFieldOrNull(LookAtGoal.class, "closestEntity", "field_75334_a");
-        ReflectionHelper.makeAccessible(closestEntityField);
-        if (closestEntityField == null)
-            throw new NullPointerException("Unable to find field 'closestEntityField' under names 'closestEntity' and 'field_75334_a'");
+        FIELD_entity = ReflectionHelper.getFieldOrNull(LookAtGoal.class, "entity", "field_75332_b");
+        ReflectionHelper.makeAccessible(FIELD_entity);
+        FIELD_closestEntity = ReflectionHelper.getFieldOrNull(LookAtGoal.class, "closestEntity", "field_75334_a");
+        ReflectionHelper.makeAccessible(FIELD_closestEntity);
+        FIELD_maxDistance = ReflectionHelper.getFieldOrNull(LookAtGoal.class, "maxDistance", "field_75333_c");
+        ReflectionHelper.makeAccessible(FIELD_maxDistance);
 
-        random = new Random();
+        if (FIELD_entity == null)
+            throw new NullPointerException("Unable to find field 'FIELD_entity' under names 'entity' and 'field_75332_b'");
+        if (FIELD_closestEntity == null)
+            throw new NullPointerException("Unable to find field 'FIELD_closestEntity' under names 'closestEntity' and 'field_75334_a'");
+        if (FIELD_maxDistance == null)
+            throw new NullPointerException("Unable to find field 'FIELD_maxDistance' under names 'maxDistance' and 'field_75333_c'");
+
+
+        RANDOM = new Random();
     }
 
 
@@ -168,13 +181,13 @@ public class BytecodeHelper {
     /**
      * Gets the corrected distance from an entity to the player.
      *
-     * @param entity1 The entity to use for the first position.
-     * @param entity2 The entity to use for the second position.
+     * @param entity The entity to use for the first position.
+     * @param offsetEntity The entity with offsets to use for the second position.
      *
      * @return The distance between the first entity and second entity.
      */
-    public static float modifiedGetDistance(Entity entity1, Entity entity2) {
-        return (float) Math.sqrt(BytecodeHelper.modifiedGetDistanceSq(entity1, entity2));
+    public static float modifiedGetDistance(Entity entity, Entity offsetEntity) {
+        return (float) Math.sqrt(BytecodeHelper.modifiedGetDistanceSq(entity, offsetEntity));
     }
 
 
@@ -259,7 +272,7 @@ public class BytecodeHelper {
      * @param shooter The shooter of the projectile.
      */
     public static void offsetProjectile(Entity projectile, LivingEntity shooter) {
-        Vec3d offsets = Offsetter.getOffsets((PlayerEntity) shooter);
+        Vec3d offsets = Offsetter.getOffsets(shooter);
 
         if (!offsets.equals(Vec3d.ZERO))
             projectile.setPosition(
@@ -280,10 +293,10 @@ public class BytecodeHelper {
      * @return Either a zero vector or the entity's offsets.
      */
     public static Vec3d applyLookAtOffsetsRandomly(double x, double y, double z, LookAtGoal lookAtGoal) {
-        Entity closestEntity = (Entity) ReflectionHelper.getValueOrDefault(closestEntityField, lookAtGoal, null);
+        Entity closestEntity = (Entity) ReflectionHelper.getValueOrDefault(FIELD_closestEntity, lookAtGoal, null);
         Vec3d offsets = Offsetter.getOffsets(closestEntity);
 
-        if (offsets.equals(Vec3d.ZERO) || random.nextBoolean())
+        if (offsets.equals(Vec3d.ZERO) || RANDOM.nextBoolean())
             return new Vec3d(x, y, z);
 
         return new Vec3d(x + offsets.x, y + offsets.y, z + offsets.z);
@@ -344,5 +357,39 @@ public class BytecodeHelper {
         Vec3d offsets = Offsetter.getOffsets(entity);
 
         return !offsets.equals(Vec3d.ZERO) ? camera.isBoundingBoxInFrustum(axisAlignedBB.offset(offsets)) : originalResult;
+    }
+
+
+    /**
+     * Redoes the check in {@link LookAtGoal#shouldContinueExecuting()} if the distance to the closest player is too large
+     *  and they have offsets.
+     *
+     * @param originalDistanceSq The original distance squared between the entity of LookAtGoal and its closest entity.
+     * @param lookAtGoal The LookAtGoal that is checking the distance.
+     *
+     * @return Either the original distance squared or the distance squared to the player's offset position.
+     */
+    public static double redoIsWithinMaxDistance(double originalDistanceSq, LookAtGoal lookAtGoal) {
+        float maxDistanceSq = (float) ReflectionHelper.getValueOrDefault(FIELD_maxDistance, lookAtGoal, Float.NaN);
+        if (Float.isNaN(maxDistanceSq)) throw new NullPointerException("Unable to get value from 'FIELD_maxDistance'");
+        maxDistanceSq *= maxDistanceSq;
+
+        if (originalDistanceSq <= (double) maxDistanceSq)
+            return originalDistanceSq;
+
+
+        Entity closestEntity = (Entity) ReflectionHelper.getValueOrDefault(FIELD_closestEntity, lookAtGoal, null);
+        if (closestEntity == null) throw new NullPointerException("Unable to get value from 'FIELD_closestEntity'");
+
+        Vec3d offsets = Offsetter.getOffsets(closestEntity);
+
+        if (!offsets.equals(Vec3d.ZERO)) {
+            Entity entity = (Entity) ReflectionHelper.getValueOrDefault(FIELD_entity, lookAtGoal, null);
+            if (entity == null) throw new NullPointerException("Unable to get value from 'FIELD_entity'");
+
+            return entity.getDistanceSq(closestEntity.getPositionVector().add(offsets));
+        }
+
+        return originalDistanceSq;
     }
 }

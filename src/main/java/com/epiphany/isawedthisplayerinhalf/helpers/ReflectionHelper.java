@@ -3,6 +3,8 @@ package com.epiphany.isawedthisplayerinhalf.helpers;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+// TODO Remove accessibility checks.
+
 /**
  * A helper for refection so that the other classes are not a mess of try/catch blocks.
  */
