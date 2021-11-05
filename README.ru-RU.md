@@ -1,7 +1,7 @@
-Смотреть на другом языке: [English](../master/README.md), [toki pona](../master/README.tok.md)
+Смотреть на другом языке: [English](./README.md), [toki pona](./README.tok.md)
 
 
-![mi tu e jan ni](../master/src/main/resources/modicon.png)
+![mi tu e jan ni](./src/main/resources/modicon.png)
 
 
 # ЯРаскололЭтогоИгрокаПополам (ISawedThisPlayerInHalf)
