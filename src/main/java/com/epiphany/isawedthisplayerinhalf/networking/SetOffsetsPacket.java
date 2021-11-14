@@ -67,7 +67,7 @@ public class SetOffsetsPacket implements IPacket {
         final boolean MAGIC_BOOLEAN = true;
         NetworkEvent.Context context = contextSupplier.get();
 
-        context.enqueueWork(() -> DistExecutor.<Boolean>runForDist(
+        context.enqueueWork(() -> DistExecutor.runForDist(
                 // Client-side.
                 () -> () -> {
                     // Security.
