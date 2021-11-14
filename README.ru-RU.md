@@ -4,7 +4,7 @@
 ![mi tu e jan ni](./src/main/resources/modicon.png)
 
 
-# ЯРаскололЭтогоИгрокаПополам (ISawedThisPlayerInHalf)
+# ЯРаскололЭтогоИгрокаПополам! (ISawedThisPlayerInHalf!)
 Ваш персонаж... это тор- о боже мой, летает его торс!
 
 Этот мод раскалывает персонажа пополам, освободив торс от ног.

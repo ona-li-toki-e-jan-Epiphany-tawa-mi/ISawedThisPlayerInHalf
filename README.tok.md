@@ -4,7 +4,7 @@ lukin kepeken toki ante: [English](./README.md "View in English"), [Русски
 ![mi tu e jan ni](./src/main/resources/modicon.png)
 
 
-# MiTuEJanNi (ISawedThisPlayerInHalf)
+# MiTuEJanNi! (ISawedThisPlayerInHalf!)
 jan sina... li suwi sike suli pa- jan sewi o, sijelo sewi ona li waso a!
 
 ante musi ni li tu e sijelo jan li pana e sijelo sewi lon ma ante.

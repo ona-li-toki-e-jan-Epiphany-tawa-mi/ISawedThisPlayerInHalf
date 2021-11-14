@@ -3,7 +3,7 @@ View in a different language: [Русский](./README.ru-RU.md "Смотрет
 ![mi tu e jan ni](./src/main/resources/modicon.png)
 
 
-# ISawedThisPlayerInHalf
+# ISawedThisPlayerInHalf!
 Your player... is ca- oh my god, his torso is flying!
 
 This mod splits apart the player, freeing the torso from the legs.
