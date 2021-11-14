@@ -72,7 +72,8 @@ public class SetOffsetsPacket implements IPacket {
                 () -> () -> {
                     // Security.
                     if (!Double.isFinite(this.xOffset) || !Double.isFinite(this.yOffset) || !Double.isFinite(this.zOffset)) {
-                        ISawedThisPlayerInHalf.LOGGER.log(Level.WARN, I18n.format("network.error.set_offsets.invalid_offsets", this.playerID));
+                        ISawedThisPlayerInHalf.LOGGER.log(Level.WARN,
+                                I18n.format("network.error.set_offsets.invalid_offsets", this.playerID));
                         return MAGIC_BOOLEAN;
                     }
 

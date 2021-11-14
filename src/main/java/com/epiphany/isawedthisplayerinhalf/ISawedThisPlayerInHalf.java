@@ -49,6 +49,8 @@ public class ISawedThisPlayerInHalf {
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent fmlClientSetupEvent) {
+        MinecraftForge.EVENT_BUS.register(OffsetsCommand.class);
+
         Config.enable();
         RenderingOffsetter.replacePlayerRenderers();
     }
