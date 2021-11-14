@@ -20,7 +20,7 @@ nimi wawa ni pi tomo toki li ken e ni: sina ante e ma ante pi sijelo sewi sina l
 
 ::ofs li ken kepeken tawa ::offsets.
 
-kin la sina ken ante e ma ante kepeken poki nimi ante (li lon config/isawedthisplayerinhalf-client.toml)
+sin la sina ken ante e ma ante kepeken poki nimi ante (li lon config/isawedthisplayerinhalf-client.toml)
 
 
 ## musi pi jan mute
