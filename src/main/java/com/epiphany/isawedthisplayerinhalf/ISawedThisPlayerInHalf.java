@@ -24,7 +24,6 @@ for(LivingEntity livingentity : this.world.getEntitiesWithinAABB(LivingEntity.cl
 // TODO TemptGoal.
 // TODO worldIn.playSound((PlayerEntity)null, shooter.getPosX(), shooter.getPosY(), shooter.getPosZ(), SoundEvents.ITEM_CROSSBOW_SHOOT, SoundCategory.PLAYERS, 1.0F, soundPitch); in CrossbowItem in fireProjectile.
 // TODO Check if endermen get triggered when looked at by offsets upper body.
-// TODO Change floating point format in lang files to %g.
 
 // TODO (MAYBE MAYBE NOT) Expose an API for other mods to interact with this one.
 // TODO (MAYBE MAYBE NOT) Create a compatibility mode jar that injects into general position methods and uses calling class and calling method names to use offsets.
@@ -49,7 +48,7 @@ public class ISawedThisPlayerInHalf {
 
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
-    public static void onClientSetup(final FMLClientSetupEvent fmlClientSetupEvent) {
+    public static void onClientSetup(FMLClientSetupEvent fmlClientSetupEvent) {
         Config.enable();
         RenderingOffsetter.replacePlayerRenderers();
     }

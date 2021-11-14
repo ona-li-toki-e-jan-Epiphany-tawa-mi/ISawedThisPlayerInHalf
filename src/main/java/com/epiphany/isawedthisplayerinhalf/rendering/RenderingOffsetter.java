@@ -1,5 +1,6 @@
 package com.epiphany.isawedthisplayerinhalf.rendering;
 
+import com.epiphany.isawedthisplayerinhalf.Offsetter;
 import com.epiphany.isawedthisplayerinhalf.helpers.ReflectionHelper;
 import com.epiphany.isawedthisplayerinhalf.rendering.modfiedRendering.ModifiedPlayerRenderer;
 import net.minecraft.client.Minecraft;
@@ -12,9 +13,9 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Contains various functions to offset the rendering of players.
@@ -54,10 +55,23 @@ public class RenderingOffsetter {
 
 
 
-    private static final HashMap<UUID, RenderingOffsets> renderingOffsetsMap = new HashMap<>();
+    private static final ConcurrentHashMap<UUID, RenderingOffsets> renderingOffsetsMap = new ConcurrentHashMap<>();
+
+    /**
+     * Returns the rendering offsets an entity has, or null, if it has none.
+     *
+     * @param entity The entity to get the offsets of.
+     *
+     * @return The entity's offsets.
+     */
+    public static RenderingOffsets getOffsetsOrNull(Entity entity) {
+        return entity instanceof PlayerEntity ? renderingOffsetsMap.get(entity.getUniqueID()) : null;
+    }
 
     /**
      * Calculates and assigns rendering offset information to a player.
+     *
+     * Do not run this method directly; use {@link com.epiphany.isawedthisplayerinhalf.Offsetter#getOffsets(PlayerEntity)} instead.
      *
      * @param playerEntity The player to set the offsets for.
      * @param offsets The physical offsets of the player's body.
@@ -86,18 +100,9 @@ public class RenderingOffsetter {
     }
 
     /**
-     * Returns the rendering offsets an entity has, or null, if it has none.
-     *
-     * @param entity The entity to get the offsets of.
-     *
-     * @return The entity's offsets.
-     */
-    public static RenderingOffsets getOffsetsOrNull(Entity entity) {
-        return entity instanceof PlayerEntity ? renderingOffsetsMap.get(entity.getUniqueID()) : null;
-    }
-
-    /**
      * Removes the offsets of the player with the given UUID.
+     *
+     * Do not run this method directly; use {@link com.epiphany.isawedthisplayerinhalf.Offsetter#unsetOffsets(PlayerEntity)} instead.
      *
      * @param playerUUID The UUID of the player.
      */
@@ -105,6 +110,11 @@ public class RenderingOffsetter {
         renderingOffsetsMap.remove(playerUUID);
     }
 
+    /**
+     * Clears the entire map of player offsets.
+     *
+     * Do not run this method directly; use {@link Offsetter#clearAllOffsets()} instead.
+     */
     public static void clearAllOffsets() {
         renderingOffsetsMap.clear();
     }
