@@ -8,6 +8,7 @@
   "commands.swdthsplyrnhlf.offsets.set.already_set": "Offsets are already set to %f, %f, %f",
 
   "commands.swdthsplyrnhlf.offsets.help": "Splits your body in half and puts the upper part elsewhere\nAlias: ::ofs",
+  "commands.swdthsplyrnhlf.offsets.usage_title": "Usage:",
   "commands.swdthsplyrnhlf.offsets.help.usage": "Help: ::offsets help",
   "commands.swdthsplyrnhlf.offsets.get.usage": "Display current offsets: ::offsets get",
   "commands.swdthsplyrnhlf.offsets.reset.usage": "Reset offsets: ::offsets reset",

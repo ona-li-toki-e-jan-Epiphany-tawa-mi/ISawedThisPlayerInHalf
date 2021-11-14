@@ -192,11 +192,15 @@ public class OffsetsCommand {
      *
      * @param player The client.
      */
-    // TODO Make display Usage:
     private static void sendUsageMessages(ClientPlayerEntity player) {
-        player.sendMessage(new TranslationTextComponent("commands.swdthsplyrnhlf.offsets.help.usage"));
-        player.sendMessage(new TranslationTextComponent("commands.swdthsplyrnhlf.offsets.get.usage"));
-        player.sendMessage(new TranslationTextComponent("commands.swdthsplyrnhlf.offsets.reset.usage"));
-        player.sendMessage(new TranslationTextComponent("commands.swdthsplyrnhlf.offsets.set.usage"));
+        player.sendMessage(new TranslationTextComponent("commands.swdthsplyrnhlf.offsets.usage_title"));
+        player.sendMessage(new StringTextComponent(
+                "    " + I18n.format("commands.swdthsplyrnhlf.offsets.help.usage")));
+        player.sendMessage(new StringTextComponent(
+                "    " + I18n.format("commands.swdthsplyrnhlf.offsets.get.usage")));
+        player.sendMessage(new StringTextComponent(
+                "    " + I18n.format("commands.swdthsplyrnhlf.offsets.reset.usage")));
+        player.sendMessage(new StringTextComponent(
+                "    " + I18n.format("commands.swdthsplyrnhlf.offsets.set.usage")));
     }
 }

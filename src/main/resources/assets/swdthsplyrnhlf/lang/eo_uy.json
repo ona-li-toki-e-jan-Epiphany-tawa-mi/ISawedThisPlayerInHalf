@@ -8,6 +8,7 @@
   "commands.swdthsplyrnhlf.offsets.set.already_set": "nanpa pi ma ante li ante sama lon tenpo pini kin li awen %f en %f en %f",
 
   "commands.swdthsplyrnhlf.offsets.help": "li pana e sijelo sewi sina lon ma ante\nnimi ante: ::ofs",
+  "commands.swdthsplyrnhlf.offsets.usage_title": "nasin kepeken:",
   "commands.swdthsplyrnhlf.offsets.help.usage": "sona kepeken: ::offsets help",
   "commands.swdthsplyrnhlf.offsets.get.usage": "pana e nanpa pi ma ante tawa sina: ::offsets get",
   "commands.swdthsplyrnhlf.offsets.reset.usage": "pana e sijelo sewi lon ma pi ante ala: ::offsets reset",
