@@ -19,6 +19,8 @@ public interface IPacket {
 
     /**
      * Handles the packet once it arrives from the other side of the network. (Server to client or client to server.)
+     *
+     * @param contextSupplier A supplier to the context behind the packet handle call.
      */
     void handle(Supplier<NetworkEvent.Context> contextSupplier);
 }
