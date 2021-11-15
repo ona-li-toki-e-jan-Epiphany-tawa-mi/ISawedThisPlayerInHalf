@@ -1,5 +1,7 @@
 {
   "commands.swdthsplyrnhlf.offsets.get": "Текущие смещения: %f, %f, %f",
+  "commands.swdthsplyrnhlf.offsets.get.of_player": "У %s есть смещения %f, %f, %f",
+  "commands.swdthsplyrnhlf.offsets.get.no_offsets": "У %s смещений нет",
 
   "commands.swdthsplyrnhlf.offsets.reset": "Смещения сброшены",
   "commands.swdthsplyrnhlf.offsets.reset.already_reset": "Смещения уже сброшены",
@@ -19,6 +21,7 @@
   "commands.swdthsplyrnhlf.errors.incomplete_command": "Не совершено",
   "commands.swdthsplyrnhlf.errors.unknown_command": "Неизвестная команда",
   "commands.swdthsplyrnhlf.errors.error_position_pointer": "<--[ЗДЕСЬ]",
+  "commands.swdthsplyrnhlf.errors.unknown_player": "Игрок не обнаружен",
 
 
 

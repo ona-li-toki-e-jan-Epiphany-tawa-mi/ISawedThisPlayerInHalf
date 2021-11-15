@@ -26,7 +26,6 @@ for(LivingEntity livingentity : this.world.getEntitiesWithinAABB(LivingEntity.cl
 // TODO Check if endermen get triggered when looked at by offsets upper body.
 
 // TODO (MAYBE MAYBE NOT) Expose an API for other mods to interact with this one.
-// TODO (MAYBE MAYBE NOT) Create a compatibility mode jar that injects into general position methods and uses calling class and calling method names to use offsets.
 
 /**
  * This mod splits apart the player, freeing the torso from the legs.

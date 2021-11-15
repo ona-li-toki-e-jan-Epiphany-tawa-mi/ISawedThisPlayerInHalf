@@ -1,5 +1,7 @@
 {
   "commands.swdthsplyrnhlf.offsets.get": "nanpa pi ma ante li %f en %f en %f",
+  "commands.swdthsplyrnhlf.offsets.get.of_player": "nanpa pi ma ante pi jan %s li %f en %f en %f",
+  "commands.swdthsplyrnhlf.offsets.get.no_offsets": "jan %s li jo ala e ma ante",
 
   "commands.swdthsplyrnhlf.offsets.reset": "tenpo ni la nanpa pi ma ante li 0 en 0 en 0",
   "commands.swdthsplyrnhlf.offsets.reset.already_reset": "tenpo pini kin la nanpa pi ma ante li kama 0 en 0 en 0",
@@ -19,6 +21,7 @@
   "commands.swdthsplyrnhlf.errors.incomplete_command": "nimi wawa li pini ala",
   "commands.swdthsplyrnhlf.errors.unknown_command": "nimi wawa li lon ala",
   "commands.swdthsplyrnhlf.errors.error_position_pointer": "<--[lon ni]",
+  "commands.swdthsplyrnhlf.errors.unknown_player": "jan li lon ala",
 
 
 

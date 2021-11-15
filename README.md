@@ -15,7 +15,7 @@ These chat commands allow you to control your offsets, the new position of the t
 * Help: **::offsets help**
 * Set offsets: **::offsets set \<x> \<y> \<z>**
 * Reset offsets: **::offsets reset**
-* Print out offsets: **::offsets get**
+* Print out offsets (defaults to self): **::offsets get [player name]**
 
 ::ofs can be used in place of ::offsets.
 

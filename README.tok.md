@@ -16,7 +16,7 @@ nimi wawa ni pi tomo toki li ken e ni: sina ante e ma ante pi sijelo sewi sina l
 * sona kepeken: **::offsets help**
 * ante e ma ante: **::offsets set \<x> \<y> \<z>**
 * pana e sijelo sewi lon ma pi ante ala: **::offsets reset**
-* pana e nanpa pi ma ante tawa sina: **::offsets get**
+* pana e nanpa pi ma ante tawa sina (sina pana ala e nimi la ona li nanpa sina): **::offsets get [nimi jan]**
 
 ::ofs li ken kepeken tawa ::offsets.
 

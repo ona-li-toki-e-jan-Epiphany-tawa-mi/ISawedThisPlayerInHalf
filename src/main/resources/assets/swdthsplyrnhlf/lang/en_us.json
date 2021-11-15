@@ -1,5 +1,7 @@
 {
   "commands.swdthsplyrnhlf.offsets.get": "Current offsets: %f, %f, %f",
+  "commands.swdthsplyrnhlf.offsets.get.of_player": "%s's offsets: %f, %f, %f",
+  "commands.swdthsplyrnhlf.offsets.get.no_offsets": "%s has no offsets",
 
   "commands.swdthsplyrnhlf.offsets.reset": "Offsets reset",
   "commands.swdthsplyrnhlf.offsets.reset.already_reset": "Offsets have already been reset",
@@ -19,6 +21,7 @@
   "commands.swdthsplyrnhlf.errors.incomplete_command": "Incomplete command",
   "commands.swdthsplyrnhlf.errors.unknown_command": "Unknown command",
   "commands.swdthsplyrnhlf.errors.error_position_pointer": "<--[HERE]",
+  "commands.swdthsplyrnhlf.errors.unknown_player": "No player was found",
 
 
 

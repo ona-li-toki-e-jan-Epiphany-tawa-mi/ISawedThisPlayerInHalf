@@ -24,6 +24,7 @@ public class Networker {
 
         modChannel.registerMessage(getNextIndex(), SetOffsetsPacket.class, SetOffsetsPacket::toBytes, SetOffsetsPacket::new, SetOffsetsPacket::handle);
         modChannel.registerMessage(getNextIndex(), RequestOffsetsPacket.class, RequestOffsetsPacket::toBytes, RequestOffsetsPacket::new, RequestOffsetsPacket::handle);
+        modChannel.registerMessage(getNextIndex(), RequestDisplayOffsetsPacket.class, RequestDisplayOffsetsPacket::toBytes, RequestDisplayOffsetsPacket::new, RequestDisplayOffsetsPacket::handle);
     }
 
     /**
@@ -66,7 +67,23 @@ public class Networker {
      * @param playerEntityId The entity id of the requested player.
      */
     @OnlyIn(Dist.CLIENT)
-    public static void requestOffsetsFor(int playerEntityId) {
+    public static void requestOffsets(int playerEntityId) {
         modChannel.sendToServer(new RequestOffsetsPacket(playerEntityId));
+    }
+
+    /**
+     * Requests the server to message the client with the offsets of the specified player.
+     * Name must be 16 characters or shorter.
+     *
+     * @param playerName The name of the player to request the offsets of.
+     *
+     * @throws IndexOutOfBoundsException If the player name is longer than 16 characters.
+     */
+    @OnlyIn(Dist.CLIENT)
+    public static void requestDisplayOffsets(String playerName) {
+        if (playerName.length() > 16)
+            throw new IndexOutOfBoundsException("The player name '" + playerName + "' is too long! Player names must be 16 or shorter.");
+
+        modChannel.sendToServer(new RequestDisplayOffsetsPacket(playerName));
     }
 }

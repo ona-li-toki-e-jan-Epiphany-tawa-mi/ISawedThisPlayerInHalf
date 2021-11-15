@@ -5,6 +5,7 @@ import com.mojang.realmsclient.gui.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -17,17 +18,17 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 @OnlyIn(Dist.CLIENT)
 public class OffsetsCommand {
-    // TODO (Maybe) add the ability to ::ofs get the offsets of other players.
     // TODO Improve parsing.
     /**
      * In-game config options implemented via chat "commands."
      */
     @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = true)
     public static void onPlayerChat(ClientChatEvent clientChatEvent) {
-        String originalMessage = clientChatEvent.getOriginalMessage().toLowerCase();
+        String originalMessage = clientChatEvent.getOriginalMessage();
         String[] possibleCommand = originalMessage.split(" ");
 
-        if (!possibleCommand[0].equals("::offsets") && !possibleCommand[0].equals("::ofs"))
+        String possibleCommandStart = possibleCommand[0].toLowerCase();
+        if (!"::offsets".equals(possibleCommandStart) && !"::ofs".equals(possibleCommandStart))
             return;
 
         clientChatEvent.setCanceled(true);
@@ -36,9 +37,9 @@ public class OffsetsCommand {
         ClientPlayerEntity player = minecraft.player;
 
         if (possibleCommand.length >= 2) {
-            switch (possibleCommand[1]) {
+            switch (possibleCommand[1].toLowerCase()) {
                 case "get":
-                    getOffsets(player);
+                    getOffsets(player, possibleCommand, minecraft);
                     break;
 
                 case "set":
@@ -80,19 +81,65 @@ public class OffsetsCommand {
      * Displays the client's offsets.
      *
      * @param player The client.
+     * @param possibleCommand The partially parsed command.
+     * @param minecraft The current instance of Minecraft.
      */
-    private static void getOffsets(ClientPlayerEntity player) {
-        Vec3d offsets = Config.getOffsets();
+    private static void getOffsets(ClientPlayerEntity player, String[] possibleCommand, Minecraft minecraft) {
+        // Getting offsets of client.
+        if (possibleCommand.length == 2) {
+            Vec3d offsets = Config.getOffsets();
 
-        player.sendMessage(new TranslationTextComponent(
-                "commands.swdthsplyrnhlf.offsets.get", offsets.x, offsets.y, offsets.z));
+            player.sendMessage(new TranslationTextComponent(
+                    "commands.swdthsplyrnhlf.offsets.get", offsets.x, offsets.y, offsets.z));
+
+        // Getting offsets of a specified player.
+        } else {
+            String requestedPlayerName = possibleCommand[2];
+
+            if (requestedPlayerName.length() > 16) {
+                player.sendMessage(new TranslationTextComponent(
+                        "commands.swdthsplyrnhlf.errors.unknown_player")
+                        .applyTextStyle(TextFormatting.RED));
+                return;
+            }
+
+
+            boolean success = false;
+
+            for (PlayerEntity playerEntity : player.world.getPlayers())
+                if (requestedPlayerName.equals(playerEntity.getName().getString())) {
+                    Vec3d playerOffsets = Offsetter.getOffsetsOrNull(playerEntity);
+
+                    if (playerOffsets != null) {
+                        player.sendMessage(new TranslationTextComponent(
+                                "commands.swdthsplyrnhlf.offsets.get.of_player", requestedPlayerName, playerOffsets.x, playerOffsets.y, playerOffsets.z));
+
+                    } else if (!minecraft.isSingleplayer()) {
+                        Networker.requestDisplayOffsets(requestedPlayerName);
+
+                    } else
+                        player.sendMessage(new TranslationTextComponent(
+                                "commands.swdthsplyrnhlf.offsets.get.no_offsets", requestedPlayerName));
+
+                    success = true;
+                }
+
+            if (!success)
+                if (!minecraft.isSingleplayer()) {
+                    Networker.requestDisplayOffsets(requestedPlayerName);
+
+                } else
+                    player.sendMessage(new TranslationTextComponent(
+                            "commands.swdthsplyrnhlf.errors.unknown_player")
+                            .applyTextStyle(TextFormatting.RED));
+        }
     }
 
     /**
      * Attempts to set the client's offsets to new values.
      *
      * @param player The client.
-     * @param possibleCommand The partially-parsed command.
+     * @param possibleCommand The partially parsed command.
      * @param originalMessage The original command they typed.
      * @param minecraft The current instance of Minecraft.
      */
