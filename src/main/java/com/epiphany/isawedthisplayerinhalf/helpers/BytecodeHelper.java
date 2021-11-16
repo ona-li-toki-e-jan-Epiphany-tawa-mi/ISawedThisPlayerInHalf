@@ -14,9 +14,7 @@ import net.minecraft.entity.ai.goal.LookAtGoal;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.server.management.PlayerInteractionManager;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.*;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -526,5 +524,20 @@ public class BytecodeHelper {
         }
 
         return originalDistanceSq;
+    }
+
+    /**
+     * Redoes the check in {@link LivingEntity#canEntityBeSeen(Entity)} so that mobs can see players' torsos, even if the legs are not in view.
+     *
+     * @param originalResult The original result of the function.
+     * @param livingEntity The entity that is attempting to see.
+     * @param entity The entity that is possibly being seen.
+     * @param livingEntityPosition The position of the seeing entity.
+     * @param entityPosition The position of the (maybe) seen entity.
+     *
+     * @return Whether the entity can bee seen by the other.
+     */
+    public static boolean redoCanEntityBeSeen(boolean originalResult, LivingEntity livingEntity, Entity entity, Vec3d livingEntityPosition, Vec3d entityPosition) {
+        return originalResult || livingEntity.world.rayTraceBlocks(new RayTraceContext(livingEntityPosition, offsetVector(entityPosition, entity), RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, livingEntity)).getType() == RayTraceResult.Type.MISS;
     }
 }

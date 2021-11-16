@@ -259,6 +259,7 @@ function initializeCoreMod() {
 
         /**
          * Alters knockback to account for offsets.
+         * Allows entities to see offsets players, even if only the upper half is in view.
          */
         "LivingEntity": {
             "target": {
@@ -269,6 +270,7 @@ function initializeCoreMod() {
             "transformer": function(classNode) {
                 var classPath = "net.minecraft.entity.LivingEntity"
 
+                // Alters knockback to account for offsets.
                 var attackEntityFrom = findObfuscatedMethodWithSignature(classNode, "attackEntityFrom", "func_70097_a",
                     "(Lnet/minecraft/util/DamageSource;F)Z")
                 var functionName = "function attackEntityFrom"
@@ -343,7 +345,54 @@ function initializeCoreMod() {
                     }
 
                 } else
-                    logTransformError(functionName, classPath, "Unable to function to transform")
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                // Allows entities to see offsets players, even if only the upper half is in view.
+                var canEntityBeSeen = findObfuscatedMethodWithSignature(classNode, "canEntityBeSeen", "func_70685_l", "(Lnet/minecraft/entity/Entity;)Z")
+                var functionName = "function canEntityBeSeen"
+
+                if (canEntityBeSeen !== null) {
+                    try {
+                        var oldInstructions = canEntityBeSeen.instructions
+                        success = false
+
+                        for (var i = oldInstructions.size()-1; i >= 0; i--) {
+                            if (checkInsn(oldInstructions.get(i), Opcodes.IRETURN)) {
+                                var redoCanEntityBeSeen = new InsnList()
+
+                                redoCanEntityBeSeen.add(new VarInsnNode(Opcodes.ALOAD, 0)) // this Lnet/minecraft/entity/LivingEntity;
+                                redoCanEntityBeSeen.add(new VarInsnNode(Opcodes.ALOAD, 1)) // entityIn Lnet/minecraft/entity/Entity;
+                                redoCanEntityBeSeen.add(new VarInsnNode(Opcodes.ALOAD, 2)) // vec3d Lnet/minecraft/util/math/Vec3d;
+                                redoCanEntityBeSeen.add(new VarInsnNode(Opcodes.ALOAD, 3)) // vec3d1 Lnet/minecraft/util/math/Vec3d;
+                                redoCanEntityBeSeen.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "redoCanEntityBeSeen",
+                                    "(ZLnet/minecraft/entity/LivingEntity;Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;)Z",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(oldInstructions.get(i), redoCanEntityBeSeen)
+                                // IRETURN
+                                // METHOD END.
+
+                                success = true
+                                logTransformSuccess(functionName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
 
                 return classNode
             }
