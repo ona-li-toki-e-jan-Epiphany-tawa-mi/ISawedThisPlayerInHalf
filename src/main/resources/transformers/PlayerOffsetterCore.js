@@ -969,6 +969,7 @@ function initializeCoreMod() {
         /**
          * Makes entities look at the offset position of players randomly, resulting in them shaking their heads "out of confusion."
          * Redoes range check when deciding whether to keep looking at an offset player.
+         * Modifies distance checks to allow mobs to notice and start looking at offsets players even if the main body is far away.
          */
         "LookAtGoal": {
             "target": {
@@ -1081,6 +1082,55 @@ function initializeCoreMod() {
                                 // ...
                                 // INVOKEVIRTUAL net/minecraft/entity/MobEntity.getDistanceSq (Lnet/minecraft/entity/Entity;)D
                                 oldInstructions.insert(instruction, redoIsWithinMaxDistance)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(functionName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                // Modifies distance checks to allow mobs to notice and start looking at offsets players even if the main body is far away.
+                var shouldExecute = findObfuscatedMethodWithSignature(classNode, "shouldExecute", "func_75250_a", "()Z")
+                functionName = "function shouldExecute"
+
+                if (shouldExecute !== null) {
+                    try {
+                        var oldInstructions = shouldExecute.instructions
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/world/World", "getClosestPlayer", "func_217372_a",
+                                    "(Lnet/minecraft/entity/EntityPredicate;Lnet/minecraft/entity/LivingEntity;DDD)Lnet/minecraft/entity/player/PlayerEntity;")) {
+                                var redoGetClosestPlayer = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                redoGetClosestPlayer.add(skipOriginal)
+                                redoGetClosestPlayer.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "modifiedGetClosestPlayer",
+                                    "(Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityPredicate;Lnet/minecraft/entity/LivingEntity;DDD)Lnet/minecraft/entity/player/PlayerEntity;",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/world/World.getClosestPlayer (Lnet/minecraft/entity/EntityPredicate;Lnet/minecraft/entity/LivingEntity;DDD)Lnet/minecraft/entity/player/PlayerEntity;
+                                oldInstructions.insert(instruction, redoGetClosestPlayer)
                                 // ...
 
                                 success = true

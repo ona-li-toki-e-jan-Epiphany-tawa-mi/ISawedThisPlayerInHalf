@@ -20,7 +20,6 @@ for(LivingEntity livingentity : this.world.getEntitiesWithinAABB(LivingEntity.cl
     }
 }
 */
-// TODO Look more into LookAtGoal.
 // TODO TemptGoal.
 // TODO worldIn.playSound((PlayerEntity)null, shooter.getPosX(), shooter.getPosY(), shooter.getPosZ(), SoundEvents.ITEM_CROSSBOW_SHOOT, SoundCategory.PLAYERS, 1.0F, soundPitch); in CrossbowItem in fireProjectile.
 // TODO Check if endermen get triggered when looked at by offsets upper body.

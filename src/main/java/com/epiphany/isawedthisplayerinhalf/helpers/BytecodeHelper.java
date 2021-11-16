@@ -7,7 +7,9 @@ import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.culling.ClippingHelperImpl;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityPredicate;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.goal.LookAtGoal;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.FishingBobberEntity;
@@ -15,11 +17,14 @@ import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Random;
+import java.util.function.Predicate;
 
 /**
  * Helper class for calling functions and accessing fields that can't be done in pure bytecode thanks to obfuscation,
@@ -27,9 +32,19 @@ import java.util.Random;
  */
 @SuppressWarnings("unused")
 public class BytecodeHelper {
+    // LookAtGoal.
     private static final Field FIELD_entity;
     private static final Field FIELD_closestEntity;
     private static final Field FIELD_maxDistance;
+    // EntityPredicate.
+    private static final Field FIELD_allowInvulnerable;
+    private static final Field FIELD_customPredicate;
+    private static final Field FIELD_skipAttackChecks;
+    private static final Field FIELD_friendlyFire;
+    private static final Field FIELD_distance;
+    private static final Field FIELD_useVisibilityModifier;
+    private static final Field FIELD_requireLineOfSight;
+
     private static final Random RANDOM;
 
     static {
@@ -47,6 +62,37 @@ public class BytecodeHelper {
             throw new NullPointerException("Unable to find field 'FIELD_closestEntity' under names 'closestEntity' and 'field_75334_a'");
         if (FIELD_maxDistance == null)
             throw new NullPointerException("Unable to find field 'FIELD_maxDistance' under names 'maxDistance' and 'field_75333_c'");
+
+        // EntityPredicate.
+        FIELD_allowInvulnerable = ReflectionHelper.getDeclaredFieldOrNull(EntityPredicate.class, "allowInvulnerable", "field_221018_c");
+        ReflectionHelper.makeAccessible(FIELD_allowInvulnerable);
+        FIELD_customPredicate = ReflectionHelper.getDeclaredFieldOrNull(EntityPredicate.class, "customPredicate", "field_221023_h");
+        ReflectionHelper.makeAccessible(FIELD_customPredicate);
+        FIELD_skipAttackChecks = ReflectionHelper.getDeclaredFieldOrNull(EntityPredicate.class, "skipAttackChecks", "field_221021_f");
+        ReflectionHelper.makeAccessible(FIELD_skipAttackChecks);
+        FIELD_friendlyFire = ReflectionHelper.getDeclaredFieldOrNull(EntityPredicate.class, "friendlyFire", "field_221019_d");
+        ReflectionHelper.makeAccessible(FIELD_friendlyFire);
+        FIELD_distance = ReflectionHelper.getDeclaredFieldOrNull(EntityPredicate.class, "distance", "field_221017_b");
+        ReflectionHelper.makeAccessible(FIELD_distance);
+        FIELD_useVisibilityModifier = ReflectionHelper.getDeclaredFieldOrNull(EntityPredicate.class, "useVisibilityModifier", "field_221022_g");
+        ReflectionHelper.makeAccessible(FIELD_useVisibilityModifier);
+        FIELD_requireLineOfSight = ReflectionHelper.getDeclaredFieldOrNull(EntityPredicate.class, "requireLineOfSight", "field_221020_e");
+        ReflectionHelper.makeAccessible(FIELD_requireLineOfSight);
+
+        if (FIELD_allowInvulnerable == null)
+            throw new NullPointerException("Unable to find field 'FIELD_allowInvulnerable' under names 'allowInvulnerable' and 'field_221018_c'");
+        if (FIELD_customPredicate == null)
+            throw new NullPointerException("Unable to find field 'FIELD_customPredicate' under names 'customPredicate' and 'field_221023_h'");
+        if (FIELD_skipAttackChecks == null)
+            throw new NullPointerException("Unable to find field 'FIELD_skipAttackChecks' under names 'skipAttackChecks' and 'field_221021_f'");
+        if (FIELD_friendlyFire == null)
+            throw new NullPointerException("Unable to find field 'FIELD_friendlyFire' under names 'friendlyFire' and 'field_221019_d'");
+        if (FIELD_distance == null)
+            throw new NullPointerException("Unable to find field 'FIELD_distance' under names 'distance' and 'field_221017_b'");
+        if (FIELD_useVisibilityModifier == null)
+            throw new NullPointerException("Unable to find field 'FIELD_useVisibilityModifier' under names 'useVisibilityModifier' and 'field_221022_g'");
+        if (FIELD_requireLineOfSight == null)
+            throw new NullPointerException("Unable to find field 'FIELD_requireLineOfSight' under names 'requireLineOfSight' and 'field_221020_e'");
 
 
         RANDOM = new Random();
@@ -186,6 +232,95 @@ public class BytecodeHelper {
      */
     public static float modifiedGetDistance(Entity entity, Entity offsetEntity) {
         return (float) Math.sqrt(BytecodeHelper.modifiedGetDistanceSq(entity, offsetEntity));
+    }
+
+
+    /**
+     * Gets the player that is closest to the target entity, or null, if nothing is found.
+     * Corrected for offsets.
+     *
+     * @see net.minecraft.world.IEntityReader#getClosestPlayer(EntityPredicate, LivingEntity, double, double, double).
+     *
+     * @param world The world the target is in.
+     * @param predicate A predicate to control which players can be targeted.
+     * @param target The target entity.
+     * @param targetX The x-position of the target entity.
+     * @param targetY The y-position of the target entity.
+     * @param targetZ The z-position of the target entity.
+     *
+     * @return The player closest to the target, or null.
+     */
+    public static PlayerEntity modifiedGetClosestPlayer(World world, EntityPredicate predicate, LivingEntity target, double targetX, double targetY, double targetZ) {
+        List<? extends PlayerEntity> players =  target.world.getPlayers();
+        PlayerEntity closestPlayer = null;
+        double smallestDistance = Double.MAX_VALUE;
+
+        for (PlayerEntity playerEntity : players)
+            if (modifiedCanTarget(predicate, target, playerEntity)) {
+                double distance = Math.min(playerEntity.getDistanceSq(targetX, targetY, targetZ), modifiedGetDistanceSq(playerEntity, targetX, targetY, targetZ));
+
+                if (distance < smallestDistance) {
+                    closestPlayer = playerEntity;
+                    smallestDistance = distance;
+                }
+            }
+
+        return closestPlayer;
+    }
+
+    /**
+     * Gets whether a player can be targeted with the given predicate, accounting for offsets if the target is a player.
+     *
+     * @param predicate A predicate to control whether the entity can be targeted.
+     * @param attacker The entity attempting to target.
+     * @param target The player being targeted.
+     *
+     * @return Whether the target can be targeted.
+     */
+    public static boolean modifiedCanTarget(EntityPredicate predicate, LivingEntity attacker, PlayerEntity target) {
+        if (attacker == target) {
+            return false;
+
+        } else if (target.isSpectator() || !target.isAlive()
+                || (!((boolean) ReflectionHelper.getValueOrDefault(FIELD_allowInvulnerable, predicate, false)) && target.isInvulnerable())) {
+            return false;
+
+        } else {
+            Predicate<LivingEntity> customPredicate = (Predicate<LivingEntity>) ReflectionHelper.getValueOrDefault(FIELD_customPredicate, predicate, null);
+
+            if (customPredicate != null && !customPredicate.test(target)) {
+                return false;
+
+            } else {
+                if (attacker != null) {
+                    if (!((boolean) ReflectionHelper.getValueOrDefault(FIELD_skipAttackChecks, predicate, false))
+                            && (!attacker.canAttack(target) || !attacker.canAttack(target.getType())))
+                        return false;
+
+                    if (!((boolean) ReflectionHelper.getValueOrDefault(FIELD_friendlyFire, predicate, false)) && attacker.isOnSameTeam(target))
+                        return false;
+
+
+                    double distance = (double) ReflectionHelper.getValueOrDefault(FIELD_distance, predicate, -1.0);
+
+                    if (distance > 0.0) {
+                        double visibilityModifier = ((boolean) ReflectionHelper.getValueOrDefault(FIELD_useVisibilityModifier, predicate, true))
+                                ? target.getVisibilityMultiplier(attacker) : 1.0;
+                        double visibleDistance = distance * visibilityModifier;
+
+                        if (Math.min(attacker.getDistanceSq(target.getPosX(), target.getPosY(), target.getPosZ()), modifiedGetDistance(attacker, target)) > visibleDistance * visibleDistance)
+                            return false;
+                    }
+
+
+                    if (!((boolean) ReflectionHelper.getValueOrDefault(FIELD_requireLineOfSight, predicate, false)) && attacker instanceof MobEntity
+                            && !((MobEntity) attacker).getEntitySenses().canSee(target))
+                        return false;
+                }
+
+                return true;
+            }
+        }
     }
 
 
