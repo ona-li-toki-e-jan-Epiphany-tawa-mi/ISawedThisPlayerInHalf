@@ -631,6 +631,65 @@ function initializeCoreMod() {
         },
 
         /**
+         * Makes the staring aggro check for endermen account for offsets.
+         */
+        "EndermanEntity": {
+            "target": {
+                "type": "CLASS",
+                "name": "net.minecraft.entity.monster.EndermanEntity"
+            },
+
+            "transformer": function(classNode) {
+                var classPath = "net.minecraft.entity.monster.EndermanEntity"
+
+                var shouldAttackPlayer = findObfuscatedMethodWithSignature(classNode, "shouldAttackPlayer", "func_70821_d", "(Lnet/minecraft/entity/player/PlayerEntity;)Z")
+                var functionName = "function shouldAttackPlayer"
+
+                if (shouldAttackPlayer !== null) {
+                    try {
+                        var oldInstructions = shouldAttackPlayer.instructions
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            if (checkMethodInsn(oldInstructions.get(i), Opcodes.INVOKESPECIAL, "net/minecraft/util/math/Vec3d", "<init>", "(DDD)V")) {
+                                var offsetRaycastInstructions = new InsnList()
+
+                                offsetRaycastInstructions.add(new VarInsnNode(Opcodes.ALOAD, 1)) // player Lnet/minecraft/entity/player/PlayerEntity;
+                                offsetRaycastInstructions.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "offsetVectorInversely",
+                                    "(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/math/Vec3d;",
+                                    false
+                                ))
+
+                                // ...
+                                // INVOKESPECIAL net/minecraft/util/math/Vec3d.<init> (DDD)V
+                                oldInstructions.insert(oldInstructions.get(i), offsetRaycastInstructions)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(functionName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                return classNode
+            }
+        },
+
+        /**
          * Offsets arrows shot by players.
          */
         "AbstractArrowEntity": {

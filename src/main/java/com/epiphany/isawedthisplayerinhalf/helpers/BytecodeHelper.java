@@ -338,6 +338,20 @@ public class BytecodeHelper {
     }
 
     /**
+     * Offsets a vector by subtracting the offsets of an entity.
+     *
+     * @param vector The vector to offset.
+     * @param entity The entity to get the offsets from.
+     *
+     * @return The vector that is inversely offset.
+     */
+    public static Vec3d offsetVectorInversely(Vec3d vector, Entity entity) {
+        Vec3d offsets = Offsetter.getOffsets(entity);
+
+        return !offsets.equals(Vec3d.ZERO) ? vector.subtract(offsets) : vector;
+    }
+
+    /**
      * Offsets a vector using the offsets from the angler of a fishing bobber.
      *
      * @param vector The vector to offset.
