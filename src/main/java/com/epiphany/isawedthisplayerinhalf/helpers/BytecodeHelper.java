@@ -21,6 +21,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Random;
@@ -443,7 +444,7 @@ public class BytecodeHelper {
      * @param pitch The pitch of the sound.
      * @param offsetEntity The entity to get the offsets from.
      */
-    public static void modifiedPlaySound(World world, PlayerEntity player, double x, double y, double z, SoundEvent soundIn, SoundCategory category, float volume, float pitch, LivingEntity offsetEntity) {
+    public static void modifiedPlaySound(World world, @Nullable PlayerEntity player, double x, double y, double z, SoundEvent soundIn, SoundCategory category, float volume, float pitch, LivingEntity offsetEntity) {
         Vec3d offsets = Offsetter.getOffsets(offsetEntity);
 
         if (!offsets.equals(Vec3d.ZERO)) {

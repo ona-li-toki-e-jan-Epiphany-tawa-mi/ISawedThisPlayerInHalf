@@ -1,5 +1,6 @@
 package com.epiphany.isawedthisplayerinhalf.helpers;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -46,7 +47,7 @@ public class ReflectionHelper {
      *
      * @return The value stored in the field, or the default value.
      */
-    public static Object getValueOrDefault(Field field, Object object, Object defaultValue) {
+    public static Object getValueOrDefault(Field field, Object object, @Nullable Object defaultValue) {
         Object returnValue;
 
         try {
@@ -67,7 +68,7 @@ public class ReflectionHelper {
      * @param object The object to set the field's value to.
      * @param value The value to set to the field.
      */
-    public static void setValue(Field field, Object object, Object value) {
+    public static void setValue(Field field, Object object, @Nullable Object value) {
         try {
             field.set(object, value);
 
@@ -83,7 +84,7 @@ public class ReflectionHelper {
      *
      * @param object The field or method to make accessible.
      */
-    public static void makeAccessible(Object object) {
+    public static void makeAccessible(@Nullable Object object) {
         if (object != null)
             if (object instanceof Method) {
                 Method method = (Method) object;

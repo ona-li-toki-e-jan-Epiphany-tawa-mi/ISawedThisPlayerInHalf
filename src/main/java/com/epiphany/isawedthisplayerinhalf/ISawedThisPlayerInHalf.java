@@ -23,8 +23,7 @@ for(LivingEntity livingentity : this.world.getEntitiesWithinAABB(LivingEntity.cl
 // TODO TemptGoal.
 // TODO Enderman.StareGoal.
 // TODO Enderman.FindPlayerGoal.
-// TODO Add @Nullable to methods where possible.
-// TODO Bow sounds
+// TODO Bow sounds.
 
 // TODO (MAYBE MAYBE NOT) Expose an API for other mods to interact with this one.
 
