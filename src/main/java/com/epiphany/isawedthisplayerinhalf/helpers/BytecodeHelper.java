@@ -14,6 +14,8 @@ import net.minecraft.entity.ai.goal.LookAtGoal;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.server.management.PlayerInteractionManager;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.*;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
@@ -425,6 +427,30 @@ public class BytecodeHelper {
                     projectile.getPosY() + offsets.y,
                     projectile.getPosZ() + offsets.z
             );
+    }
+
+    /**
+     * Plays a sound, offsetting its position with the offsets of the offset entity.
+     *
+     * @param world The world for the sound to occur in.
+     * @param player A player to exclude from those who can hear it.
+     * @param x The x-position of the sound.
+     * @param y The y-position of the sound.
+     * @param z The z-position of the sound.
+     * @param soundIn The sound to play.
+     * @param category The category of the sound.
+     * @param volume The volume of the sound.
+     * @param pitch The pitch of the sound.
+     * @param offsetEntity The entity to get the offsets from.
+     */
+    public static void modifiedPlaySound(World world, PlayerEntity player, double x, double y, double z, SoundEvent soundIn, SoundCategory category, float volume, float pitch, LivingEntity offsetEntity) {
+        Vec3d offsets = Offsetter.getOffsets(offsetEntity);
+
+        if (!offsets.equals(Vec3d.ZERO)) {
+            world.playSound(player, x + offsets.x, y + offsets.y, z + offsets.z, soundIn, category, volume, pitch);
+
+        } else
+            world.playSound(player, x, y, z, soundIn, category, volume, pitch);
     }
 
     /**

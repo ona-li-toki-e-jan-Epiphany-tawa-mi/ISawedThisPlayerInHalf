@@ -2,7 +2,6 @@ package com.epiphany.isawedthisplayerinhalf;
 
 import com.epiphany.isawedthisplayerinhalf.networking.Networker;
 import com.epiphany.isawedthisplayerinhalf.rendering.RenderingOffsetter;
-import net.minecraft.entity.monster.EndermanEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
@@ -22,9 +21,10 @@ for(LivingEntity livingentity : this.world.getEntitiesWithinAABB(LivingEntity.cl
 }
 */
 // TODO TemptGoal.
-// TODO worldIn.playSound((PlayerEntity)null, shooter.getPosX(), shooter.getPosY(), shooter.getPosZ(), SoundEvents.ITEM_CROSSBOW_SHOOT, SoundCategory.PLAYERS, 1.0F, soundPitch); in CrossbowItem in fireProjectile.
 // TODO Enderman.StareGoal.
 // TODO Enderman.FindPlayerGoal.
+// TODO Add @Nullable to methods where possible.
+// TODO Bow sounds
 
 // TODO (MAYBE MAYBE NOT) Expose an API for other mods to interact with this one.
 

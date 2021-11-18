@@ -1779,6 +1779,7 @@ function initializeCoreMod() {
 
         /**
          * Offsets the firing position of firework rockets.
+         * Makes the sounds of the crossbow occur at the offset position.
          */
         "CrossbowItem": {
             "target": {
@@ -1789,13 +1790,17 @@ function initializeCoreMod() {
             "transformer": function(classNode) {
                 var classPath = "net.minecraft.item.CrossbowItem"
 
+                // Offsets the firing position of firework rockets.
                 var fireProjectile = findObfuscatedMethodWithSignature(classNode, "fireProjectile", "func_220016_a",
                     "(Lnet/minecraft/world/World;Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/util/Hand;Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;FZFFF)V")
                 var functionName = "function fireProjectile"
 
                 if (fireProjectile !== null) {
+                    var oldInstructions = fireProjectile.instructions
+
+                    // Offsets the firing position of firework rockets.
+                    var areaName = "first area of " + functionName
                     try {
-                        var oldInstructions = fireProjectile.instructions
                         var success = false
 
                         for (var i = 0; i <= oldInstructions.size() - 2; i++) {
@@ -1820,6 +1825,100 @@ function initializeCoreMod() {
                                 // ...
 
                                 success = true
+                                logTransformSuccess(areaName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(areaName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(areaName, classPath, exception.message)
+                    }
+
+                    // Makes the fire sound of the crossbow occur at the offset position.
+                    areaName = "second area of " + functionName
+                    try {
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/world/World", "playSound", "func_184148_a",
+                                    "(Lnet/minecraft/entity/player/PlayerEntity;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V")) {
+                                var modifiedPlaySound = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                modifiedPlaySound.add(skipOriginal)
+                                modifiedPlaySound.add(new VarInsnNode(Opcodes.ALOAD, 1)) // shooter Lnet/minecraft/entity/LivingEntity;
+                                modifiedPlaySound.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "modifiedPlaySound",
+                                    "(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FFLnet/minecraft/entity/LivingEntity;)V",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/world/World.playSound (Lnet/minecraft/entity/player/PlayerEntity;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V
+                                oldInstructions.insert(instruction, modifiedPlaySound)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(areaName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(areaName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(areaName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                // Makes the full-load sound of the crossbow occur at the offset position.
+                var onPlayerStoppedUsing = findObfuscatedMethodWithSignature(classNode, "onPlayerStoppedUsing", "func_77615_a",
+                    "(Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/LivingEntity;I)V")
+                functionName = "function onPlayerStoppedUsing"
+
+                if (onPlayerStoppedUsing !== null) {
+                    try {
+                        var oldInstructions = onPlayerStoppedUsing.instructions
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/world/World", "playSound", "func_184148_a",
+                                    "(Lnet/minecraft/entity/player/PlayerEntity;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V")) {
+                                var modifiedPlaySound = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                modifiedPlaySound.add(skipOriginal)
+                                modifiedPlaySound.add(new VarInsnNode(Opcodes.ALOAD, 3)) // entityLiving Lnet/minecraft/entity/LivingEntity;
+                                modifiedPlaySound.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "modifiedPlaySound",
+                                    "(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FFLnet/minecraft/entity/LivingEntity;)V",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/world/World.playSound (Lnet/minecraft/entity/player/PlayerEntity;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V
+                                oldInstructions.insert(instruction, modifiedPlaySound)
+                                // ...
+
+                                success = true
                                 logTransformSuccess(functionName, classPath)
 
                                 break
@@ -1827,6 +1926,59 @@ function initializeCoreMod() {
                         }
 
                         if (!success)
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                // Makes the loading sounds of the crossbow occur at the offset position.
+                var onUse = findObfuscatedMethodWithSignature(classNode, "onUse", "func_219972_a",
+                    "(Lnet/minecraft/world/World;Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/item/ItemStack;I)V")
+                functionName = "function onUse"
+
+                if (onUse !== null) {
+                    try {
+                        var oldInstructions = onUse.instructions
+                        var successes = 0
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/world/World", "playSound", "func_184148_a",
+                                    "(Lnet/minecraft/entity/player/PlayerEntity;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V")) {
+                                var modifiedPlaySound = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                modifiedPlaySound.add(skipOriginal)
+                                modifiedPlaySound.add(new VarInsnNode(Opcodes.ALOAD, 2)) // livingEntityIn Lnet/minecraft/entity/LivingEntity;
+                                modifiedPlaySound.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "modifiedPlaySound",
+                                    "(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FFLnet/minecraft/entity/LivingEntity;)V",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/world/World.playSound (Lnet/minecraft/entity/player/PlayerEntity;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V
+                                oldInstructions.insert(instruction, modifiedPlaySound)
+                                // ...
+
+                                successes += 1
+                                if (successes >= 2)
+                                    break
+                            }
+                        }
+
+                        if (successes === 2) {
+                            logTransformSuccess(functionName, classPath)
+
+                        } else
                             logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {
