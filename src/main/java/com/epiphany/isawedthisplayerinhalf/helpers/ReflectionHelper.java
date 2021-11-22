@@ -5,8 +5,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-// TODO Collapse setting accessibility into get methods.
-
 /**
  * A helper for refection so that the other classes are not a mess of try/catch blocks.
  */
@@ -38,6 +36,7 @@ public class ReflectionHelper {
             }
         }
 
+        makeAccessible(field);
         return field;
     }
 
@@ -130,6 +129,7 @@ public class ReflectionHelper {
             }
         }
 
+        makeAccessible(method);
         return method;
     }
 
@@ -159,7 +159,7 @@ public class ReflectionHelper {
      *
      * @param object The field or method to make accessible.
      */
-    public static void makeAccessible(@Nullable Object object) {
+    private static void makeAccessible(@Nullable Object object) {
         if (object != null)
             if (object instanceof Method) {
                 Method method = (Method) object;

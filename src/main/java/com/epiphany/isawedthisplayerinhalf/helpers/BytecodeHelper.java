@@ -68,11 +68,8 @@ public class BytecodeHelper {
     static {
         // LookAtGoal.
         FIELD_entity = ReflectionHelper.getDeclaredFieldOrNull(LookAtGoal.class, "entity", "field_75332_b");
-        ReflectionHelper.makeAccessible(FIELD_entity);
         FIELD_closestEntity = ReflectionHelper.getDeclaredFieldOrNull(LookAtGoal.class, "closestEntity", "field_75334_a");
-        ReflectionHelper.makeAccessible(FIELD_closestEntity);
         FIELD_maxDistance = ReflectionHelper.getDeclaredFieldOrNull(LookAtGoal.class, "maxDistance", "field_75333_c");
-        ReflectionHelper.makeAccessible(FIELD_maxDistance);
 
         if (FIELD_entity == null)
             throw new NullPointerException("Unable to find field 'FIELD_entity' under names 'entity' and 'field_75332_b'");
@@ -83,19 +80,12 @@ public class BytecodeHelper {
 
         // EntityPredicate.
         FIELD_allowInvulnerable = ReflectionHelper.getDeclaredFieldOrNull(EntityPredicate.class, "allowInvulnerable", "field_221018_c");
-        ReflectionHelper.makeAccessible(FIELD_allowInvulnerable);
         FIELD_customPredicate = ReflectionHelper.getDeclaredFieldOrNull(EntityPredicate.class, "customPredicate", "field_221023_h");
-        ReflectionHelper.makeAccessible(FIELD_customPredicate);
         FIELD_skipAttackChecks = ReflectionHelper.getDeclaredFieldOrNull(EntityPredicate.class, "skipAttackChecks", "field_221021_f");
-        ReflectionHelper.makeAccessible(FIELD_skipAttackChecks);
         FIELD_friendlyFire = ReflectionHelper.getDeclaredFieldOrNull(EntityPredicate.class, "friendlyFire", "field_221019_d");
-        ReflectionHelper.makeAccessible(FIELD_friendlyFire);
         FIELD_distance = ReflectionHelper.getDeclaredFieldOrNull(EntityPredicate.class, "distance", "field_221017_b");
-        ReflectionHelper.makeAccessible(FIELD_distance);
         FIELD_useVisibilityModifier = ReflectionHelper.getDeclaredFieldOrNull(EntityPredicate.class, "useVisibilityModifier", "field_221022_g");
-        ReflectionHelper.makeAccessible(FIELD_useVisibilityModifier);
         FIELD_requireLineOfSight = ReflectionHelper.getDeclaredFieldOrNull(EntityPredicate.class, "requireLineOfSight", "field_221020_e");
-        ReflectionHelper.makeAccessible(FIELD_requireLineOfSight);
 
         if (FIELD_allowInvulnerable == null)
             throw new NullPointerException("Unable to find field 'FIELD_allowInvulnerable' under names 'allowInvulnerable' and 'field_221018_c'");
@@ -114,13 +104,9 @@ public class BytecodeHelper {
 
         // TemptGoal.
         FIELD_targetX = ReflectionHelper.getDeclaredFieldOrNull(TemptGoal.class, "targetX", "field_75283_c");
-        ReflectionHelper.makeAccessible(FIELD_targetX);
         FIELD_targetY = ReflectionHelper.getDeclaredFieldOrNull(TemptGoal.class, "targetY", "field_75280_d");
-        ReflectionHelper.makeAccessible(FIELD_targetY);
         FIELD_targetZ = ReflectionHelper.getDeclaredFieldOrNull(TemptGoal.class, "targetZ", "field_75281_e");
-        ReflectionHelper.makeAccessible(FIELD_targetZ);
         FIELD_closestPlayer = ReflectionHelper.getDeclaredFieldOrNull(TemptGoal.class, "closestPlayer", "field_75289_h");
-        ReflectionHelper.makeAccessible(FIELD_closestPlayer);
 
         if (FIELD_targetX == null)
             throw new NullPointerException("Unable to find field 'FIELD_targetX' under names 'targetX' and 'field_75283_c'");
@@ -136,7 +122,6 @@ public class BytecodeHelper {
                 PathNavigator.class,
                 "func_225464_a",
                 Set.class, int.class, boolean.class, int.class);
-        ReflectionHelper.makeAccessible(METHOD_func_225464_a);
 
         if (METHOD_func_225464_a == null)
             throw new NullPointerException("Unable to find field 'METHOD_func_225464_a' under name 'func_225464_a'");
@@ -146,7 +131,6 @@ public class BytecodeHelper {
                 LookController.class,
                 "getEyePosition", "func_220676_b",
                 Entity.class);
-        ReflectionHelper.makeAccessible(METHOD_getEyePosition);
 
         if (METHOD_getEyePosition == null)
             throw new NullPointerException("Unable to find field 'METHOD_getEyePosition' under names 'getEyePosition' and 'func_220676_b'");

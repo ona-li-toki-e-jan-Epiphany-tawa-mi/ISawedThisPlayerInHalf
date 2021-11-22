@@ -28,9 +28,7 @@ public class RenderingOffsetter {
 
     static {
         FIELD_skinMap = ReflectionHelper.getDeclaredFieldOrNull(EntityRendererManager.class, "skinMap", "field_178636_l");
-        ReflectionHelper.makeAccessible(FIELD_skinMap);
         FIELD_playerRenderer = ReflectionHelper.getDeclaredFieldOrNull(EntityRendererManager.class, "playerRenderer", "field_178637_m");
-        ReflectionHelper.makeAccessible(FIELD_playerRenderer);
 
         if (FIELD_skinMap == null)
             throw new NullPointerException("Unable to find field 'FIELD_skinMap' under names 'skinMap' and 'field_178636_l'");
