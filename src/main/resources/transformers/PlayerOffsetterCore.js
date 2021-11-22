@@ -1230,7 +1230,7 @@ function initializeCoreMod() {
                                 redoGetClosestPlayer.add(new MethodInsnNode(
                                     Opcodes.INVOKESTATIC,
                                     "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
-                                    "modifiedGetClosestPlayer",
+                                    "modifiedGetClosestPlayerNOOF",
                                     "(Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityPredicate;Lnet/minecraft/entity/LivingEntity;DDD)Lnet/minecraft/entity/player/PlayerEntity;",
                                     false
                                 ))
@@ -1253,6 +1253,378 @@ function initializeCoreMod() {
 
                     } catch (exception) {
                         logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                return classNode
+            }
+        },
+
+        /**
+         * Modifies tempting entities so that they are tempted to the player's offset position.
+         */
+        "TemptGoal": {
+            "target": {
+                "type": "CLASS",
+                "name": "net.minecraft.entity.ai.goal.TemptGoal"
+            },
+
+            "transformer": function(classNode) {
+                var classPath = "net.minecraft.entity.ai.goal.TemptGoal"
+
+                // Modifies the start method for attracting animals with food to account for player offsets.
+                var shouldExecute = findObfuscatedMethodWithSignature(classNode, "shouldExecute", "func_75250_a", "()Z")
+                var functionName = "function shouldExecute"
+
+                if (shouldExecute !== null) {
+                    try {
+                        var oldInstructions = shouldExecute.instructions
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/world/World", "getClosestPlayer", "func_217370_a",
+                                    "(Lnet/minecraft/entity/EntityPredicate;Lnet/minecraft/entity/LivingEntity;)Lnet/minecraft/entity/player/PlayerEntity;")) {
+                                var redoGetClosestPlayer = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                redoGetClosestPlayer.add(skipOriginal);
+                                redoGetClosestPlayer.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "modifiedGetClosestPlayerOF",
+                                    "(Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityPredicate;Lnet/minecraft/entity/LivingEntity;)Lnet/minecraft/entity/player/PlayerEntity;",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/world/World.getClosestPlayer (Lnet/minecraft/entity/EntityPredicate;Lnet/minecraft/entity/LivingEntity;)Lnet/minecraft/entity/player/PlayerEntity;
+                                oldInstructions.insert(instruction, redoGetClosestPlayer)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(functionName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                // Modifies the method for checking whether the TemptGoal should continue to execute to account for player offsets.
+                var shouldContinueExecuting = findObfuscatedMethodWithSignature(classNode, "shouldContinueExecuting", "func_75253_b", "()Z")
+                functionName = "function shouldContinueExecuting"
+
+                if (shouldContinueExecuting !== null) {
+                    var oldInstructions = shouldContinueExecuting.instructions
+
+                    var areaName = "first area of " + functionName
+                    try {
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/CreatureEntity", "getDistanceSq", "func_70068_e", "(Lnet/minecraft/entity/Entity;)D")) {
+                                var redoGetDistanceSq = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                redoGetDistanceSq.add(skipOriginal);
+                                redoGetDistanceSq.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "modifiedGetDistanceSq",
+                                    "(Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/Entity;)D",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/entity/CreatureEntity.getDistanceSq (Lnet/minecraft/entity/Entity;)D
+                                oldInstructions.insert(instruction, redoGetDistanceSq)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(areaName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(areaName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(areaName, classPath, exception.message)
+                    }
+
+                    areaName = "second area of " + functionName
+                    try {
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getDistanceSq", "func_70092_e", "(DDD)D")) {
+                                var redoGetDistanceSq = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                redoGetDistanceSq.add(skipOriginal);
+                                redoGetDistanceSq.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "modifiedGetDistanceSq",
+                                    "(Lnet/minecraft/entity/player/PlayerEntity;DDD)D",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/entity/player/PlayerEntity.getDistanceSq (DDD)D
+                                oldInstructions.insert(instruction, redoGetDistanceSq)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(areaName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(areaName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(areaName, classPath, exception.message)
+                    }
+
+                    areaName = "third area of " + functionName
+                    try {
+                        var success = false
+
+                        for (var i = 0; i <= oldInstructions.size() - 3; i++) {
+                            if (checkObfuscatedFieldInsn(oldInstructions.get(i), Opcodes.GETFIELD, "net/minecraft/entity/ai/goal/TemptGoal", "closestPlayer", "field_75289_h", "Lnet/minecraft/entity/player/PlayerEntity;")
+                                    && checkObfuscatedMethodInsn(oldInstructions.get(i+1), Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/PlayerEntity", "getPosZ", "func_226281_cx_", "()D")
+                                    && checkObfuscatedFieldInsn(oldInstructions.get(i+2), Opcodes.PUTFIELD, "net/minecraft/entity/ai/goal/TemptGoal", "targetZ", "field_75281_e", "D")) {
+                                var offsetTargetPosition = new InsnList()
+
+                                offsetTargetPosition.add(new VarInsnNode(Opcodes.ALOAD, 0)) // this Lnet/minecraft/entity/ai/goal/TemptGoal;
+                                offsetTargetPosition.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "offsetTargetPosition",
+                                    "(Lnet/minecraft/entity/ai/goal/TemptGoal;)V",
+                                    false
+                                ))
+
+                                // ...
+                                // GETFIELD net/minecraft/entity/ai/goal/TemptGoal.closestPlayer : Lnet/minecraft/entity/player/PlayerEntity;
+                                // INVOKEVIRTUAL net/minecraft/entity/player/PlayerEntity.getPosZ ()D
+                                // PUTFIELD net/minecraft/entity/ai/goal/TemptGoal.targetZ : D
+                                oldInstructions.insert(oldInstructions.get(i+2), offsetTargetPosition)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(areaName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(areaName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(areaName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                // Modifies the init function to account for player offsets.
+                var startExecuting = findObfuscatedMethodWithSignature(classNode, "startExecuting", "func_75249_e", "()V")
+                functionName = "function startExecuting"
+
+                if (startExecuting !== null) {
+                    try {
+                        var oldInstructions = startExecuting.instructions
+                        var success = false
+
+                        for (var i = oldInstructions.size() - 1; i >= 0; i--) {
+                            if (checkInsn(oldInstructions.get(i), Opcodes.RETURN)) {
+                                var redoSetTarget = new InsnList()
+
+                                redoSetTarget.add(new VarInsnNode(Opcodes.ALOAD, 0)) // this Lnet/minecraft/entity/ai/goal/TemptGoal;
+                                redoSetTarget.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "offsetTargetPosition",
+                                    "(Lnet/minecraft/entity/ai/goal/TemptGoal;)V",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(oldInstructions.get(i), redoSetTarget)
+                                // RETURN
+                                // ...
+
+                                success = true
+                                logTransformSuccess(functionName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                // Modifies ai pathfinding goals to account for player offsets.
+                var tick = findObfuscatedMethodWithSignature(classNode, "tick", "func_75246_d", "()V")
+                functionName = "function tick"
+
+                if (tick !== null) {
+                    var oldInstructions = tick.instructions
+
+                    var areaName = "first area of " + functionName
+                    try {
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/ai/controller/LookController", "setLookPositionWithEntity", "func_75651_a",
+                                    "(Lnet/minecraft/entity/Entity;FF)V")) {
+                                var redoSetLookPositionWithEntity = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                redoSetLookPositionWithEntity.add(skipOriginal);
+                                redoSetLookPositionWithEntity.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "setLookPositionWithOffsetEntity",
+                                    "(Lnet/minecraft/entity/ai/controller/LookController;Lnet/minecraft/entity/Entity;FF)V",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/entity/ai/controller/LookController.setLookPositionWithEntity (Lnet/minecraft/entity/Entity;FF)V
+                                oldInstructions.insert(instruction, redoSetLookPositionWithEntity)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(areaName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(areaName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(areaName, classPath, exception.message)
+                    }
+
+                    areaName = "second area of " + functionName
+                    try {
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/CreatureEntity", "getDistanceSq", "func_70068_e",
+                                    "(Lnet/minecraft/entity/Entity;)D")) {
+                                var redoGetDistanceSq = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                redoGetDistanceSq.add(skipOriginal);
+                                redoGetDistanceSq.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "modifiedGetDistanceSq",
+                                    "(Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/Entity;)D",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/entity/CreatureEntity.getDistanceSq (Lnet/minecraft/entity/Entity;)D
+                                oldInstructions.insert(instruction, redoGetDistanceSq)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(areaName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(areaName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(areaName, classPath, exception.message)
+                    }
+
+                    areaName = "third area of " + functionName
+                    try {
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/pathfinding/PathNavigator", "tryMoveToEntityLiving", "func_75497_a",
+                                    "(Lnet/minecraft/entity/Entity;D)Z")) {
+                                var redoTryMoveToEntityLiving = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                redoTryMoveToEntityLiving.add(skipOriginal);
+                                redoTryMoveToEntityLiving.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "tryMoveToOffsetEntityLiving",
+                                    "(Lnet/minecraft/pathfinding/PathNavigator;Lnet/minecraft/entity/Entity;D)Z",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/pathfinding/PathNavigator.tryMoveToEntityLiving (Lnet/minecraft/entity/Entity;D)Z
+                                oldInstructions.insert(instruction, redoTryMoveToEntityLiving)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(areaName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(areaName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(areaName, classPath, exception.message)
                     }
 
                 } else

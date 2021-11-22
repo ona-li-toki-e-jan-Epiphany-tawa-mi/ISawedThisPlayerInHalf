@@ -20,7 +20,6 @@ for(LivingEntity livingentity : this.world.getEntitiesWithinAABB(LivingEntity.cl
     }
 }
 */
-// TODO TemptGoal.
 // TODO Enderman.StareGoal.
 // TODO Enderman.FindPlayerGoal.
 // TODO Bow sounds.

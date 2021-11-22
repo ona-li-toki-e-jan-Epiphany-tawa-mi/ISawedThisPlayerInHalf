@@ -1,6 +1,7 @@
 package com.epiphany.isawedthisplayerinhalf.helpers;
 
 import com.epiphany.isawedthisplayerinhalf.Offsetter;
+import com.google.common.collect.ImmutableSet;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
@@ -10,9 +11,13 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityPredicate;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.controller.LookController;
 import net.minecraft.entity.ai.goal.LookAtGoal;
+import net.minecraft.entity.ai.goal.TemptGoal;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.FishingBobberEntity;
+import net.minecraft.pathfinding.Path;
+import net.minecraft.pathfinding.PathNavigator;
 import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
@@ -23,8 +28,11 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
 /**
@@ -45,6 +53,15 @@ public class BytecodeHelper {
     private static final Field FIELD_distance;
     private static final Field FIELD_useVisibilityModifier;
     private static final Field FIELD_requireLineOfSight;
+    // TemptGoal.
+    private static final Field FIELD_targetX;
+    private static final Field FIELD_targetY;
+    private static final Field FIELD_targetZ;
+    private static final Field FIELD_closestPlayer;
+    // PathNavigator.
+    private static final Method METHOD_func_225464_a;
+    // LookController.
+    private static final Method METHOD_getEyePosition;
 
     private static final Random RANDOM;
 
@@ -94,6 +111,45 @@ public class BytecodeHelper {
             throw new NullPointerException("Unable to find field 'FIELD_useVisibilityModifier' under names 'useVisibilityModifier' and 'field_221022_g'");
         if (FIELD_requireLineOfSight == null)
             throw new NullPointerException("Unable to find field 'FIELD_requireLineOfSight' under names 'requireLineOfSight' and 'field_221020_e'");
+
+        // TemptGoal.
+        FIELD_targetX = ReflectionHelper.getDeclaredFieldOrNull(TemptGoal.class, "targetX", "field_75283_c");
+        ReflectionHelper.makeAccessible(FIELD_targetX);
+        FIELD_targetY = ReflectionHelper.getDeclaredFieldOrNull(TemptGoal.class, "targetY", "field_75280_d");
+        ReflectionHelper.makeAccessible(FIELD_targetY);
+        FIELD_targetZ = ReflectionHelper.getDeclaredFieldOrNull(TemptGoal.class, "targetZ", "field_75281_e");
+        ReflectionHelper.makeAccessible(FIELD_targetZ);
+        FIELD_closestPlayer = ReflectionHelper.getDeclaredFieldOrNull(TemptGoal.class, "closestPlayer", "field_75289_h");
+        ReflectionHelper.makeAccessible(FIELD_closestPlayer);
+
+        if (FIELD_targetX == null)
+            throw new NullPointerException("Unable to find field 'FIELD_targetX' under names 'targetX' and 'field_75283_c'");
+        if (FIELD_targetY == null)
+            throw new NullPointerException("Unable to find field 'FIELD_targetY' under names 'targetY' and 'field_75280_d'");
+        if (FIELD_targetZ == null)
+            throw new NullPointerException("Unable to find field 'FIELD_targetZ' under names 'targetZ' and 'field_75281_e'");
+        if (FIELD_closestPlayer == null)
+            throw new NullPointerException("Unable to find field 'FIELD_closestPlayer' under names 'closestPlayer' and 'field_75289_h'");
+
+        // PathNavigator.
+        METHOD_func_225464_a = ReflectionHelper.getDeclaredMethodOrNull(
+                PathNavigator.class,
+                "func_225464_a",
+                Set.class, int.class, boolean.class, int.class);
+        ReflectionHelper.makeAccessible(METHOD_func_225464_a);
+
+        if (METHOD_func_225464_a == null)
+            throw new NullPointerException("Unable to find field 'METHOD_func_225464_a' under name 'func_225464_a'");
+
+        // LookController.
+        METHOD_getEyePosition = ReflectionHelper.getDeclaredMethodOrNull(
+                LookController.class,
+                "getEyePosition", "func_220676_b",
+                Entity.class);
+        ReflectionHelper.makeAccessible(METHOD_getEyePosition);
+
+        if (METHOD_getEyePosition == null)
+            throw new NullPointerException("Unable to find field 'METHOD_getEyePosition' under names 'getEyePosition' and 'func_220676_b'");
 
 
         RANDOM = new Random();
@@ -238,7 +294,23 @@ public class BytecodeHelper {
 
     /**
      * Gets the player that is closest to the target entity, or null, if nothing is found.
-     * Corrected for offsets.
+     * Corrected for offsets, checking only the players offset position.
+     *
+     * @see net.minecraft.world.IEntityReader#getClosestPlayer(EntityPredicate, LivingEntity).
+     *
+     * @param world The world the target is in.
+     * @param predicate A predicate to control which players can be targeted.
+     * @param target The target entity.
+     *
+     * @return The player closest to the target, or null.
+     */
+    public static PlayerEntity modifiedGetClosestPlayerOF(World world, EntityPredicate predicate, LivingEntity target) {
+        return modifiedGetClosestPlayer(world, predicate, target, BytecodeHelper::modifiedGetDistanceSq);
+    }
+
+    /**
+     * Gets the player that is closest to the target entity, or null, if nothing is found.
+     * Corrected for offsets, checking both the player's normal and offset positions.
      *
      * @see net.minecraft.world.IEntityReader#getClosestPlayer(EntityPredicate, LivingEntity, double, double, double).
      *
@@ -251,14 +323,33 @@ public class BytecodeHelper {
      *
      * @return The player closest to the target, or null.
      */
-    public static PlayerEntity modifiedGetClosestPlayer(World world, EntityPredicate predicate, LivingEntity target, double targetX, double targetY, double targetZ) {
+    public static PlayerEntity modifiedGetClosestPlayerNOOF(World world, EntityPredicate predicate, LivingEntity target, double targetX, double targetY, double targetZ) {
+        return modifiedGetClosestPlayer(world, predicate, target, (livingTarget, playerEntity) -> {
+            return Math.min(playerEntity.getDistanceSq(targetX, targetY, targetZ), modifiedGetDistanceSq(playerEntity, targetX, targetY, targetZ));
+        });
+    }
+
+    /**
+     * Gets the player that is closest to the target entity, or null, if nothing is found.
+     *
+     * @see net.minecraft.world.IEntityReader#getClosestPlayer(EntityPredicate, LivingEntity, double, double, double).
+     *
+     * @param world The world the target is in.
+     * @param predicate A predicate to control which players can be targeted.
+     * @param target The target entity.
+     * @param distanceSqFunction A function that accepts the target and player and calculates the distance squared between them.
+     *      Whether to account for those offsets will depend on application.
+     *
+     * @return The player closest to the target, or null.
+     */
+    public static PlayerEntity modifiedGetClosestPlayer(World world, EntityPredicate predicate, LivingEntity target, BiFunction<LivingEntity, PlayerEntity, Double> distanceSqFunction) {
         List<? extends PlayerEntity> players =  target.world.getPlayers();
         PlayerEntity closestPlayer = null;
         double smallestDistance = Double.MAX_VALUE;
 
         for (PlayerEntity playerEntity : players)
-            if (modifiedCanTarget(predicate, target, playerEntity)) {
-                double distance = Math.min(playerEntity.getDistanceSq(targetX, targetY, targetZ), modifiedGetDistanceSq(playerEntity, targetX, targetY, targetZ));
+            if (modifiedCanTarget(predicate, target, playerEntity, distanceSqFunction)) {
+                double distance = distanceSqFunction.apply(target, playerEntity);
 
                 if (distance < smallestDistance) {
                     closestPlayer = playerEntity;
@@ -275,10 +366,12 @@ public class BytecodeHelper {
      * @param predicate A predicate to control whether the entity can be targeted.
      * @param attacker The entity attempting to target.
      * @param target The player being targeted.
+     * @param distanceSqFunction A function that accepts the attacker and target (the one with offsets) and calculates the distance squared between them.
+     *      Whether to account for those offsets will depend on application.
      *
      * @return Whether the target can be targeted.
      */
-    public static boolean modifiedCanTarget(EntityPredicate predicate, LivingEntity attacker, PlayerEntity target) {
+    public static boolean modifiedCanTarget(EntityPredicate predicate, LivingEntity attacker, PlayerEntity target, BiFunction<LivingEntity, PlayerEntity, Double> distanceSqFunction) {
         if (attacker == target) {
             return false;
 
@@ -309,7 +402,7 @@ public class BytecodeHelper {
                                 ? target.getVisibilityMultiplier(attacker) : 1.0;
                         double visibleDistance = distance * visibilityModifier;
 
-                        if (Math.min(attacker.getDistanceSq(target.getPosX(), target.getPosY(), target.getPosZ()), modifiedGetDistance(attacker, target)) > visibleDistance * visibleDistance)
+                        if (distanceSqFunction.apply(attacker, target) > visibleDistance * visibleDistance)
                             return false;
                     }
 
@@ -474,6 +567,73 @@ public class BytecodeHelper {
             return new Vec3d(x, y, z);
 
         return new Vec3d(x + offsets.x, y + offsets.y, z + offsets.z);
+    }
+
+    /**
+     * Offsets the target position of a TemptGoal.
+     *
+     * @param temptGoal The tempt goal to offset the target position of.
+     */
+    public static void offsetTargetPosition(TemptGoal temptGoal) {
+        PlayerEntity closestPlayer = (PlayerEntity) ReflectionHelper.getValueOrDefault(FIELD_closestPlayer, temptGoal, null);
+        if (closestPlayer == null) throw new NullPointerException("Unable to get value from 'TemptGoal'");
+
+        Vec3d offsets = Offsetter.getOffsets(closestPlayer);
+
+        ReflectionHelper.setValue(FIELD_targetX, temptGoal, offsets.x + (double) ReflectionHelper.getValueOrDefault(FIELD_targetX, temptGoal, closestPlayer.getPosX()));
+        ReflectionHelper.setValue(FIELD_targetY, temptGoal, offsets.y + (double) ReflectionHelper.getValueOrDefault(FIELD_targetY, temptGoal, closestPlayer.getPosY()));
+        ReflectionHelper.setValue(FIELD_targetZ, temptGoal, offsets.z + (double) ReflectionHelper.getValueOrDefault(FIELD_targetZ, temptGoal, closestPlayer.getPosZ()));
+    }
+
+    /**
+     * Makes the entity of the given look controller look at an entity's offset position.
+     *
+     * @see LookController#setLookPositionWithEntity(Entity, float, float).
+     *
+     * @param lookController The entity's look controller.
+     * @param offsetEntity The entity to look at the offset position of.
+     * @param deltaYaw How fast to rotate the entity's yaw.
+     * @param deltaPitch How fast to rotate the entity pitch.
+     */
+    public static void setLookPositionWithOffsetEntity(LookController lookController, Entity offsetEntity, float deltaYaw, float deltaPitch) {
+        if (offsetEntity instanceof PlayerEntity) {
+            Vec3d offsets = Offsetter.getOffsets(offsetEntity);
+
+            if (!offsets.equals(Vec3d.ZERO)) {
+                Double eyePosition = (Double) ReflectionHelper.invokeMethod(METHOD_getEyePosition, lookController, offsetEntity);
+                if (eyePosition == null) throw new NullPointerException("Unable to invoke method in 'LookController'");
+
+                lookController.setLookPosition(offsetEntity.getPosX() + offsets.x, eyePosition + offsets.y, offsetEntity.getPosZ() + offsets.z, deltaYaw, deltaPitch);
+                return;
+            }
+        }
+
+        lookController.setLookPositionWithEntity(offsetEntity, deltaYaw, deltaPitch);
+    }
+
+    /**
+     * Uses entity path finding to try to navigate to an entity's offset position.
+     *
+     * @see net.minecraft.pathfinding.PathNavigator#tryMoveToEntityLiving(Entity, double).
+     *
+     * @param pathNavigator The entity's path navigator.
+     * @param offsetTarget The entity to move to the offset position of.
+     * @param speed How fast to move to the target.
+     *
+     * @return Whether the entity will try to navigate to that position (if a valid path exists.)
+     */
+    public static boolean tryMoveToOffsetEntityLiving(PathNavigator pathNavigator, Entity offsetTarget, double speed) {
+        if (offsetTarget instanceof PlayerEntity) {
+            Vec3d offsets = Offsetter.getOffsets((PlayerEntity) offsetTarget);
+
+            if (!offsets.equals(Vec3d.ZERO)) {
+                Path pathToEntity = (Path) ReflectionHelper.invokeMethod(METHOD_func_225464_a, pathNavigator,
+                        ImmutableSet.of(new BlockPos(offsetTarget.getPositionVector().add(offsets))), 16, true, 1);
+                return pathToEntity != null && pathNavigator.setPath(pathToEntity, speed);
+            }
+        }
+
+        return pathNavigator.tryMoveToEntityLiving(offsetTarget, speed);
     }
 
 
