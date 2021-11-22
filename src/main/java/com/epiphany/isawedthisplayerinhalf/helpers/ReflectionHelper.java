@@ -1,6 +1,8 @@
 package com.epiphany.isawedthisplayerinhalf.helpers;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
@@ -8,32 +10,33 @@ import java.lang.reflect.Method;
  */
 public class ReflectionHelper {
     /**
-     * Gets a declared field from a class, or null.
+     * Gets a declared field from a class, or null, if nothing is found.
      *
      * @param clazz The class to get the field from.
      * @param fieldName The name of the field to get.
      * @param obfuscatedFieldName The obfuscated name of the field to get.
      *
-     * @return The field with the name fieldName in class clazz.
+     * @return The field with the name fieldName in class clazz, or null.
      */
-    public static Field getFieldOrNull(Class<?> clazz, String fieldName, String obfuscatedFieldName) {
+    public static Field getDeclaredFieldOrNull(Class<?> clazz, String fieldName, String obfuscatedFieldName) {
         Field field;
 
         try {
             field = clazz.getDeclaredField(fieldName);
 
-        } catch (NoSuchFieldException exception) {
+        } catch (NoSuchFieldException noSuchFieldException) {
             try {
                 field = clazz.getDeclaredField(obfuscatedFieldName);
 
-            } catch (NoSuchFieldException innerException) {
+            } catch (NoSuchFieldException innerNoSuchFieldException) {
                 field = null;
 
-                exception.printStackTrace();
-                innerException.printStackTrace();
+                noSuchFieldException.printStackTrace();
+                innerNoSuchFieldException.printStackTrace();
             }
         }
 
+        makeAccessible(field);
         return field;
     }
 
@@ -46,30 +49,18 @@ public class ReflectionHelper {
      *
      * @return The value stored in the field, or the default value.
      */
-    public static Object getValueOrDefault(Field field, Object object, Object defaultValue) {
-        if (field != null) {
-            Object returnValue;
+    public static Object getValueOrDefault(Field field, Object object, @Nullable Object defaultValue) {
+        Object returnValue;
 
-            try {
-                boolean wasAccessible = field.isAccessible();
+        try {
+            returnValue = field.get(object);
 
-                if (!wasAccessible)
-                    field.setAccessible(true);
-
-                returnValue = field.get(object);
-
-                if (!wasAccessible)
-                    field.setAccessible(false);
-
-            } catch (IllegalAccessException e) {
-                returnValue = defaultValue;
-                e.printStackTrace();
-            }
-
-            return returnValue;
+        } catch (IllegalAccessException illegalAccessException) {
+            returnValue = defaultValue;
+            illegalAccessException.printStackTrace();
         }
 
-        return defaultValue;
+        return returnValue;
     }
 
     /**
@@ -79,22 +70,86 @@ public class ReflectionHelper {
      * @param object The object to set the field's value to.
      * @param value The value to set to the field.
      */
-    public static void setField(Field field, Object object, Object value) {
-        if (field != null)
-            try {
-                boolean wasAccessible = field.isAccessible();
+    public static void setValue(Field field, Object object, @Nullable Object value) {
+        try {
+            field.set(object, value);
 
-                if (!wasAccessible)
-                    field.setAccessible(true);
+        } catch (IllegalAccessException illegalAccessException) {
+            illegalAccessException.printStackTrace();
+        }
+    }
 
-                field.set(object, value);
 
-                if (!wasAccessible)
-                    field.setAccessible(false);
 
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
+    /**
+     * Attempts to get a declared method from the given class through reflection.
+     * Returns null if no method is found.
+     *
+     * @param clazz The class the method was declared in.
+     * @param methodName The name of the method.
+     * @param argumentTypes The argument types of the method.
+     *
+     * @return The specified method in the class, or null.
+     */
+    public static Method getDeclaredMethodOrNull(Class<?> clazz, String methodName, Class<?>... argumentTypes) {
+       return getDeclaredMethodOrNull(clazz, methodName, null, argumentTypes);
+    }
+
+    /**
+     * Attempts to get a declared method from the given class through reflection.
+     * Returns null if no method is found.
+     *
+     * @param clazz The class the method was declared in.
+     * @param methodName The name of the method.
+     * @param argumentTypes The argument types of the method.
+     * @param obfuscatedMethodName The obfuscated method name.
+     *
+     * @return The specified method in the class, or null.
+     */
+    public static Method getDeclaredMethodOrNull(Class<?> clazz, String methodName, @Nullable String obfuscatedMethodName, Class<?>... argumentTypes) {
+        Method method;
+
+        try {
+            method = clazz.getDeclaredMethod(methodName, argumentTypes);
+
+        } catch (NoSuchMethodException exception) {
+            if (obfuscatedMethodName != null) {
+                try {
+                    method = clazz.getDeclaredMethod(obfuscatedMethodName, argumentTypes);
+
+                } catch (NoSuchMethodException innerException) {
+                    innerException.printStackTrace();
+                    exception.printStackTrace();
+                    method = null;
+                }
+
+            } else {
+                exception.printStackTrace();
+                method = null;
             }
+        }
+
+        makeAccessible(method);
+        return method;
+    }
+
+    /**
+     * Invokes a method.
+     *
+     * @param object The object to invoke the method with.
+     * @param method The method to invoke.
+     * @param methodArguments The arguments to the method.
+     *
+     * @return The result of invoking the method, or null, if the method call fails.
+     */
+    public static Object invokeMethod(Method method, Object object, Object... methodArguments) {
+        try {
+            return method.invoke(object, methodArguments);
+
+        } catch (IllegalAccessException | InvocationTargetException exception) {
+            exception.printStackTrace();
+            return null;
+        }
     }
 
 
@@ -104,7 +159,7 @@ public class ReflectionHelper {
      *
      * @param object The field or method to make accessible.
      */
-    public static void makeAccessible(Object object) {
+    private static void makeAccessible(@Nullable Object object) {
         if (object != null)
             if (object instanceof Method) {
                 Method method = (Method) object;

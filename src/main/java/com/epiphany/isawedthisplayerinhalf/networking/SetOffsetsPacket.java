@@ -3,6 +3,7 @@ package com.epiphany.isawedthisplayerinhalf.networking;
 import com.epiphany.isawedthisplayerinhalf.ISawedThisPlayerInHalf;
 import com.epiphany.isawedthisplayerinhalf.Offsetter;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -65,14 +66,15 @@ public class SetOffsetsPacket implements IPacket {
     public void handle(Supplier<NetworkEvent.Context> contextSupplier) {
         NetworkEvent.Context context = contextSupplier.get();
 
-        context.enqueueWork(() -> DistExecutor.<Boolean>runForDist(
+        final boolean MAGIC_BOOLEAN = true;
+        context.enqueueWork(() -> DistExecutor.runForDist(
                 // Client-side.
                 () -> () -> {
                     // Security.
-                    // TODO Add translations.
                     if (!Double.isFinite(this.xOffset) || !Double.isFinite(this.yOffset) || !Double.isFinite(this.zOffset)) {
-                        ISawedThisPlayerInHalf.LOGGER.log(Level.WARN, "Server attempted to send invalid offsets for the player with id " + this.playerID + "! - will not store!");
-                        return false;
+                        ISawedThisPlayerInHalf.LOGGER.log(Level.WARN,
+                                I18n.format("network.error.set_offsets.invalid_offsets", this.playerID));
+                        return MAGIC_BOOLEAN;
                     }
 
 
@@ -82,45 +84,45 @@ public class SetOffsetsPacket implements IPacket {
                     if (possiblePlayer instanceof PlayerEntity && !possiblePlayer.equals(minecraftInstance.player))
                         Offsetter.setOffsets((PlayerEntity) possiblePlayer, new Vec3d(this.xOffset, this.yOffset, this.zOffset));
 
-                    return true;
+                    return MAGIC_BOOLEAN;
                 },
 
                 // Server-side.
                 () -> () -> {
                     ServerPlayerEntity sender = context.getSender();
+                    if (sender == null)
+                        return MAGIC_BOOLEAN;
 
-                    if (sender != null) {
-                        // Security.
-                        if (!Double.isFinite(this.xOffset) || !Double.isFinite(this.yOffset) || !Double.isFinite(this.zOffset)) {
-                            ISawedThisPlayerInHalf.LOGGER.log(Level.WARN, "Player " + sender.getName().getString() + " attempted to send invalid offsets! - will not store nor send to clients");
-                            return false;
-                        }
-
-                        int truePlayerID = sender.getEntityId();
-
-                        if (truePlayerID != this.playerID) {
-                            this.playerID = truePlayerID;
-                            ISawedThisPlayerInHalf.LOGGER.log(Level.WARN, "Player " + sender.getName().getString() + " attempted to send offsets using an invalid id! - will use true id instead");
-                        }
-
-
-                        Offsetter.setOffsets(sender, new Vec3d(this.xOffset, this.yOffset, this.zOffset));
-
-
-                        // Routes packet to the other players on the server with the mod.
-                        UUID senderUUID = sender.getUniqueID();
-                        PlayerList playerList = sender.getServer().getPlayerList();
-
-                        for (UUID otherPlayerUUID : Offsetter.getOffsetPlayerUUIDs()) {
-                            if (otherPlayerUUID.equals(senderUUID))
-                                continue;
-
-                            ServerPlayerEntity otherPlayer = playerList.getPlayerByUUID(otherPlayerUUID);
-                            Networker.modChannel.send(PacketDistributor.PLAYER.with(() -> otherPlayer), this);
-                        }
+                    // Security.
+                    if (!Double.isFinite(this.xOffset) || !Double.isFinite(this.yOffset) || !Double.isFinite(this.zOffset)) {
+                        ISawedThisPlayerInHalf.LOGGER.log(Level.WARN, "Player " + sender.getName().getString() + " attempted to send invalid offsets! - will not store nor send to clients!");
+                        return MAGIC_BOOLEAN;
                     }
 
-                    return true;
+                    int truePlayerID = sender.getEntityId();
+
+                    if (truePlayerID != this.playerID) {
+                        this.playerID = truePlayerID;
+                        ISawedThisPlayerInHalf.LOGGER.log(Level.WARN, "Player " + sender.getName().getString() + " attempted to send offsets using an invalid id! - will use true id instead!");
+                    }
+
+
+                    Offsetter.setOffsets(sender, new Vec3d(this.xOffset, this.yOffset, this.zOffset));
+
+
+                    // Routes packet to the other players on the server with the mod.
+                    UUID senderUUID = sender.getUniqueID();
+                    PlayerList playerList = sender.getServer().getPlayerList();
+
+                    for (UUID otherPlayerUUID : Offsetter.getOffsetPlayerUUIDs()) {
+                        if (otherPlayerUUID.equals(senderUUID))
+                            continue;
+
+                        ServerPlayerEntity otherPlayer = playerList.getPlayerByUUID(otherPlayerUUID);
+                        Networker.modChannel.send(PacketDistributor.PLAYER.with(() -> otherPlayer), this);
+                    }
+
+                    return MAGIC_BOOLEAN;
                 }
         ));
 

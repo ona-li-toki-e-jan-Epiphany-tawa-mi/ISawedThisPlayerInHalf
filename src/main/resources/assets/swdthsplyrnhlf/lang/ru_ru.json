@@ -1,5 +1,7 @@
 {
   "commands.swdthsplyrnhlf.offsets.get": "Текущие смещения: %f, %f, %f",
+  "commands.swdthsplyrnhlf.offsets.get.of_player": "У %s есть смещения %f, %f, %f",
+  "commands.swdthsplyrnhlf.offsets.get.no_offsets": "У %s смещений нет",
 
   "commands.swdthsplyrnhlf.offsets.reset": "Смещения сброшены",
   "commands.swdthsplyrnhlf.offsets.reset.already_reset": "Смещения уже сброшены",
@@ -8,6 +10,7 @@
   "commands.swdthsplyrnhlf.offsets.set.already_set": "Смещения уже установлены на %f, %f, %f",
 
   "commands.swdthsplyrnhlf.offsets.help": "Раскалывает ваше тело пополам и ставит верхнюю часть где-нибудь другое\nПсевдоним: ::ofs",
+  "commands.swdthsplyrnhlf.offsets.usage_title": "Как использовать:",
   "commands.swdthsplyrnhlf.offsets.help.usage": "Помощь: ::offsets help",
   "commands.swdthsplyrnhlf.offsets.get.usage": "Отобразить текущие смещения: ::offsets get",
   "commands.swdthsplyrnhlf.offsets.reset.usage": "Сбросить смещения: ::offsets reset",
@@ -17,5 +20,10 @@
   "commands.swdthsplyrnhlf.errors.number_expected": "Ожидалось число",
   "commands.swdthsplyrnhlf.errors.incomplete_command": "Не совершено",
   "commands.swdthsplyrnhlf.errors.unknown_command": "Неизвестная команда",
-  "commands.swdthsplyrnhlf.errors.error_position_pointer": "<--[ЗДЕСЬ]"
+  "commands.swdthsplyrnhlf.errors.error_position_pointer": "<--[ЗДЕСЬ]",
+  "commands.swdthsplyrnhlf.errors.unknown_player": "Игрок не обнаружен",
+
+
+
+  "network.error.set_offsets.invalid_offsets": "Сервер попытался отправить неправильные смещения для игрока с кодом %d! - не сохранит!"
 }

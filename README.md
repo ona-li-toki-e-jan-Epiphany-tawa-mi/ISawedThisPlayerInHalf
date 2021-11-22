@@ -1,9 +1,9 @@
-View in a different language: [Русский](../master/README.ru-RU.md "Смотреть на русском"), [toki pona](../master/README.tok.md "lukin kepeken toki pona")
+View in a different language: [Русский](./README.ru-RU.md "Смотреть на русском"), [toki pona](./README.tok.md "lukin kepeken toki pona")
 
-![mi tu e jan ni](../master/src/main/resources/modicon.png)
+![mi tu e jan ni](./src/main/resources/modicon.png)
 
 
-# ISawedThisPlayerInHalf
+# ISawedThisPlayerInHalf!
 Your player... is ca- oh my god, his torso is flying!
 
 This mod splits apart the player, freeing the torso from the legs.
@@ -15,7 +15,7 @@ These chat commands allow you to control your offsets, the new position of the t
 * Help: **::offsets help**
 * Set offsets: **::offsets set \<x> \<y> \<z>**
 * Reset offsets: **::offsets reset**
-* Print out offsets: **::offsets get**
+* Print out offsets (defaults to self): **::offsets get [player name]**
 
 ::ofs can be used in place of ::offsets.
 

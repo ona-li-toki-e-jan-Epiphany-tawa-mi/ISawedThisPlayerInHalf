@@ -15,6 +15,7 @@ import java.io.File;
 // TODO Look into adding a config menu in the mode menu.
 // TODO Check out to see if config translation can be displayed depending on client locale.
 // TODO (MAYBE) Add server config that lets admins control kicking and banning when invalid offsets are sent.
+// TODO (MAYBE) Server-side translations.
 
 /**
  * Deals with configuration data for the mod.
@@ -27,11 +28,11 @@ public class Config {
      * Sets up config file and loads in data if it already exits.
      */
     public static void enable() {
-        final String configFileName = "isawedthisplayerinhalf-client.toml";
+        final String CONFIG_FILE_NAME = "isawedthisplayerinhalf-client.toml";
 
         ForgeConfigSpec configSpecification = buildConfig();
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, configSpecification);
-        loadConfigFile(FMLPaths.CONFIGDIR.get().resolve(configFileName).toString(), configSpecification);
+        loadConfigFile(FMLPaths.CONFIGDIR.get().resolve(CONFIG_FILE_NAME).toString(), configSpecification);
     }
 
     /**

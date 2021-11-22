@@ -12,7 +12,6 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-// TODO Offset player nametags.
 /* TODO Check this function in PlayerEntity.
 for(LivingEntity livingentity : this.world.getEntitiesWithinAABB(LivingEntity.class, targetEntity.getBoundingBox().grow(1.0D, 0.25D, 1.0D))) {
     if (livingentity != this && livingentity != targetEntity && !this.isOnSameTeam(livingentity) && (!(livingentity instanceof ArmorStandEntity) || !((ArmorStandEntity)livingentity).hasMarker()) && this.getDistanceSq(livingentity) < 9.0D) {
@@ -21,15 +20,18 @@ for(LivingEntity livingentity : this.world.getEntitiesWithinAABB(LivingEntity.cl
     }
 }
 */
-// TODO Look more into LookAtGoal.
-// TODO Have passive mobs follow bait towards a player's offset position.
-// TODO Firework crossbows need to be offset.
+// TODO Enderman.StareGoal.
+// TODO Enderman.FindPlayerGoal.
+// TODO Bow sounds.
 
-// TODO (MAYBE) Combine shared code in ModifiedBipedModel and ModifiedPlayerModel.
-// TODO Clean up logo.
+// TODO (MAYBE MAYBE NOT) Expose an API for other mods to interact with this one.
 
-// TODO (MAYBE) Expose an API for other mods to interact with this one.
-
+/**
+ * This mod splits apart the player, freeing the torso from the legs.
+ *
+ * @see <a href="https://github.com/ona-li-toki-e-jan-Epiphany-tawa-mi/ISawedThisPlayerInHalf">Github repo.</a>
+ * @see <a href="https://www.curseforge.com/minecraft/mc-mods/i-sawed-this-player-in-half">Curseforge page.</a>
+ */
 @Mod("swdthsplyrnhlf")
 public class ISawedThisPlayerInHalf {
     public static final String MOD_ID = "swdthsplyrnhlf";
@@ -44,7 +46,9 @@ public class ISawedThisPlayerInHalf {
 
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
-    public static void onClientSetup(final FMLClientSetupEvent fmlClientSetupEvent) {
+    public static void onClientSetup(FMLClientSetupEvent fmlClientSetupEvent) {
+        MinecraftForge.EVENT_BUS.register(OffsetsCommand.class);
+
         Config.enable();
         RenderingOffsetter.replacePlayerRenderers();
     }

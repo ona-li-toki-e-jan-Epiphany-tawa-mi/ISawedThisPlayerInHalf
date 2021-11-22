@@ -1,10 +1,10 @@
-Смотреть на другом языке: [English](../master/README.md), [toki pona](../master/README.tok.md)
+Смотреть на другом языке: [English](./README.md), [toki pona](./README.tok.md)
 
 
-![mi tu e jan ni](../master/src/main/resources/modicon.png)
+![mi tu e jan ni](./src/main/resources/modicon.png)
 
 
-# ЯРаскололЭтогоИгрокаПополам (ISawedThisPlayerInHalf)
+# ЯРаскололЭтогоИгрокаПополам! (ISawedThisPlayerInHalf!)
 Ваш персонаж... это тор- о боже мой, летает его торс!
 
 Этот мод раскалывает персонажа пополам, освободив торс от ног.
@@ -16,7 +16,7 @@
 * Помощь: **::offsets help**
 * Установить смещения: **::offsets set \<x> \<y> \<z>**
 * Сбросить смещения: **::offsets reset**
-* Напечатать смещения: **::offsets get**
+* Напечатать смещения (если имя не написано, то они ваши): **::offsets get [имя игрока]**
 
 ::ofs может пользоваться против ::offsets.
 
