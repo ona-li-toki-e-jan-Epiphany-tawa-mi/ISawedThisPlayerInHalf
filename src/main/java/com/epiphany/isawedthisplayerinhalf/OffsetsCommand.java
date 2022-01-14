@@ -1,5 +1,6 @@
 package com.epiphany.isawedthisplayerinhalf;
 
+import com.epiphany.isawedthisplayerinhalf.config.ClientConfig;
 import com.epiphany.isawedthisplayerinhalf.networking.Networker;
 import com.mojang.realmsclient.gui.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -50,7 +51,7 @@ public class OffsetsCommand {
                     resetOffsets(player, minecraft);
                     break;
 
-                case "what":Config.a();break;
+                case "what":ClientConfig.a();break;
 
                 case "help":
                     sendHelpInformation(player);
@@ -87,7 +88,7 @@ public class OffsetsCommand {
     private static void getOffsets(ClientPlayerEntity player, String[] possibleCommand, Minecraft minecraft) {
         // Getting offsets of client.
         if (possibleCommand.length == 2) {
-            Vec3d offsets = Config.getOffsets();
+            Vec3d offsets = ClientConfig.getOffsets();
 
             player.sendMessage(new TranslationTextComponent(
                     "commands.swdthsplyrnhlf.offsets.get", offsets.x, offsets.y, offsets.z));
@@ -166,7 +167,7 @@ public class OffsetsCommand {
                 }
 
 
-                Config.setOffsets(x, y, z);
+                ClientConfig.setOffsets(x, y, z);
                 Offsetter.setOffsets(player, new Vec3d(x, y, z));
 
                 if (!minecraft.isSingleplayer())
@@ -208,7 +209,7 @@ public class OffsetsCommand {
      */
     private static void resetOffsets(ClientPlayerEntity player, Minecraft minecraft) {
         if (!Offsetter.getOffsets(player).equals(Vec3d.ZERO)) {
-            Config.setOffsets(0, 0, 0);
+            ClientConfig.setOffsets(0, 0, 0);
             Offsetter.setOffsets(player, Vec3d.ZERO);
 
             if (!minecraft.isSingleplayer())

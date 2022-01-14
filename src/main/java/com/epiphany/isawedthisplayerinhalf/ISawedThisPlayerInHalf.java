@@ -1,5 +1,7 @@
 package com.epiphany.isawedthisplayerinhalf;
 
+import com.epiphany.isawedthisplayerinhalf.config.ClientConfig;
+import com.epiphany.isawedthisplayerinhalf.config.ServerConfig;
 import com.epiphany.isawedthisplayerinhalf.networking.Networker;
 import com.epiphany.isawedthisplayerinhalf.rendering.RenderingOffsetter;
 import net.minecraftforge.api.distmarker.Dist;
@@ -8,6 +10,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -49,7 +52,14 @@ public class ISawedThisPlayerInHalf {
     public static void onClientSetup(FMLClientSetupEvent fmlClientSetupEvent) {
         MinecraftForge.EVENT_BUS.register(OffsetsCommand.class);
 
-        Config.enable();
+        ClientConfig.enable();
         RenderingOffsetter.replacePlayerRenderers();
+    }
+
+    @OnlyIn(Dist.DEDICATED_SERVER)
+    @SubscribeEvent
+    public static void onServerSetup(FMLDedicatedServerSetupEvent fmlDedicatedServerSetupEvent) {
+        ServerConfig.enable();
+        ServerTranslations.enable();
     }
 }

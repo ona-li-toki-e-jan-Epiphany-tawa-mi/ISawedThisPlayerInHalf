@@ -1,5 +1,6 @@
 package com.epiphany.isawedthisplayerinhalf;
 
+import com.epiphany.isawedthisplayerinhalf.config.ClientConfig;
 import com.epiphany.isawedthisplayerinhalf.networking.Networker;
 import com.epiphany.isawedthisplayerinhalf.rendering.RenderingOffsetter;
 import net.minecraft.client.Minecraft;
@@ -182,7 +183,7 @@ public class Offsetter {
     public static void onPostHandleJoinGame() {
         Minecraft minecraft = Minecraft.getInstance();
         ClientPlayerEntity player = minecraft.player;
-        Vec3d offsets = Config.getOffsets();
+        Vec3d offsets = ClientConfig.getOffsets();
 
         setOffsets(player, offsets);
 
