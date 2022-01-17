@@ -6,13 +6,14 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
 
 // TODO (MAYBE) Add server config that lets admins control kicking and banning when invalid offsets are sent.
-// TODO Internalize and translate server messages.
 
 /**
  * Server configuration file and data.
  */
 @OnlyIn(Dist.DEDICATED_SERVER)
 public class ServerConfig {
+    public static final Locale DEFAULT_LOCALE = Locale.EN_US;
+
     private static ForgeConfigSpec.EnumValue<Locale> serverLocale;
 
     public static void enable() {

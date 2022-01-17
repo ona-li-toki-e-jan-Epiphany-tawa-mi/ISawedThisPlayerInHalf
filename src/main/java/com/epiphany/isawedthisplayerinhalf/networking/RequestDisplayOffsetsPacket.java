@@ -2,6 +2,7 @@ package com.epiphany.isawedthisplayerinhalf.networking;
 
 import com.epiphany.isawedthisplayerinhalf.ISawedThisPlayerInHalf;
 import com.epiphany.isawedthisplayerinhalf.Offsetter;
+import com.epiphany.isawedthisplayerinhalf.ServerTranslations;
 import io.netty.handler.codec.DecoderException;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -61,8 +62,8 @@ public class RequestDisplayOffsetsPacket implements IPacket {
                         "commands.swdthsplyrnhlf.errors.unknown_player")
                         .applyTextStyle(TextFormatting.RED));
 
-                ISawedThisPlayerInHalf.LOGGER.log(Level.WARN, "Player " + sender.getName().getString() + " attempted to request offsets with an invalid player name (" +
-                        this.playerName + ")! - will not process!");
+                ISawedThisPlayerInHalf.LOGGER.log(Level.WARN, ServerTranslations.translateAndFormatKey(
+                        "network.error.request_display_offsets.invalid_name"), sender.getName().getString(), this.playerName);
                 return;
             }
 

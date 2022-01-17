@@ -18,19 +18,32 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+// TODO Add information about server-side translations to README.
+
 /**
  * Handles the loading and localization of server-side translations.
  */
 @OnlyIn(Dist.DEDICATED_SERVER)
 public class ServerTranslations {
     private static final Pattern NUMERIC_VARIABLE_PATTERN = Pattern.compile("%(\\d+\\$)?[\\d\\.]*[df]");
-    private static final String SERVER_LANG_DIRECTORY = "/assets/swdthsplyrnhlf/lang/";
+    private static final String SERVER_LANG_DIRECTORY = "/assets/swdthsplyrnhlf/serverLang/";
 
     private static final Map<String, String> localeMapping = new HashMap<>();
 
     public static void enable() {
         Locale serverLocale = ServerConfig.getServerLocale();
-        String localeFilePath = SERVER_LANG_DIRECTORY + serverLocale.localeFilename + ".json";
+
+        if (serverLocale != ServerConfig.DEFAULT_LOCALE)
+            loadLocaleData(ServerConfig.DEFAULT_LOCALE);
+        loadLocaleData(serverLocale);
+    }
+
+    /**
+     * Loads local localization mappings into the locale map from the sever language directory.
+     * @param locale The locale to load.
+     */
+    private static void loadLocaleData(Locale locale) {
+        String localeFilePath = SERVER_LANG_DIRECTORY + locale.localeFilename + ".json";
 
         // Copied from LanguageMap.
         // Loads data for selected locale from file.
@@ -51,6 +64,8 @@ public class ServerTranslations {
         }
     }
 
+
+
     /**
      * Translates the key into the corresponding translation for the current locale.
      *
@@ -61,5 +76,18 @@ public class ServerTranslations {
     public static String translateKey(String key) {
         String translation = localeMapping.get(key);
         return translation != null ? translation : key;
+    }
+
+    /**
+     * Translates the key into the corresponding translation for the current locale.
+     * Formats the resulting string using {@link String#format}, passing along the given arguments to it.
+     *
+     * @param key The key to the translation.
+     * @param args The arguments for String.format().
+     *
+     * @return The formatted translation for the current locale.
+     */
+    public static String translateAndFormatKey(String key, Object... args) {
+        return String.format(translateKey(key), args);
     }
 }

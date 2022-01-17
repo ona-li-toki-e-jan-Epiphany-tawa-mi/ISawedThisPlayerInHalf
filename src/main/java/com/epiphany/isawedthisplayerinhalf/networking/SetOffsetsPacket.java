@@ -2,6 +2,7 @@ package com.epiphany.isawedthisplayerinhalf.networking;
 
 import com.epiphany.isawedthisplayerinhalf.ISawedThisPlayerInHalf;
 import com.epiphany.isawedthisplayerinhalf.Offsetter;
+import com.epiphany.isawedthisplayerinhalf.ServerTranslations;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
@@ -95,15 +96,18 @@ public class SetOffsetsPacket implements IPacket {
 
                     // Security.
                     if (!Double.isFinite(this.xOffset) || !Double.isFinite(this.yOffset) || !Double.isFinite(this.zOffset)) {
-                        ISawedThisPlayerInHalf.LOGGER.log(Level.WARN, "Player " + sender.getName().getString() + " attempted to send invalid offsets! - will not store nor send to clients!");
+                        ISawedThisPlayerInHalf.LOGGER.log(Level.WARN, ServerTranslations.translateAndFormatKey(
+                                "network.error.set_offsets.invalid_offsets", sender.getName().getString()));
                         return MAGIC_BOOLEAN;
                     }
 
+                    // TODO Is id check necessary? Could just use true id and ignore sent one maybe.
                     int truePlayerID = sender.getEntityId();
 
                     if (truePlayerID != this.playerID) {
                         this.playerID = truePlayerID;
-                        ISawedThisPlayerInHalf.LOGGER.log(Level.WARN, "Player " + sender.getName().getString() + " attempted to send offsets using an invalid id! - will use true id instead!");
+                        ISawedThisPlayerInHalf.LOGGER.log(Level.WARN, ServerTranslations.translateAndFormatKey(
+                                "network.error.set_offsets.invalid_id", sender.getName().getString()));
                     }
 
 
