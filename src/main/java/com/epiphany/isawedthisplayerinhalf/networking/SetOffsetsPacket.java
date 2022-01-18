@@ -101,14 +101,7 @@ public class SetOffsetsPacket implements IPacket {
                         return MAGIC_BOOLEAN;
                     }
 
-                    // TODO Is id check necessary? Could just use true id and ignore sent one maybe.
-                    int truePlayerID = sender.getEntityId();
-
-                    if (truePlayerID != this.playerID) {
-                        this.playerID = truePlayerID;
-                        ISawedThisPlayerInHalf.LOGGER.log(Level.WARN, ServerTranslations.translateAndFormatKey(
-                                "network.error.set_offsets.invalid_id", sender.getName().getString()));
-                    }
+                    this.playerID = sender.getEntityId();
 
 
                     Offsetter.setOffsets(sender, new Vec3d(this.xOffset, this.yOffset, this.zOffset));

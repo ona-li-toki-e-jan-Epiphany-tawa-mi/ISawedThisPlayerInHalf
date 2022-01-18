@@ -1,5 +1,4 @@
 {
   "network.error.request_display_offsets.invalid_name": "tenpo pini la jan %s li lukin kama jo e ma ante pi jan ante kepeken nimi jan ike (%s)! - li pana ala!",
-  "network.error.set_offsets.invalid_offsets": "tenpo pini la jan %s li lukin pana e ma ante ike! - li poki ala li pana ala tawa jan ante!",
-  "network.error.set_offsets.invalid_id": "tenpo pini la jan %s li lukin pana e ma ante kepeken nanpa jan ike! - li kepeken e nanpa jan ona pi sona pona!"
+  "network.error.set_offsets.invalid_offsets": "tenpo pini la jan %s li lukin pana e ma ante ike! - li poki ala li pana ala tawa jan ante!"
 }

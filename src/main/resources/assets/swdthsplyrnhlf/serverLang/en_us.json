@@ -1,5 +1,4 @@
 {
   "network.error.request_display_offsets.invalid_name": "Player %s attempted to request offsets with an invalid player name (%s)! - will not process!",
-  "network.error.set_offsets.invalid_offsets": "Player %s attempted to send invalid offsets! - will not store nor send to clients!",
-  "network.error.set_offsets.invalid_id": "Player %s attempted to send offsets using an invalid id! - will use true id instead!"
+  "network.error.set_offsets.invalid_offsets": "Player %s attempted to send invalid offsets! - will not store nor send to clients!"
 }
