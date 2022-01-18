@@ -18,13 +18,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-// TODO Add information about server-side translations to README.
-
 /**
  * Handles the loading and localization of server-side translations.
  */
 @OnlyIn(Dist.DEDICATED_SERVER)
 public class ServerTranslations {
+    // Copied from LanguageMap.
     private static final Pattern NUMERIC_VARIABLE_PATTERN = Pattern.compile("%(\\d+\\$)?[\\d\\.]*[df]");
     private static final String SERVER_LANG_DIRECTORY = "/assets/swdthsplyrnhlf/serverLang/";
 

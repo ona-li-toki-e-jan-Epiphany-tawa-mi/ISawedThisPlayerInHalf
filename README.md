@@ -27,6 +27,7 @@ The mod must also be on the server for multiplayer-compatibility.
 
 I would **_not_** recommend using this on a server that does not have the mod.
 
+Server owners can change which language that ISawedThisPlayerInHalf! displays information in using the config file (in config/isawedthisplayerinhalf-server.toml). 
 
 ## Links
 [CurseForge Project Page](https://www.curseforge.com/minecraft/mc-mods/i-sawed-this-player-in-half "I Sawed This Player In Half! Project Page on CurseForge")
