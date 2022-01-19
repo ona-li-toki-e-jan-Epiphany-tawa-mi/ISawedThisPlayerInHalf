@@ -19,14 +19,13 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 @OnlyIn(Dist.CLIENT)
 public class OffsetsCommand {
-    // TODO Improve parsing.
     /**
      * In-game config options implemented via chat "commands."
      */
     @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = true)
     public static void onPlayerChat(ClientChatEvent clientChatEvent) {
         String originalMessage = clientChatEvent.getOriginalMessage();
-        String[] possibleCommand = originalMessage.split(" ");
+        String[] possibleCommand = originalMessage.split(" +");
 
         String possibleCommandStart = possibleCommand[0].toLowerCase();
         if (!"::offsets".equals(possibleCommandStart) && !"::ofs".equals(possibleCommandStart))
