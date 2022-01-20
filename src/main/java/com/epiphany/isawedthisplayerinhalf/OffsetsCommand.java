@@ -32,8 +32,10 @@ public class OffsetsCommand {
             return;
 
         clientChatEvent.setCanceled(true);
-
+        // Ensures that the command is put into the player's history for when they press the up arrow to recall it.
         Minecraft minecraft = Minecraft.getInstance();
+        minecraft.ingameGUI.getChatGUI().addToSentMessages(originalMessage);
+
         ClientPlayerEntity player = minecraft.player;
 
         if (possibleCommand.length >= 2) {
