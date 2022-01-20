@@ -2364,6 +2364,73 @@ function initializeCoreMod() {
             }
         },
 
+        /**
+         * Offsets the position of the sound made by firing a bow.
+         */
+        "BowItem": {
+            "target": {
+                "type": "CLASS",
+                "name": "net.minecraft.item.BowItem"
+            },
+
+            "transformer": function(classNode) {
+                var classPath = "net.minecraft.item.BowItem"
+
+                var onPlayerStoppedUsing = findObfuscatedMethodWithSignature(classNode, "onPlayerStoppedUsing", "func_77615_a",
+                    "(Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/LivingEntity;I)V")
+                var functionName = "function onPlayerStoppedUsing"
+
+                if (onPlayerStoppedUsing !== null) {
+                    var oldInstructions = onPlayerStoppedUsing.instructions
+
+                    try {
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/world/World", "playSound", "func_184148_a",
+                                    "(Lnet/minecraft/entity/player/PlayerEntity;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V")) {
+                                var modifiedPlaySound = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                modifiedPlaySound.add(skipOriginal)
+                                modifiedPlaySound.add(new VarInsnNode(Opcodes.ALOAD, 3)) // entityLiving Lnet/minecraft/entity/LivingEntity;
+                                modifiedPlaySound.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "modifiedPlaySound",
+                                    "(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FFLnet/minecraft/entity/LivingEntity;)V",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/world/World.playSound (Lnet/minecraft/entity/player/PlayerEntity;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V
+                                oldInstructions.insert(instruction, modifiedPlaySound)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(functionName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                return classNode
+            }
+        },
+
 
         /**
          * Allows players to break far away blocks.

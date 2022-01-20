@@ -63,7 +63,7 @@ public class BytecodeHelper {
     // LookController.
     private static final Method METHOD_getEyePosition;
 
-    private static final Random RANDOM;
+    private static final Random RANDOM = new Random();
 
     static {
         // LookAtGoal.
@@ -134,9 +134,6 @@ public class BytecodeHelper {
 
         if (METHOD_getEyePosition == null)
             throw new NullPointerException("Unable to find field 'METHOD_getEyePosition' under names 'getEyePosition' and 'func_220676_b'");
-
-
-        RANDOM = new Random();
     }
 
 
