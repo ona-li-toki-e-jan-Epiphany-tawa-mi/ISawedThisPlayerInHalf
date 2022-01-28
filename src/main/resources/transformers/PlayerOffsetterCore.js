@@ -1634,6 +1634,117 @@ function initializeCoreMod() {
             }
         },
 
+        /**
+         * Modifies endermen's StareGoal so that they randomly switch between staring at the upper and lower bodies when being stared at.
+         */
+        "EndermanEntity$StareGoal": {
+            "target": {
+                "type": "CLASS",
+                "name": "net.minecraft.entity.monster.EndermanEntity$StareGoal"
+            },
+
+            "transformer": function(classNode) {
+                var classPath = "net.minecraft.entity.monster.EndermanEntity$StareGoal"
+
+                // Fixes range check to account for both bodies.
+                var shouldExecute = findObfuscatedMethodWithSignature(classNode, "shouldExecute", "func_75250_a", "()Z")
+                var functionName = "function shouldExecute"
+
+                if (shouldExecute !== null) {
+                    try {
+                        var oldInstructions = shouldExecute.instructions
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            if (checkObfuscatedMethodInsn(oldInstructions.get(i), Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/LivingEntity", "getDistanceSq", "func_70068_e",
+                                    "(Lnet/minecraft/entity/Entity;)D")) {
+                                var redoGetDistanceSq = new InsnList()
+
+                                redoGetDistanceSq.add(new VarInsnNode(Opcodes.ALOAD, 0)) // this Lnet/minecraft/entity/monster/EndermanEntity$StareGoal;
+                                redoGetDistanceSq.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "redoShouldExecuteRangeCheck",
+                                    "(DLjava/lang/Object;)D",
+                                    false
+                                ))
+
+                                // ...
+                                // INVOKEVIRTUAL net/minecraft/entity/Entity.getDistanceSq (Lnet/minecraft/entity/Entity;)D
+                                oldInstructions.insert(oldInstructions.get(i), redoGetDistanceSq)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(functionName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                // Changes target position for staring at random between bodies.
+                var tick = findObfuscatedMethodWithSignature(classNode, "tick", "func_75246_d", "()V")
+                functionName = "function tick"
+
+                if (tick !== null) {
+                    try {
+                        var oldInstructions = tick.instructions
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/ai/controller/LookController",
+                                    "setLookPosition", "func_220679_a", "(DDD)V")) {
+                                var offsetSetLookPosition = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                offsetSetLookPosition.add(skipOriginal)
+                                offsetSetLookPosition.add(new VarInsnNode(Opcodes.ALOAD, 0)) // this Lnet/minecraft/entity/monster/EndermanEntity$StareGoal;
+                                offsetSetLookPosition.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "applyLookAtOffsetsRandomly",
+                                    "(Lnet/minecraft/entity/ai/controller/LookController;DDDLjava/lang/Object;)V",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/entity/ai/controller/LookController.setLookPosition (DDD)V
+                                oldInstructions.insert(instruction, offsetSetLookPosition)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(functionName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                return classNode
+            }
+        },
+
 
         /**
          * Allows players to keep using containers relative to their offsets.

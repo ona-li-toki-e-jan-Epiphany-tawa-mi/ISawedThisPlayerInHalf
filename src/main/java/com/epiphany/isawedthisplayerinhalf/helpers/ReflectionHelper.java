@@ -1,6 +1,7 @@
 package com.epiphany.isawedthisplayerinhalf.helpers;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -155,23 +156,31 @@ public class ReflectionHelper {
 
 
     /**
-     * Sets fields and methods to be accessible.
+     * Gets the class under the given fully-qualified name
      *
-     * @param object The field or method to make accessible.
+     * @param className The fully-qualified name of the desired class.
+     *
+     * @return The desired class, or null, if nothing is found.
      */
-    private static void makeAccessible(@Nullable Object object) {
-        if (object != null)
-            if (object instanceof Method) {
-                Method method = (Method) object;
+    public static Class<?> classForNameOrNull(String className) {
+        try {
+            return Class.forName(className);
 
-                if (!method.isAccessible())
-                    method.setAccessible(true);
+        } catch (ClassNotFoundException classNotFoundException) {
+            classNotFoundException.printStackTrace();
+            return null;
+        }
+    }
 
-            } else if (object instanceof Field) {
-                Field field = (Field) object;
 
-                if (!field.isAccessible())
-                    field.setAccessible(true);
-            }
+
+    /**
+     * Sets fields, methods, and any other object with accessibility restrictions to be accessible.
+     *
+     * @param accessibleObject The object to make accessible.
+     */
+    private static void makeAccessible(@Nullable AccessibleObject accessibleObject) {
+        if (accessibleObject != null)
+            accessibleObject.setAccessible(true);
     }
 }

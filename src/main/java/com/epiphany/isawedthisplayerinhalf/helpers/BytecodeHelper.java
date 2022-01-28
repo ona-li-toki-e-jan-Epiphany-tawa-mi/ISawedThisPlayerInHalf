@@ -14,6 +14,7 @@ import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.controller.LookController;
 import net.minecraft.entity.ai.goal.LookAtGoal;
 import net.minecraft.entity.ai.goal.TemptGoal;
+import net.minecraft.entity.monster.EndermanEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.pathfinding.Path;
@@ -41,6 +42,8 @@ import java.util.function.Predicate;
  */
 @SuppressWarnings("unused")
 public class BytecodeHelper {
+    // EndermanEntity.
+    private static final Field FIELD_enderman;
     // LookAtGoal.
     private static final Field FIELD_entity;
     private static final Field FIELD_closestEntity;
@@ -66,6 +69,17 @@ public class BytecodeHelper {
     private static final Random RANDOM = new Random();
 
     static {
+        // EndermanEntity.
+        Class<?> stareGoal = ReflectionHelper.classForNameOrNull("net.minecraft.entity.monster.EndermanEntity$StareGoal");
+
+        if (stareGoal == null)
+            throw new NullPointerException("Unable to find class 'net.minecraft.entity.monster.EndermanEntity$StareGoal'");
+
+        FIELD_enderman = ReflectionHelper.getDeclaredFieldOrNull(stareGoal, "enderman", "field_220835_a");
+
+        if (FIELD_enderman == null)
+            throw new NullPointerException("Unable to find field 'FIELD_enderman' under names 'enderman' and 'field_220835_a'");
+
         // LookAtGoal.
         FIELD_entity = ReflectionHelper.getDeclaredFieldOrNull(LookAtGoal.class, "entity", "field_75332_b");
         FIELD_closestEntity = ReflectionHelper.getDeclaredFieldOrNull(LookAtGoal.class, "closestEntity", "field_75334_a");
@@ -551,6 +565,29 @@ public class BytecodeHelper {
     }
 
     /**
+     * Randomly switches the target location of an EndermanEntity.StareGoal between the target's original and offset bodies.
+     *
+     * @param lookController The enderman's look controller.
+     * @param x The targeted x position.
+     * @param eyePosition The target's eye y position.
+     * @param z The targeted z position.
+     * @param stareGoal The enderman's StareGoal. Must be an instance of StareGoal.
+     */
+    public static void applyLookAtOffsetsRandomly(LookController lookController, double x, double eyePosition, double z, Object stareGoal) {
+        EndermanEntity enderman = (EndermanEntity) ReflectionHelper.getValueOrDefault(FIELD_enderman, stareGoal, null);
+        if (enderman == null) throw new NullPointerException("Unable to get value from 'FIELD_enderman'");
+        LivingEntity attackTarget = enderman.getAttackTarget();
+        Vec3d offsets = Offsetter.getOffsets(attackTarget);
+
+        if (offsets.equals(Vec3d.ZERO) || RANDOM.nextBoolean()) {
+            lookController.setLookPosition(x, eyePosition, z);
+            return;
+        }
+
+        lookController.setLookPosition(x + offsets.x, eyePosition + offsets.y, z + offsets.z);
+    }
+
+    /**
      * Offsets the target position of a TemptGoal.
      *
      * @param temptGoal The tempt goal to offset the target position of.
@@ -706,6 +743,24 @@ public class BytecodeHelper {
         }
 
         return originalDistanceSq;
+    }
+
+    /**
+     * Redoes the range check for an enderman's StareGoal accounting for the target's offsets.
+     *
+     * @param originalDistanceSq The original distanced squared to the target.
+     * @param stareGoal The enderman's StareGoal. Must be an instance of StareGoal.
+     */
+    public static double redoShouldExecuteRangeCheck(double originalDistanceSq, Object stareGoal) {
+        EndermanEntity enderman = (EndermanEntity) ReflectionHelper.getValueOrDefault(FIELD_enderman, stareGoal, null);
+        if (enderman == null) throw new NullPointerException("Unable to get value from 'FIELD_enderman'");
+        LivingEntity attackTarget = enderman.getAttackTarget();
+        Vec3d offsets = Offsetter.getOffsets(attackTarget);
+
+        if (offsets.equals(Vec3d.ZERO))
+            return originalDistanceSq;
+
+        return Math.min(originalDistanceSq, enderman.getDistanceSq(attackTarget.getPositionVec().add(offsets)));
     }
 
     /**
