@@ -228,6 +228,17 @@ public class BytecodeHelper {
     }
 
     /**
+     * Either returns the LivingEntity's offsets or the zero vector, randomly.
+     *
+     * @param livingEntity The LivingEntity to possibly return the offsets of.
+     *
+     * @return Either the LivingEntity's offsets or the zero vector.
+     */
+    public static Vec3d getOffsetsRandomly(LivingEntity livingEntity) {
+        return RANDOM.nextBoolean() ? Offsetter.getOffsets(livingEntity) : Vec3d.ZERO;
+    }
+
+    /**
      * Gets the offsets of the angler of the fishing bobber.
      *
      * @param fishingBobberEntity The fishing bobber to get the angler with which to get the offsets from.

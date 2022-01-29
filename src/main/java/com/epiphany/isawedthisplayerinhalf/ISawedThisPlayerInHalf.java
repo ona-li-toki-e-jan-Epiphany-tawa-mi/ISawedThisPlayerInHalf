@@ -23,7 +23,6 @@ for(LivingEntity livingentity : this.world.getEntitiesWithinAABB(LivingEntity.cl
     }
 }
 */
-// TODO Enderman.StareGoal.
 // TODO Enderman.FindPlayerGoal.
 // TODO Add more debug information, more logging.
 

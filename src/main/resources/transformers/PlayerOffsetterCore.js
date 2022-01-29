@@ -399,6 +399,110 @@ function initializeCoreMod() {
         },
 
         /**
+         * Forces mobs in certain instances like skeletons shooting to look randomly between the player's upper and lower bodies to simulate confusion.
+         */
+        "MobEntity": {
+            "target": {
+                "type": "CLASS",
+                "name": "net.minecraft.entity.MobEntity"
+            },
+
+            "transformer": function(classNode) {
+                var classPath = "net.minecraft.entity.MobEntity"
+
+                var faceEntity = findObfuscatedMethodWithSignature(classNode, "faceEntity", "func_70625_a",
+                    "(Lnet/minecraft/entity/Entity;FF)V")
+                var functionName = "function faceEntity"
+
+                if (faceEntity !== null) {
+                    try {
+                        var oldInstructions = faceEntity.instructions
+                        success = false
+
+                        for (var i = 0; i <= oldInstructions.size() - 6; i++) {
+                            if (checkVarInsn(oldInstructions.get(i), Opcodes.ALOAD, 10) && checkObfuscatedMethodInsn(oldInstructions.get(i+1), Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/LivingEntity", "getPosYEye", "func_226280_cw_", "()D")
+                                    && checkVarInsn(oldInstructions.get(i+2), Opcodes.ALOAD, 0) && checkObfuscatedMethodInsn(oldInstructions.get(i+3), Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/MobEntity", "getPosYEye", "func_226280_cw_", "()D")
+                                    && checkInsn(oldInstructions.get(i+4), Opcodes.DSUB) && checkVarInsn(oldInstructions.get(i+5), Opcodes.DSTORE, 8)) {
+                                var offsetFaceEntity = new InsnList()
+
+
+                                offsetFaceEntity.add(new VarInsnNode(Opcodes.ALOAD, 10)) // livingentity Lnet/minecraft/entity/LivingEntity;
+                                offsetFaceEntity.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "getOffsetsRandomly",
+                                    "(Lnet/minecraft/entity/LivingEntity;)Lnet/minecraft/util/math/Vec3d;",
+                                    false
+                                ))
+
+                                offsetFaceEntity.add(new InsnNode(Opcodes.DUP))
+                                offsetFaceEntity.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "getVectorX",
+                                    "(Lnet/minecraft/util/math/Vec3d;)D",
+                                    false
+                                ))
+                                offsetFaceEntity.add(new VarInsnNode(Opcodes.DLOAD, 4)) // d0 D
+                                offsetFaceEntity.add(new InsnNode(Opcodes.DADD))
+                                offsetFaceEntity.add(new VarInsnNode(Opcodes.DSTORE, 4)) // d0 D
+
+                                offsetFaceEntity.add(new InsnNode(Opcodes.DUP))
+                                offsetFaceEntity.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "getVectorY",
+                                    "(Lnet/minecraft/util/math/Vec3d;)D",
+                                    false
+                                ))
+                                offsetFaceEntity.add(new VarInsnNode(Opcodes.DLOAD, 8)) // d1 D
+                                offsetFaceEntity.add(new InsnNode(Opcodes.DADD))
+                                offsetFaceEntity.add(new VarInsnNode(Opcodes.DSTORE, 8)) // d1 D
+
+                                offsetFaceEntity.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "getVectorZ",
+                                    "(Lnet/minecraft/util/math/Vec3d;)D",
+                                    false
+                                ))
+                                offsetFaceEntity.add(new VarInsnNode(Opcodes.DLOAD, 6)) // d2 D
+                                offsetFaceEntity.add(new InsnNode(Opcodes.DADD))
+                                offsetFaceEntity.add(new VarInsnNode(Opcodes.DSTORE, 6)) // d2 D
+
+
+                                // ...
+                                // ALOAD 10
+                                // INVOKEVIRTUAL net/minecraft/entity/LivingEntity.getPosYEye ()D
+                                // ALOAD 0
+                                // INVOKEVIRTUAL net/minecraft/entity/MobEntity.getPosYEye ()D
+                                // DSUB
+                                // DSTORE 8
+                                oldInstructions.insert(oldInstructions.get(i+5), offsetFaceEntity)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(functionName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                return classNode
+            }
+        },
+
+        /**
          * Modifies the home position and the position they are pulled to for leashed animals to account for offsets.
          * Modifies the distance calculations for when to change the movement type and to break the leash.
          */
