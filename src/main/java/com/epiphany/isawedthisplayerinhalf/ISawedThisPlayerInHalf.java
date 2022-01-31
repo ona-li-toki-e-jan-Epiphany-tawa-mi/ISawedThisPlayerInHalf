@@ -23,7 +23,7 @@ for(LivingEntity livingentity : this.world.getEntitiesWithinAABB(LivingEntity.cl
     }
 }
 */
-// TODO Enderman.FindPlayerGoal.
+// TODO TargetGoal.
 // TODO Add more debug information, more logging.
 
 // TODO (MAYBE MAYBE NOT) Expose an API for other mods to interact with this one.

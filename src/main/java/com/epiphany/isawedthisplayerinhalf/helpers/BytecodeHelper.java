@@ -330,9 +330,27 @@ public class BytecodeHelper {
      * @return The player closest to the target, or null.
      */
     public static PlayerEntity modifiedGetClosestPlayerNOOF(World world, EntityPredicate predicate, LivingEntity target, double targetX, double targetY, double targetZ) {
-        return modifiedGetClosestPlayer(world, predicate, target, (livingTarget, playerEntity) -> {
-            return Math.min(playerEntity.getDistanceSq(targetX, targetY, targetZ), modifiedGetDistanceSq(playerEntity, targetX, targetY, targetZ));
-        });
+        return modifiedGetClosestPlayer(world, predicate, target, (livingTarget, playerEntity) ->
+            Math.min(playerEntity.getDistanceSq(targetX, targetY, targetZ), modifiedGetDistanceSq(playerEntity, targetX, targetY, targetZ))
+        );
+    }
+
+    /**
+     * Gets the player that is closest to the target entity, or null, if nothing is found.
+     * Corrected for offsets, checking both the player's normal and offset positions.
+     *
+     * @see net.minecraft.world.IEntityReader#getClosestPlayer(EntityPredicate, LivingEntity).
+     *
+     * @param world The world the target is in.
+     * @param predicate A predicate to control which players can be targeted.
+     * @param target The target entity.
+     *
+     * @return The player closest to the target, or null.
+     */
+    public static PlayerEntity modifiedGetClosestPlayerNOOF(World world, EntityPredicate predicate, LivingEntity target) {
+        return modifiedGetClosestPlayer(world, predicate, target, (livingTarget, playerEntity) ->
+            Math.min(playerEntity.getDistanceSq(target), modifiedGetDistanceSq(target, playerEntity))
+        );
     }
 
     /**
@@ -371,7 +389,7 @@ public class BytecodeHelper {
      *
      * @param predicate A predicate to control whether the entity can be targeted.
      * @param attacker The entity attempting to target.
-     * @param target The player being targeted.
+     * @param target The entity being targeted.
      * @param distanceSqFunction A function that accepts the attacker and target (the one with offsets) and calculates the distance squared between them.
      *      Whether to account for those offsets will depend on application.
      *
@@ -421,6 +439,25 @@ public class BytecodeHelper {
                 return true;
             }
         }
+    }
+
+    /**
+     * Gets whether a player can be targeted with the given predicate, accounting for offsets if the target is a player.
+     *
+     * @param predicate A predicate to control whether the entity can be targeted.
+     * @param attacker The entity attempting to target.
+     * @param target The entity being targeted.
+     *
+     * @return Whether the target can be targeted.
+     */
+    public static boolean modifiedCanTargetNOOF(EntityPredicate predicate, LivingEntity attacker, LivingEntity target) {
+        if (target instanceof PlayerEntity) {
+            return modifiedCanTarget(predicate, attacker, (PlayerEntity) target, (livingTarget, playerEntity) ->
+                    Math.min(livingTarget.getDistanceSq(livingTarget), modifiedGetDistanceSq(livingTarget, playerEntity))
+            );
+
+        } else
+            return predicate.canTarget(attacker, target);
     }
 
 

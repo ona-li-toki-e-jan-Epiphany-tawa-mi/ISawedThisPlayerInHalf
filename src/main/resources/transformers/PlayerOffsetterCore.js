@@ -1849,6 +1849,120 @@ function initializeCoreMod() {
             }
         },
 
+        /**
+         * Makes the endermen's find player AI-goal see and account for player offsets.
+         */
+        "EndermanEntity$FindPlayerGoal": {
+            "target": {
+                "type": "CLASS",
+                "name": "net.minecraft.entity.monster.EndermanEntity$FindPlayerGoal"
+            },
+
+            "transformer": function(classNode) {
+                var classPath = "net.minecraft.entity.monster.EndermanEntity$FindPlayerGoal"
+
+                // Fixes range check to account for both bodies.
+                var shouldExecute = findObfuscatedMethodWithSignature(classNode, "shouldExecute", "func_75250_a", "()Z")
+                var functionName = "function shouldExecute"
+
+                if (shouldExecute !== null) {
+                    try {
+                        var oldInstructions = shouldExecute.instructions
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/world/World", "getClosestPlayer", "func_217370_a",
+                                    "(Lnet/minecraft/entity/EntityPredicate;Lnet/minecraft/entity/LivingEntity;)Lnet/minecraft/entity/player/PlayerEntity;")) {
+                                var redoGetClosestPlayer = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                redoGetClosestPlayer.add(skipOriginal)
+                                redoGetClosestPlayer.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "modifiedGetClosestPlayerNOOF",
+                                    "(Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityPredicate;Lnet/minecraft/entity/LivingEntity;)Lnet/minecraft/entity/player/PlayerEntity;",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/world/World.getClosestPlayer (Lnet/minecraft/entity/EntityPredicate;Lnet/minecraft/entity/LivingEntity;)Lnet/minecraft/entity/player/PlayerEntity;
+                                oldInstructions.insert(instruction, redoGetClosestPlayer)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(functionName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                // Fixes canTarget check so that enderman can see upper body.
+                var shouldContinueExecuting = findObfuscatedMethodWithSignature(classNode, "shouldContinueExecuting", "func_75253_b", "()Z")
+                functionName = "function shouldContinueExecuting"
+
+                if (shouldContinueExecuting !== null) {
+                    try {
+                        var oldInstructions = shouldContinueExecuting.instructions
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/EntityPredicate", "canTarget", "func_221015_a",
+                                    "(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/entity/LivingEntity;)Z")) {
+                                var redoCanTarget = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                redoGetClosestPlayer.add(skipOriginal)
+                                redoGetClosestPlayer.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "modifiedCanTargetNOOF",
+                                    "(Lnet/minecraft/entity/EntityPredicate;Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/entity/LivingEntity;)Z",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/entity/EntityPredicate.canTarget (Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/entity/LivingEntity;)Z
+                                oldInstructions.insert(instruction, redoGetClosestPlayer)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(functionName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                return classNode
+            }
+        },
+
 
         /**
          * Allows players to keep using containers relative to their offsets.
