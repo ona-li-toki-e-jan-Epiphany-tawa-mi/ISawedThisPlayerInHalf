@@ -3,6 +3,7 @@ package com.epiphany.isawedthisplayerinhalf;
 import com.epiphany.isawedthisplayerinhalf.config.ClientConfig;
 import com.epiphany.isawedthisplayerinhalf.config.ServerConfig;
 import com.epiphany.isawedthisplayerinhalf.networking.Networker;
+import com.epiphany.isawedthisplayerinhalf.networking.SetOffsetsPacket;
 import com.epiphany.isawedthisplayerinhalf.rendering.RenderingOffsetter;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -58,6 +59,8 @@ public class ISawedThisPlayerInHalf {
     @OnlyIn(Dist.DEDICATED_SERVER)
     @SubscribeEvent
     public static void onServerSetup(FMLDedicatedServerSetupEvent fmlDedicatedServerSetupEvent) {
+        MinecraftForge.EVENT_BUS.register(SetOffsetsPacket.class);
+
         ServerConfig.enable();
         ServerTranslations.enable();
     }

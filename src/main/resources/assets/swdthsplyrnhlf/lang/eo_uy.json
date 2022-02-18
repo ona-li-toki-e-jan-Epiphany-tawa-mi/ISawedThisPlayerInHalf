@@ -25,5 +25,6 @@
 
 
 
-  "network.error.set_offsets.invalid_offsets": "ma pi jan mute li lukin pana e ma ante ike pi jan ante! jan li nanpa %d. - li poki ala e ona!"
+  "network.error.set_offsets.invalid_offsets": "ma pi jan mute li lukin pana e ma ante ike pi jan ante! jan li nanpa %d. - li poki ala e ona!",
+  "network.disconnect.invalid_offsets": "musi Minka sina li awen pana e ma ante ike! ken la ante musi ni MiTuEJanNi! li jo e ike. anu, ken la sina lukin pali e ike, jan pi pali ike o!"
 }

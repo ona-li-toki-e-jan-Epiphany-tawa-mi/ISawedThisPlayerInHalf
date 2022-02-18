@@ -25,5 +25,6 @@
 
 
 
-  "network.error.set_offsets.invalid_offsets": "Server attempted to send invalid offsets for the player with id %d! - will not store!"
+  "network.error.set_offsets.invalid_offsets": "Server attempted to send invalid offsets for the player with id %d! - will not store!",
+  "network.disconnect.invalid_offsets": "Your client keeps sending invalid offsets! Either there is something wrong with the mod or you are up to no good, you no-gooder!"
 }

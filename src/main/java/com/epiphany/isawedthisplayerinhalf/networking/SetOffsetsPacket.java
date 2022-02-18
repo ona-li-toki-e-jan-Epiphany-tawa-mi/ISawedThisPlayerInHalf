@@ -3,6 +3,7 @@ package com.epiphany.isawedthisplayerinhalf.networking;
 import com.epiphany.isawedthisplayerinhalf.ISawedThisPlayerInHalf;
 import com.epiphany.isawedthisplayerinhalf.Offsetter;
 import com.epiphany.isawedthisplayerinhalf.ServerTranslations;
+import com.epiphany.isawedthisplayerinhalf.config.ServerConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
@@ -11,11 +12,19 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.PacketDistributor;
 import org.apache.logging.log4j.Level;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -23,6 +32,8 @@ import java.util.function.Supplier;
  * A packet used for sending a player's offsets.
  */
 public class SetOffsetsPacket implements IPacket {
+    private static final Map<UUID, Integer> warningCounter = new HashMap<>();
+
     private int playerID;
     private final double xOffset, yOffset, zOffset;
 
@@ -98,6 +109,23 @@ public class SetOffsetsPacket implements IPacket {
                     if (!Double.isFinite(this.xOffset) || !Double.isFinite(this.yOffset) || !Double.isFinite(this.zOffset)) {
                         ISawedThisPlayerInHalf.LOGGER.log(Level.WARN, ServerTranslations.translateAndFormatKey(
                                 "network.error.set_offsets.invalid_offsets", sender.getName().getString()));
+
+
+                        // TODO Make setting offsets completely serverside (including returning messages.)
+                        // Kicks players if they send to many invalid packets.
+                        UUID senderUUID = sender.getUniqueID();
+                        int warnings = warningCounter.getOrDefault(senderUUID, 1);
+                        warningCounter.put(senderUUID, warnings + 1);
+
+                        if (ServerConfig.shouldKickOnInvalid() && warnings > ServerConfig.getKickWarningCount()) {
+                            sender.connection.disconnect(new TranslationTextComponent("network.disconnect.invalid_offsets"));
+                            warningCounter.remove(senderUUID);
+
+                            ISawedThisPlayerInHalf.LOGGER.log(Level.WARN, ServerTranslations.translateAndFormatKey(
+                                    "network.disconnected_player.invalid_offsets", sender.getName().getString()));
+                        }
+
+
                         return MAGIC_BOOLEAN;
                     }
 
@@ -124,5 +152,15 @@ public class SetOffsetsPacket implements IPacket {
         ));
 
         context.setPacketHandled(true);
+    }
+
+
+    /**
+     * Removes players' warning counts when they leave.
+     */
+    @OnlyIn(Dist.DEDICATED_SERVER)
+    @SubscribeEvent
+    public static void onPlayerLeaveServer(PlayerEvent.PlayerLoggedOutEvent playerLoggedOutEvent) {
+        warningCounter.remove(playerLoggedOutEvent.getPlayer().getUniqueID());
     }
 }
