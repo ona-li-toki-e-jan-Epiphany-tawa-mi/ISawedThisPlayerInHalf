@@ -168,11 +168,15 @@ public class OffsetsCommand {
                 }
 
 
-                Offsetter.trySetClientOffsets(new Vec3d(x, y, z));
+                Offsetter.trySetClientOffsets(new Vec3d(x, y, z), (success) -> {
+                    if (success) {
+                        player.sendMessage(new TranslationTextComponent("commands.swdthsplyrnhlf.offsets.set", x, y, z));
 
-
-                player.sendMessage(new TranslationTextComponent(
-                        "commands.swdthsplyrnhlf.offsets.set", x, y, z));
+                    } else
+                        player.sendMessage(new TranslationTextComponent(
+                                "commands.swdthsplyrnhlf.offsets.set.server_error")
+                                .applyTextStyle(TextFormatting.RED));
+                });
 
             } catch (NumberFormatException exception) {
                 // Grabs arguments up to the one that caused the error.
@@ -205,8 +209,15 @@ public class OffsetsCommand {
      */
     private static void resetOffsets(ClientPlayerEntity player) {
         if (!Offsetter.getOffsets(player).equals(Vec3d.ZERO)) {
-            Offsetter.trySetClientOffsets(Vec3d.ZERO);
-            player.sendMessage(new TranslationTextComponent("commands.swdthsplyrnhlf.offsets.reset"));
+            Offsetter.trySetClientOffsets(Vec3d.ZERO, (success) -> {
+                if (success) {
+                    player.sendMessage(new TranslationTextComponent("commands.swdthsplyrnhlf.offsets.reset"));
+
+                } else
+                    player.sendMessage(new TranslationTextComponent(
+                            "commands.swdthsplyrnhlf.offsets.reset.server_error")
+                            .applyTextStyle(TextFormatting.RED));
+            });
 
         } else
             player.sendMessage(new TranslationTextComponent(

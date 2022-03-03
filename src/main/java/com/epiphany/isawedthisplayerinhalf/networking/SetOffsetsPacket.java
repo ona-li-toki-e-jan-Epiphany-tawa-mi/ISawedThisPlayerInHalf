@@ -16,7 +16,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
@@ -24,19 +23,21 @@ import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.PacketDistributor;
 import org.apache.logging.log4j.Level;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
-
-// TODO Get messages that result from successful and unsuccessful sends built into server-side checking.
 
 /**
  * A packet used for sending a player's offsets.
  */
 public class SetOffsetsPacket implements IPacket {
     private static final Map<UUID, Integer> warningCounter = new HashMap<>();
+    // TODO (MAYBE MAYBE NOT) Set up a queue for this if trySetClientOffsets(V,C) in Offsetter is used more than now.
     private static Vec3d expectedOffsets = null;
+    private static Consumer<Boolean> responseListener = null;
 
     /**
      * Updates the offsets that are expected from the server.
@@ -46,8 +47,19 @@ public class SetOffsetsPacket implements IPacket {
      *
      * @param newExpectedOffsets The new offsets expected from the server.
      */
-    static void setExpectedOffsets(Vec3d newExpectedOffsets) {
+    static void setExpectedOffsets(@Nullable Vec3d newExpectedOffsets) {
         expectedOffsets = newExpectedOffsets;
+    }
+
+    /**
+     * Sets the function to call once the server serves a response packet; true if offsets were successfully set, false
+     *   if not.
+     * Once called the underlying variable will be set back to null.
+     *
+     * @param onRespond The function to call when the server responds.
+     */
+    static void setResponseListener(@Nullable Consumer<Boolean> onRespond) {
+        responseListener = onRespond;
     }
 
     private int playerID;
@@ -98,30 +110,50 @@ public class SetOffsetsPacket implements IPacket {
         context.enqueueWork(() -> DistExecutor.runForDist(
                 // Client-side.
                 () -> () -> {
+                    Minecraft minecraftInstance = Minecraft.getInstance();
+                    Entity possiblePlayer = minecraftInstance.world.getEntityByID(this.playerID);
+
+
                     // Security.
                     if (!Double.isFinite(this.xOffset) || !Double.isFinite(this.yOffset) || !Double.isFinite(this.zOffset)) {
                         ISawedThisPlayerInHalf.LOGGER.log(Level.WARN,
                                 I18n.format("network.error.set_offsets.invalid_offsets", this.playerID));
+
+                        if (responseListener != null && expectedOffsets != null && possiblePlayer.equals(minecraftInstance.player)) {
+                            responseListener.accept(false);
+                            responseListener = null;
+
+                            expectedOffsets = null;
+                        }
+
                         return MAGIC_BOOLEAN;
                     }
 
 
-                    Minecraft minecraftInstance = Minecraft.getInstance();
-                    Entity possiblePlayer = minecraftInstance.world.getEntityByID(this.playerID);
-
                     if (possiblePlayer instanceof PlayerEntity)
                         if (possiblePlayer.equals(minecraftInstance.player)) {
+                            boolean response;
+
                             // Checks to see if the change is desired.
                             if (expectedOffsets != null && expectedOffsets.x == this.xOffset && expectedOffsets.y == this.yOffset
                                     && expectedOffsets.z == this.zOffset) {
                                 Offsetter.setOffsets((PlayerEntity) possiblePlayer, new Vec3d(this.xOffset, this.yOffset, this.zOffset));
                                 ClientConfig.setOffsets(this.xOffset, this.yOffset, this.zOffset);
 
-                            } else
+                                response = true;
+
+                            } else {
+                                response = false;
                                 ISawedThisPlayerInHalf.LOGGER.log(Level.WARN,
                                         I18n.format("network.error.set_offsets.invalid_offsets", this.playerID));
+                            }
 
                             expectedOffsets = null;
+
+                            if (responseListener != null) {
+                                responseListener.accept(response);
+                                responseListener = null;
+                            }
 
                         } else
                             Offsetter.setOffsets((PlayerEntity) possiblePlayer, new Vec3d(this.xOffset, this.yOffset, this.zOffset));
@@ -139,6 +171,8 @@ public class SetOffsetsPacket implements IPacket {
                     if (!Double.isFinite(this.xOffset) || !Double.isFinite(this.yOffset) || !Double.isFinite(this.zOffset)) {
                         ISawedThisPlayerInHalf.LOGGER.log(Level.WARN, ServerTranslations.translateAndFormatKey(
                                 "network.error.set_offsets.invalid_offsets", sender.getName().getString()));
+
+                        Networker.modChannel.send(PacketDistributor.PLAYER.with(() -> sender), this);
 
 
                         // Kicks players if they send too many invalid packets.

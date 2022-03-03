@@ -4,11 +4,9 @@ import com.epiphany.isawedthisplayerinhalf.config.ClientConfig;
 import com.epiphany.isawedthisplayerinhalf.networking.Networker;
 import com.epiphany.isawedthisplayerinhalf.rendering.RenderingOffsetter;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.concurrent.ThreadTaskExecutor;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -18,13 +16,13 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.LogicalSidedProvider;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 /**
  * Contains various functions to offset the actions taken by the player.
@@ -78,7 +76,7 @@ public class Offsetter {
     /**
      * Sets the offsets for the given player.
      * Meant for updating the offsets of players locally, without sharing over the network. For changing the client's
-     *   own offsets on all sides, use {@link Offsetter#trySetClientOffsets(Vec3d)}.
+     *   own offsets on all sides, use {@link Offsetter#trySetClientOffsets(Vec3d, Consumer)}.
      *
      * @param playerEntity The player to set the offsets of.
      * @param offsets The offsets to set to the player.
@@ -95,17 +93,22 @@ public class Offsetter {
      * Attempts to set the client's offsets, succeeding if the server accepts them.
      *
      * @param offsets The offsets to set for the client.
+     * @param onRespond A function that is called once the server returns a response; true if successfully set, false
+     *   if not
      */
     @OnlyIn(Dist.CLIENT)
-    public static void trySetClientOffsets(Vec3d offsets) {
+    public static void trySetClientOffsets(Vec3d offsets, @Nullable Consumer<Boolean> onRespond) {
         Minecraft minecraft = Minecraft.getInstance();
 
         if (minecraft.isSingleplayer()) {
             setOffsets(minecraft.player, offsets);
             ClientConfig.setOffsets(offsets.x, offsets.y, offsets.z);
+            
+            if (onRespond != null)
+                onRespond.accept(true);
 
         } else
-            Networker.sendServerOffsets(offsets);
+            Networker.sendServerOffsets(offsets, onRespond);
     }
 
     /**
@@ -141,7 +144,7 @@ public class Offsetter {
 
         if (!minecraft.isSingleplayer())
             setOffsets(minecraft.player, Vec3d.ZERO);
-        trySetClientOffsets(ClientConfig.getOffsets());
+        trySetClientOffsets(ClientConfig.getOffsets(), null);
     }
 
     /**

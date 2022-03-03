@@ -9,6 +9,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 
+import javax.annotation.Nullable;
+import java.util.function.Consumer;
+
 /**
  * Stuff for networking.
  */
@@ -41,23 +44,12 @@ public class Networker {
     /**
      * Sends the server the offsets to set to the player.
      *
-     * @param xOffset The x-offset to set to the player.
-     * @param yOffset The y-offset to set to the player.
-     * @param zOffset The z-offset to set to the player.
-     */
-    @OnlyIn(Dist.CLIENT)
-    public static void sendServerOffsets(double xOffset, double yOffset, double zOffset) {
-        sendServerOffsets(xOffset, yOffset, zOffset);
-    }
-
-    /**
-     * Sends the server the offsets to set to the player.
-     *
      * @param offsets The offsets to set to the player.
      */
     @OnlyIn(Dist.CLIENT)
-    public static void sendServerOffsets(Vec3d offsets) {
+    public static void sendServerOffsets(Vec3d offsets, @Nullable Consumer<Boolean> onRespond) {
         SetOffsetsPacket.setExpectedOffsets(offsets);
+        SetOffsetsPacket.setResponseListener(onRespond);
         modChannel.sendToServer(new SetOffsetsPacket(Minecraft.getInstance().player, offsets.x, offsets.y, offsets.z));
     }
 

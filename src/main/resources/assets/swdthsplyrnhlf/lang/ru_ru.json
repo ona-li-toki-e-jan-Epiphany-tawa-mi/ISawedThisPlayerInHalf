@@ -5,9 +5,11 @@
 
   "commands.swdthsplyrnhlf.offsets.reset": "Смещения сброшены",
   "commands.swdthsplyrnhlf.offsets.reset.already_reset": "Смещения уже сброшены",
+  "commands.swdthsplyrnhlf.offsets.reset.server_error": "Не удалось сбросить смещения - Сервер отказал",
 
   "commands.swdthsplyrnhlf.offsets.set": "Смещения установлены (%f, %f, %f)",
   "commands.swdthsplyrnhlf.offsets.set.already_set": "Смещения уже установлены на %f, %f, %f",
+  "commands.swdthsplyrnhlf.offsets.set.server_error": "Не удалось установить смещения - Сервер отказал",
 
   "commands.swdthsplyrnhlf.offsets.help": "Раскалывает ваше тело пополам и ставит верхнюю часть где-нибудь другое\nПсевдоним: ::ofs",
   "commands.swdthsplyrnhlf.offsets.usage_title": "Как использовать:",

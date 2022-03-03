@@ -5,9 +5,11 @@
 
   "commands.swdthsplyrnhlf.offsets.reset": "Offsets reset",
   "commands.swdthsplyrnhlf.offsets.reset.already_reset": "Offsets have already been reset",
+  "commands.swdthsplyrnhlf.offsets.reset.server_error": "Unable to reset offsets - Server refused",
 
   "commands.swdthsplyrnhlf.offsets.set": "Offsets set (%f, %f, %f)",
   "commands.swdthsplyrnhlf.offsets.set.already_set": "Offsets are already set to %f, %f, %f",
+  "commands.swdthsplyrnhlf.offsets.set.server_error": "Unable to set offsets - Server refused",
 
   "commands.swdthsplyrnhlf.offsets.help": "Splits your body in half and puts the upper part elsewhere\nAlias: ::ofs",
   "commands.swdthsplyrnhlf.offsets.usage_title": "Usage:",
