@@ -49,7 +49,7 @@ public class OffsetsCommand {
                     break;
 
                 case "reset":
-                    resetOffsets(player, minecraft);
+                    resetOffsets(player);
                     break;
 
                 case "what":ClientConfig.a();break;
@@ -168,11 +168,8 @@ public class OffsetsCommand {
                 }
 
 
-                ClientConfig.setOffsets(x, y, z);
-                Offsetter.setOffsets(player, new Vec3d(x, y, z));
+                Offsetter.trySetClientOffsets(new Vec3d(x, y, z));
 
-                if (!minecraft.isSingleplayer())
-                    Networker.sendServerOffsets(x,y,z);
 
                 player.sendMessage(new TranslationTextComponent(
                         "commands.swdthsplyrnhlf.offsets.set", x, y, z));
@@ -204,18 +201,11 @@ public class OffsetsCommand {
 
     /**
      * Attempts to reset the client's offsets to (0, 0, 0).
-     *
      * @param player The client.
-     * @param minecraft The current instance of Minecraft.
      */
-    private static void resetOffsets(ClientPlayerEntity player, Minecraft minecraft) {
+    private static void resetOffsets(ClientPlayerEntity player) {
         if (!Offsetter.getOffsets(player).equals(Vec3d.ZERO)) {
-            ClientConfig.setOffsets(0, 0, 0);
-            Offsetter.setOffsets(player, Vec3d.ZERO);
-
-            if (!minecraft.isSingleplayer())
-                Networker.sendServerOffsets(0, 0, 0);
-
+            Offsetter.trySetClientOffsets(Vec3d.ZERO);
             player.sendMessage(new TranslationTextComponent("commands.swdthsplyrnhlf.offsets.reset"));
 
         } else

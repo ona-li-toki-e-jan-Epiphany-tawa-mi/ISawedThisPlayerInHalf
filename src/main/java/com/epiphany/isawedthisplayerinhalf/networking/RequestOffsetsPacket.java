@@ -13,6 +13,8 @@ import net.minecraftforge.fml.network.PacketDistributor;
 
 import java.util.function.Supplier;
 
+// TODO Condense this into single packet with request display offsets.
+
 /**
  * A packet used for querying a certain player's offsets from the server.
  */
