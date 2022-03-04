@@ -286,6 +286,23 @@ public class BytecodeHelper {
     }
 
     /**
+     * Gets the minimum distance squared from an entity to an offset one.
+     *
+     * @param entity The first entity to get the distance from.
+     * @param offsetEntity The second, offset, entity to get the distance from.
+     * @param originalDistanceSq The original distance squared between the two - without accounting for offsets.
+     *
+     * @return The minmum distance squared between the two entities.
+     */
+    public static double getMinimumDistanceSq(Entity entity, Entity offsetEntity, double originalDistanceSq) {
+        Vec3d offsets = Offsetter.getOffsets(offsetEntity);
+
+        return !offsets.equals(Vec3d.ZERO) ?
+                Math.min(entity.getDistanceSq(offsetEntity.getPositionVec().add(offsets)), originalDistanceSq) :
+                originalDistanceSq;
+    }
+
+    /**
      * Gets the corrected distance from an entity to the player.
      *
      * @param entity The entity to use for the first position.
@@ -824,5 +841,18 @@ public class BytecodeHelper {
      */
     public static boolean redoCanEntityBeSeen(boolean originalResult, LivingEntity livingEntity, Entity entity, Vec3d livingEntityPosition, Vec3d entityPosition) {
         return originalResult || livingEntity.world.rayTraceBlocks(new RayTraceContext(livingEntityPosition, offsetVector(entityPosition, entity), RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, livingEntity)).getType() == RayTraceResult.Type.MISS;
+    }
+
+    /**
+     * Redoes the check in {@link LivingEntity#canEntityBeSeen(Entity)} so that mobs can see players' torsos, even if the legs are not in view.
+     * TODO Unused.
+     * @param originalResult The original result of the function.
+     * @param livingEntity The entity that is attempting to see.
+     * @param entity The entity that is possibly being seen.
+     *
+     * @return Whether the entity can bee seen by the other.
+     */
+    public static boolean redoCanEntityBeSeen(boolean originalResult, LivingEntity livingEntity, Entity entity) {
+        return redoCanEntityBeSeen(originalResult, livingEntity, entity, livingEntity.getPositionVec(), entity.getPositionVec());
     }
 }

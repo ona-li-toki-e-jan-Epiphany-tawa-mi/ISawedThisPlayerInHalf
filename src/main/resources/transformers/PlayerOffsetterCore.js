@@ -1963,6 +1963,125 @@ function initializeCoreMod() {
             }
         },
 
+        /**
+         * Partially allows mobs to see and target players using their offset position - allowing them to see it.
+         */
+        "TargetGoal": {
+            "target": {
+                "type": "CLASS",
+                "name": "net.minecraft.entity.ai.goal.TargetGoal"
+            },
+
+            "transformer": function(classNode) {
+                var classPath = "net.minecraft.entity.ai.goal.TargetGoal"
+
+                // Redoes continuous targeting checks.
+                var shouldContinueExecuting = findObfuscatedMethodWithSignature(classNode, "shouldContinueExecuting",
+                    "func_75253_b", "()Z")
+                var functionName = "function shouldContinueExecuting"
+
+                if (shouldContinueExecuting !== null) {
+                    try {
+                        var oldInstructions = shouldContinueExecuting.instructions
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/MobEntity", "getDistanceSq",
+                                    "func_70068_e", "(Lnet/minecraft/entity/Entity;)D")) {
+                                var redoGetDistanceSq = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                redoGetDistanceSq.add(skipOriginal)
+                                redoGetDistanceSq.add(new VarInsnNode(Opcodes.DLOAD, 4)) // d0 D
+                                redoGetDistanceSq.add(new VarInsnNode(Opcodes.DLOAD, 4)) // d0 D
+                                redoGetDistanceSq.add(new InsnNode(Opcodes.DMUL))
+                                redoGetDistanceSq.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "getMinimumDistanceSq",
+                                    "(Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/Entity;D)D",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/entity/MobEntity.getDistanceSq (Lnet/minecraft/entity/Entity;)D
+                                oldInstructions.insert(instruction, redoGetDistanceSq)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(functionName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                // Modifies initial targeting.
+                var isSuitableTarget = findObfuscatedMethodWithSignature(classNode, "isSuitableTarget",
+                    "func_220777_a", "(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/entity/EntityPredicate;)Z")
+                functionName = "function isSuitableTarget"
+
+                if (isSuitableTarget !== null) {
+                    try {
+                        var oldInstructions = isSuitableTarget.instructions
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/EntityPredicate", "canTarget",
+                                    "func_221015_a", "(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/entity/LivingEntity;)Z")) {
+                                var redoCanTarget = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                redoCanTarget.add(skipOriginal)
+                                redoCanTarget.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "modifiedCanTargetNOOF",
+                                    "(Lnet/minecraft/entity/EntityPredicate;Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/entity/LivingEntity;)Z",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/entity/EntityPredicate.canTarget (Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/entity/LivingEntity;)Z
+                                oldInstructions.insert(instruction, redoCanTarget)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(functionName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                return classNode
+            }
+        },
+
 
         /**
          * Allows players to keep using containers relative to their offsets.
