@@ -2082,6 +2082,71 @@ function initializeCoreMod() {
             }
         },
 
+        /**
+         * Improves mob AI by allowing them to see players with only the offset position in view. TODO
+         */
+        "EntitySenses": {
+            "target": {
+                "type": "CLASS",
+                "name": "net.minecraft.entity.ai.goal.EntitySenses"
+            },
+
+            "transformer": function(classNode) {
+                var classPath = "net.minecraft.entity.ai.goal.EntitySenses"
+
+                var canSee = findObfuscatedMethodWithSignature(classNode, "canSee",
+                    "func_75522_a", "(Lnet/minecraft/entity/Entity;)Z")
+                var functionName = "function canSee"
+
+                if (canSee !== null) {
+                    try {
+                        var oldInstructions = canSee.instructions
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/MobEntity", "canEntityBeSeen",
+                                    "func_70685_l", "(Lnet/minecraft/entity/Entity;)Z")) {
+                                var redoCanEntityBeSeen = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                redoCanEntityBeSeen.add(skipOriginal)
+                                redoCanEntityBeSeen.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "modifiedCanEntityBeSeen",
+                                    "(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/entity/Entity;)Z",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/entity/MobEntity.canEntityBeSeen (Lnet/minecraft/entity/Entity;)Z
+                                oldInstructions.insert(instruction, redoCanEntityBeSeen)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(functionName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                return classNode
+            }
+        },
+
 
         /**
          * Allows players to keep using containers relative to their offsets.

@@ -840,19 +840,21 @@ public class BytecodeHelper {
      * @return Whether the entity can bee seen by the other.
      */
     public static boolean redoCanEntityBeSeen(boolean originalResult, LivingEntity livingEntity, Entity entity, Vec3d livingEntityPosition, Vec3d entityPosition) {
+        if (!(entity instanceof PlayerEntity))
+            return originalResult;
+
         return originalResult || livingEntity.world.rayTraceBlocks(new RayTraceContext(livingEntityPosition, offsetVector(entityPosition, entity), RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, livingEntity)).getType() == RayTraceResult.Type.MISS;
     }
 
     /**
      * Redoes the check in {@link LivingEntity#canEntityBeSeen(Entity)} so that mobs can see players' torsos, even if the legs are not in view.
-     * TODO Unused.
-     * @param originalResult The original result of the function.
+     *
      * @param livingEntity The entity that is attempting to see.
      * @param entity The entity that is possibly being seen.
      *
      * @return Whether the entity can bee seen by the other.
      */
-    public static boolean redoCanEntityBeSeen(boolean originalResult, LivingEntity livingEntity, Entity entity) {
-        return redoCanEntityBeSeen(originalResult, livingEntity, entity, livingEntity.getPositionVec(), entity.getPositionVec());
+    public static boolean modifiedCanEntityBeSeen(LivingEntity livingEntity, Entity entity) {
+        return redoCanEntityBeSeen(livingEntity.canEntityBeSeen(entity), livingEntity, entity, livingEntity.getPositionVec(), entity.getPositionVec());
     }
 }
