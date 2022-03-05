@@ -848,12 +848,13 @@ public class BytecodeHelper {
 
     /**
      * Redoes the check in {@link LivingEntity#canEntityBeSeen(Entity)} so that mobs can see players' torsos, even if the legs are not in view.
-     *
+     * TODO Shelved
      * @param livingEntity The entity that is attempting to see.
      * @param entity The entity that is possibly being seen.
      *
      * @return Whether the entity can bee seen by the other.
      */
+    @Deprecated
     public static boolean modifiedCanEntityBeSeen(LivingEntity livingEntity, Entity entity) {
         return redoCanEntityBeSeen(livingEntity.canEntityBeSeen(entity), livingEntity, entity, livingEntity.getPositionVec(), entity.getPositionVec());
     }

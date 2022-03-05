@@ -2083,9 +2083,9 @@ function initializeCoreMod() {
         },
 
         /**
-         * Improves mob AI by allowing them to see players with only the offset position in view. TODO
+         * Improves mob AI by allowing them to see players with only the offset position in view. TODO Shelved
          */
-        "EntitySenses": {
+        /*"EntitySenses": {
             "target": {
                 "type": "CLASS",
                 "name": "net.minecraft.entity.ai.goal.EntitySenses"
@@ -2145,7 +2145,7 @@ function initializeCoreMod() {
 
                 return classNode
             }
-        },
+        },*/
 
 
         /**
