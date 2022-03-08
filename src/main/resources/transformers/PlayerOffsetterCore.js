@@ -1177,6 +1177,176 @@ function initializeCoreMod() {
             }
         },
 
+        /**
+         * Offsets the creation of some particles and sounds in the PlayerEntity class, mainly with attacking.
+         */
+        "PlayerEntity": {
+            "target": {
+                "type": "CLASS",
+                "name": "net.minecraft.entity.player.PlayerEntity"
+            },
+
+            "transformer": function(classNode) {
+                var classPath = "net.minecraft.entity.player.PlayerEntity"
+
+                // Duplicates particles that are spawned on a player when a raid's max level exceeds that of the amplifier of the player's bad omen effect.
+                var addParticlesAroundSelf = findObfuscatedMethodWithSignature(classNode, "addParticlesAroundSelf", "func_213824_a",
+                    "(Lnet/minecraft/particles/IParticleData;)V")
+                var functionName = "function addParticlesAroundSelf"
+
+                if (addParticlesAroundSelf !== null) {
+                    try {
+                        var oldInstructions = addParticlesAroundSelf.instructions
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/world/World", "addParticle", "func_195594_a", "(Lnet/minecraft/particles/IParticleData;DDDDDD)V")) {
+                                var duplicateAddParticle = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                duplicateAddParticle.add(skipOriginal)
+                                duplicateAddParticle.add(new VarInsnNode(Opcodes.ALOAD, 0)) // this Lnet/minecraft/entity/player/PlayerEntity;
+                                duplicateAddParticle.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "duplicateParticleOffset",
+                                    "(Lnet/minecraft/world/World;Lnet/minecraft/particles/IParticleData;DDDDDDLnet/minecraft/entity/player/PlayerEntity;)V",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/world/World.addParticle (Lnet/minecraft/particles/IParticleData;DDDDDD)V
+                                oldInstructions.insert(instruction, duplicateAddParticle)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(functionName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                // Offsets some of the sounds created when attacking.
+                var attackTargetEntityWithCurrentItem = findObfuscatedMethodWithSignature(classNode, "attackTargetEntityWithCurrentItem", "func_71059_n",
+                    "(Lnet/minecraft/entity/Entity;)V")
+                functionName = "function attackTargetEntityWithCurrentItem"
+
+                if (attackTargetEntityWithCurrentItem !== null) {
+                    var oldInstructions = attackTargetEntityWithCurrentItem.instructions
+
+                    var areaName = "first area of " + functionName
+                    try {
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/world/World", "playSound", "func_184148_a", "(Lnet/minecraft/entity/player/PlayerEntity;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V")) {
+                                var offsetPlaySound = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                offsetPlaySound.add(skipOriginal)
+                                offsetPlaySound.add(new VarInsnNode(Opcodes.ALOAD, 0)) // this Lnet/minecraft/entity/player/PlayerEntity;
+                                offsetPlaySound.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "modifiedPlaySound",
+                                    "(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FFLnet/minecraft/entity/LivingEntity;)V",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/world/World.playSound (Lnet/minecraft/entity/player/PlayerEntity;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V"
+                                oldInstructions.insert(instruction, offsetPlaySound)
+                                // ...
+
+                                i += 1
+                                success = true
+                            }
+                        }
+
+                        if (success) {
+                            logTransformSuccess(areaName, classPath)
+
+                        } else
+                            logTransformError(areaName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(areaName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                // Offsets spawning of sweep attack particles.
+                var spawnSweepParticles = findObfuscatedMethodWithSignature(classNode, "spawnSweepParticles", "func_184810_cG",
+                    "()V")
+                functionName = "function spawnSweepParticles"
+
+                if (spawnSweepParticles !== null) {
+                    try {
+                        var oldInstructions = spawnSweepParticles.instructions
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/world/server/ServerWorld", "spawnParticle", "func_195598_a", "(Lnet/minecraft/particles/IParticleData;DDDIDDDD)I")) {
+                                var redoSpawnParticle = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                redoSpawnParticle.add(skipOriginal)
+                                redoSpawnParticle.add(new VarInsnNode(Opcodes.ALOAD, 0)) // this Lnet/minecraft/entity/player/PlayerEntity;
+                                redoSpawnParticle.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "modifiedSpawnParticle",
+                                    "(Lnet/minecraft/world/server/ServerWorld;Lnet/minecraft/particles/IParticleData;DDDIDDDDLnet/minecraft/entity/player/PlayerEntity;)I",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/world/server/ServerWorld.spawnParticle (Lnet/minecraft/particles/IParticleData;DDDIDDDD)I
+                                oldInstructions.insert(instruction, redoSpawnParticle)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(functionName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+
+                return classNode
+            }
+        },
+
 
         /**
          * Makes entities look at the offset position of players randomly, resulting in them shaking their heads "out of confusion."

@@ -16,14 +16,12 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/* TODO Check this function in PlayerEntity.
-for(LivingEntity livingentity : this.world.getEntitiesWithinAABB(LivingEntity.class, targetEntity.getBoundingBox().grow(1.0D, 0.25D, 1.0D))) {
-    if (livingentity != this && livingentity != targetEntity && !this.isOnSameTeam(livingentity) && (!(livingentity instanceof ArmorStandEntity) || !((ArmorStandEntity)livingentity).hasMarker()) && this.getDistanceSq(livingentity) < 9.0D) {
-        livingentity.knockBack(this, 0.4F, (double)MathHelper.sin(this.rotationYaw * ((float)Math.PI / 180F)), (double)(-MathHelper.cos(this.rotationYaw * ((float)Math.PI / 180F))));
-        livingentity.attackEntityFrom(DamageSource.causePlayerDamage(this), f3);
-    }
-}
-*/
+// TODO MAYBE knockback in LivingEntity, make sure to remove attackEntityFrom transformer.
+
+// trySleep() next in PlayerEntity.
+// TODO updateCape ()V in PlayerEntity.
+// TODO Offset position rotates with camera, fix. Possibly in PlayerEntity#updateRidden()
+
 // TODO Add more debug information, more logging.
 
 // TODO (MAYBE MAYBE NOT) Expose an API for other mods to interact with this one.

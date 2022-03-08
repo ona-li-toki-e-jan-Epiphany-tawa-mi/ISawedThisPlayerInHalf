@@ -17,6 +17,7 @@ import net.minecraft.entity.ai.goal.TemptGoal;
 import net.minecraft.entity.monster.EndermanEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.FishingBobberEntity;
+import net.minecraft.particles.IParticleData;
 import net.minecraft.pathfinding.Path;
 import net.minecraft.pathfinding.PathNavigator;
 import net.minecraft.server.management.PlayerInteractionManager;
@@ -24,6 +25,7 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.*;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -650,6 +652,49 @@ public class BytecodeHelper {
         }
 
         lookController.setLookPosition(x + offsets.x, eyePosition + offsets.y, z + offsets.z);
+    }
+
+    /**
+     * Duplicates a particle so that it appears at its origin and at the position that is the players' offsets plus the
+     *   origin, if they have offsets.
+     *
+     * @param world The world to create the particle in.
+     * @param particleData See {@link World#addParticle(IParticleData, double, double, double, double, double, double)}.
+     * @param x See {@link World#addParticle(IParticleData, double, double, double, double, double, double)}.
+     * @param y See {@link World#addParticle(IParticleData, double, double, double, double, double, double)}.
+     * @param z See {@link World#addParticle(IParticleData, double, double, double, double, double, double)}.
+     * @param xSpeed See {@link World#addParticle(IParticleData, double, double, double, double, double, double)}.
+     * @param ySpeed See {@link World#addParticle(IParticleData, double, double, double, double, double, double)}.
+     * @param zSpeed See {@link World#addParticle(IParticleData, double, double, double, double, double, double)}.
+     * @param playerEntity The player with offsets.
+     */
+    public static void duplicateParticleOffset(World world, IParticleData particleData, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, PlayerEntity playerEntity) {
+        Vec3d offsets = Offsetter.getOffsets(playerEntity);
+        if (!offsets.equals(Vec3d.ZERO))
+            world.addParticle(particleData, x + offsets.x, y + offsets.y, z + offsets.z, xSpeed, ySpeed, zSpeed);
+
+        world.addParticle(particleData, x, y, z, xSpeed, ySpeed, zSpeed);
+    }
+
+    /**
+     * Offsets the spawning of a particle with the given player's offsets.
+     *
+     * @param serverWorld The world to spawn the particle in.
+     * @param type See {@link ServerWorld#spawnParticle(IParticleData, double, double, double, int, double, double, double, double)}.
+     * @param posX See {@link ServerWorld#spawnParticle(IParticleData, double, double, double, int, double, double, double, double)}.
+     * @param posY See {@link ServerWorld#spawnParticle(IParticleData, double, double, double, int, double, double, double, double)}.
+     * @param posZ See {@link ServerWorld#spawnParticle(IParticleData, double, double, double, int, double, double, double, double)}.
+     * @param particleCount See {@link ServerWorld#spawnParticle(IParticleData, double, double, double, int, double, double, double, double)}.
+     * @param xOffset See {@link ServerWorld#spawnParticle(IParticleData, double, double, double, int, double, double, double, double)}.
+     * @param yOffset See {@link ServerWorld#spawnParticle(IParticleData, double, double, double, int, double, double, double, double)}.
+     * @param zOffset See {@link ServerWorld#spawnParticle(IParticleData, double, double, double, int, double, double, double, double)}.
+     * @param speed See {@link ServerWorld#spawnParticle(IParticleData, double, double, double, int, double, double, double, double)}.
+     * @param playerEntity The player to get offsets from.
+     * @param <T>  See {@link ServerWorld#spawnParticle(IParticleData, double, double, double, int, double, double, double, double)}.
+     */
+    public static <T extends IParticleData> int modifiedSpawnParticle(ServerWorld serverWorld, T type, double posX, double posY, double posZ, int particleCount, double xOffset, double yOffset, double zOffset, double speed, PlayerEntity playerEntity) {
+        Vec3d offsets = Offsetter.getOffsets(playerEntity);
+        return serverWorld.spawnParticle(type, posX + offsets.x, posY + offsets.y, posZ + offsets.z, particleCount, xOffset, yOffset, zOffset, speed);
     }
 
     /**
