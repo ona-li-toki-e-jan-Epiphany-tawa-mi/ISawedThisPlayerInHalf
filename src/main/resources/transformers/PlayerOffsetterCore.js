@@ -399,6 +399,110 @@ function initializeCoreMod() {
         },
 
         /**
+         * Forces mobs in certain instances like skeletons shooting to look randomly between the player's upper and lower bodies to simulate confusion.
+         */
+        "MobEntity": {
+            "target": {
+                "type": "CLASS",
+                "name": "net.minecraft.entity.MobEntity"
+            },
+
+            "transformer": function(classNode) {
+                var classPath = "net.minecraft.entity.MobEntity"
+
+                var faceEntity = findObfuscatedMethodWithSignature(classNode, "faceEntity", "func_70625_a",
+                    "(Lnet/minecraft/entity/Entity;FF)V")
+                var functionName = "function faceEntity"
+
+                if (faceEntity !== null) {
+                    try {
+                        var oldInstructions = faceEntity.instructions
+                        success = false
+
+                        for (var i = 0; i <= oldInstructions.size() - 6; i++) {
+                            if (checkVarInsn(oldInstructions.get(i), Opcodes.ALOAD, 10) && checkObfuscatedMethodInsn(oldInstructions.get(i+1), Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/LivingEntity", "getPosYEye", "func_226280_cw_", "()D")
+                                    && checkVarInsn(oldInstructions.get(i+2), Opcodes.ALOAD, 0) && checkObfuscatedMethodInsn(oldInstructions.get(i+3), Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/MobEntity", "getPosYEye", "func_226280_cw_", "()D")
+                                    && checkInsn(oldInstructions.get(i+4), Opcodes.DSUB) && checkVarInsn(oldInstructions.get(i+5), Opcodes.DSTORE, 8)) {
+                                var offsetFaceEntity = new InsnList()
+
+
+                                offsetFaceEntity.add(new VarInsnNode(Opcodes.ALOAD, 10)) // livingentity Lnet/minecraft/entity/LivingEntity;
+                                offsetFaceEntity.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "getOffsetsRandomly",
+                                    "(Lnet/minecraft/entity/LivingEntity;)Lnet/minecraft/util/math/Vec3d;",
+                                    false
+                                ))
+
+                                offsetFaceEntity.add(new InsnNode(Opcodes.DUP))
+                                offsetFaceEntity.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "getVectorX",
+                                    "(Lnet/minecraft/util/math/Vec3d;)D",
+                                    false
+                                ))
+                                offsetFaceEntity.add(new VarInsnNode(Opcodes.DLOAD, 4)) // d0 D
+                                offsetFaceEntity.add(new InsnNode(Opcodes.DADD))
+                                offsetFaceEntity.add(new VarInsnNode(Opcodes.DSTORE, 4)) // d0 D
+
+                                offsetFaceEntity.add(new InsnNode(Opcodes.DUP))
+                                offsetFaceEntity.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "getVectorY",
+                                    "(Lnet/minecraft/util/math/Vec3d;)D",
+                                    false
+                                ))
+                                offsetFaceEntity.add(new VarInsnNode(Opcodes.DLOAD, 8)) // d1 D
+                                offsetFaceEntity.add(new InsnNode(Opcodes.DADD))
+                                offsetFaceEntity.add(new VarInsnNode(Opcodes.DSTORE, 8)) // d1 D
+
+                                offsetFaceEntity.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "getVectorZ",
+                                    "(Lnet/minecraft/util/math/Vec3d;)D",
+                                    false
+                                ))
+                                offsetFaceEntity.add(new VarInsnNode(Opcodes.DLOAD, 6)) // d2 D
+                                offsetFaceEntity.add(new InsnNode(Opcodes.DADD))
+                                offsetFaceEntity.add(new VarInsnNode(Opcodes.DSTORE, 6)) // d2 D
+
+
+                                // ...
+                                // ALOAD 10
+                                // INVOKEVIRTUAL net/minecraft/entity/LivingEntity.getPosYEye ()D
+                                // ALOAD 0
+                                // INVOKEVIRTUAL net/minecraft/entity/MobEntity.getPosYEye ()D
+                                // DSUB
+                                // DSTORE 8
+                                oldInstructions.insert(oldInstructions.get(i+5), offsetFaceEntity)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(functionName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                return classNode
+            }
+        },
+
+        /**
          * Modifies the home position and the position they are pulled to for leashed animals to account for offsets.
          * Modifies the distance calculations for when to change the movement type and to break the leash.
          */
@@ -1073,6 +1177,176 @@ function initializeCoreMod() {
             }
         },
 
+        /**
+         * Offsets the creation of some particles and sounds in the PlayerEntity class, mainly with attacking.
+         */
+        "PlayerEntity": {
+            "target": {
+                "type": "CLASS",
+                "name": "net.minecraft.entity.player.PlayerEntity"
+            },
+
+            "transformer": function(classNode) {
+                var classPath = "net.minecraft.entity.player.PlayerEntity"
+
+                // Duplicates particles that are spawned on a player when a raid's max level exceeds that of the amplifier of the player's bad omen effect.
+                var addParticlesAroundSelf = findObfuscatedMethodWithSignature(classNode, "addParticlesAroundSelf", "func_213824_a",
+                    "(Lnet/minecraft/particles/IParticleData;)V")
+                var functionName = "function addParticlesAroundSelf"
+
+                if (addParticlesAroundSelf !== null) {
+                    try {
+                        var oldInstructions = addParticlesAroundSelf.instructions
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/world/World", "addParticle", "func_195594_a", "(Lnet/minecraft/particles/IParticleData;DDDDDD)V")) {
+                                var duplicateAddParticle = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                duplicateAddParticle.add(skipOriginal)
+                                duplicateAddParticle.add(new VarInsnNode(Opcodes.ALOAD, 0)) // this Lnet/minecraft/entity/player/PlayerEntity;
+                                duplicateAddParticle.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "duplicateParticleOffset",
+                                    "(Lnet/minecraft/world/World;Lnet/minecraft/particles/IParticleData;DDDDDDLnet/minecraft/entity/player/PlayerEntity;)V",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/world/World.addParticle (Lnet/minecraft/particles/IParticleData;DDDDDD)V
+                                oldInstructions.insert(instruction, duplicateAddParticle)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(functionName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                // Offsets some of the sounds created when attacking.
+                var attackTargetEntityWithCurrentItem = findObfuscatedMethodWithSignature(classNode, "attackTargetEntityWithCurrentItem", "func_71059_n",
+                    "(Lnet/minecraft/entity/Entity;)V")
+                functionName = "function attackTargetEntityWithCurrentItem"
+
+                if (attackTargetEntityWithCurrentItem !== null) {
+                    var oldInstructions = attackTargetEntityWithCurrentItem.instructions
+
+                    var areaName = "first area of " + functionName
+                    try {
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/world/World", "playSound", "func_184148_a", "(Lnet/minecraft/entity/player/PlayerEntity;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V")) {
+                                var offsetPlaySound = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                offsetPlaySound.add(skipOriginal)
+                                offsetPlaySound.add(new VarInsnNode(Opcodes.ALOAD, 0)) // this Lnet/minecraft/entity/player/PlayerEntity;
+                                offsetPlaySound.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "modifiedPlaySound",
+                                    "(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FFLnet/minecraft/entity/LivingEntity;)V",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/world/World.playSound (Lnet/minecraft/entity/player/PlayerEntity;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V"
+                                oldInstructions.insert(instruction, offsetPlaySound)
+                                // ...
+
+                                i += 1
+                                success = true
+                            }
+                        }
+
+                        if (success) {
+                            logTransformSuccess(areaName, classPath)
+
+                        } else
+                            logTransformError(areaName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(areaName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                // Offsets spawning of sweep attack particles.
+                var spawnSweepParticles = findObfuscatedMethodWithSignature(classNode, "spawnSweepParticles", "func_184810_cG",
+                    "()V")
+                functionName = "function spawnSweepParticles"
+
+                if (spawnSweepParticles !== null) {
+                    try {
+                        var oldInstructions = spawnSweepParticles.instructions
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/world/server/ServerWorld", "spawnParticle", "func_195598_a", "(Lnet/minecraft/particles/IParticleData;DDDIDDDD)I")) {
+                                var redoSpawnParticle = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                redoSpawnParticle.add(skipOriginal)
+                                redoSpawnParticle.add(new VarInsnNode(Opcodes.ALOAD, 0)) // this Lnet/minecraft/entity/player/PlayerEntity;
+                                redoSpawnParticle.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "modifiedSpawnParticle",
+                                    "(Lnet/minecraft/world/server/ServerWorld;Lnet/minecraft/particles/IParticleData;DDDIDDDDLnet/minecraft/entity/player/PlayerEntity;)I",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/world/server/ServerWorld.spawnParticle (Lnet/minecraft/particles/IParticleData;DDDIDDDD)I
+                                oldInstructions.insert(instruction, redoSpawnParticle)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(functionName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+
+                return classNode
+            }
+        },
+
 
         /**
          * Makes entities look at the offset position of players randomly, resulting in them shaking their heads "out of confusion."
@@ -1633,6 +1907,415 @@ function initializeCoreMod() {
                 return classNode
             }
         },
+
+        /**
+         * Modifies endermen's StareGoal so that they randomly switch between staring at the upper and lower bodies when being stared at.
+         */
+        "EndermanEntity$StareGoal": {
+            "target": {
+                "type": "CLASS",
+                "name": "net.minecraft.entity.monster.EndermanEntity$StareGoal"
+            },
+
+            "transformer": function(classNode) {
+                var classPath = "net.minecraft.entity.monster.EndermanEntity$StareGoal"
+
+                // Fixes range check to account for both bodies.
+                var shouldExecute = findObfuscatedMethodWithSignature(classNode, "shouldExecute", "func_75250_a", "()Z")
+                var functionName = "function shouldExecute"
+
+                if (shouldExecute !== null) {
+                    try {
+                        var oldInstructions = shouldExecute.instructions
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            if (checkObfuscatedMethodInsn(oldInstructions.get(i), Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/LivingEntity", "getDistanceSq", "func_70068_e",
+                                    "(Lnet/minecraft/entity/Entity;)D")) {
+                                var redoGetDistanceSq = new InsnList()
+
+                                redoGetDistanceSq.add(new VarInsnNode(Opcodes.ALOAD, 0)) // this Lnet/minecraft/entity/monster/EndermanEntity$StareGoal;
+                                redoGetDistanceSq.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "redoShouldExecuteRangeCheck",
+                                    "(DLjava/lang/Object;)D",
+                                    false
+                                ))
+
+                                // ...
+                                // INVOKEVIRTUAL net/minecraft/entity/Entity.getDistanceSq (Lnet/minecraft/entity/Entity;)D
+                                oldInstructions.insert(oldInstructions.get(i), redoGetDistanceSq)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(functionName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                // Changes target position for staring at random between bodies.
+                var tick = findObfuscatedMethodWithSignature(classNode, "tick", "func_75246_d", "()V")
+                functionName = "function tick"
+
+                if (tick !== null) {
+                    try {
+                        var oldInstructions = tick.instructions
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/ai/controller/LookController",
+                                    "setLookPosition", "func_220679_a", "(DDD)V")) {
+                                var offsetSetLookPosition = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                offsetSetLookPosition.add(skipOriginal)
+                                offsetSetLookPosition.add(new VarInsnNode(Opcodes.ALOAD, 0)) // this Lnet/minecraft/entity/monster/EndermanEntity$StareGoal;
+                                offsetSetLookPosition.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "applyLookAtOffsetsRandomly",
+                                    "(Lnet/minecraft/entity/ai/controller/LookController;DDDLjava/lang/Object;)V",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/entity/ai/controller/LookController.setLookPosition (DDD)V
+                                oldInstructions.insert(instruction, offsetSetLookPosition)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(functionName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                return classNode
+            }
+        },
+
+        /**
+         * Makes the endermen's find player AI-goal see and account for player offsets.
+         */
+        "EndermanEntity$FindPlayerGoal": {
+            "target": {
+                "type": "CLASS",
+                "name": "net.minecraft.entity.monster.EndermanEntity$FindPlayerGoal"
+            },
+
+            "transformer": function(classNode) {
+                var classPath = "net.minecraft.entity.monster.EndermanEntity$FindPlayerGoal"
+
+                // Fixes range check to account for both bodies.
+                var shouldExecute = findObfuscatedMethodWithSignature(classNode, "shouldExecute", "func_75250_a", "()Z")
+                var functionName = "function shouldExecute"
+
+                if (shouldExecute !== null) {
+                    try {
+                        var oldInstructions = shouldExecute.instructions
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/world/World", "getClosestPlayer", "func_217370_a",
+                                    "(Lnet/minecraft/entity/EntityPredicate;Lnet/minecraft/entity/LivingEntity;)Lnet/minecraft/entity/player/PlayerEntity;")) {
+                                var redoGetClosestPlayer = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                redoGetClosestPlayer.add(skipOriginal)
+                                redoGetClosestPlayer.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "modifiedGetClosestPlayerNOOF",
+                                    "(Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityPredicate;Lnet/minecraft/entity/LivingEntity;)Lnet/minecraft/entity/player/PlayerEntity;",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/world/World.getClosestPlayer (Lnet/minecraft/entity/EntityPredicate;Lnet/minecraft/entity/LivingEntity;)Lnet/minecraft/entity/player/PlayerEntity;
+                                oldInstructions.insert(instruction, redoGetClosestPlayer)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(functionName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                // Fixes canTarget check so that enderman can see upper body.
+                var shouldContinueExecuting = findObfuscatedMethodWithSignature(classNode, "shouldContinueExecuting", "func_75253_b", "()Z")
+                functionName = "function shouldContinueExecuting"
+
+                if (shouldContinueExecuting !== null) {
+                    try {
+                        var oldInstructions = shouldContinueExecuting.instructions
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/EntityPredicate", "canTarget", "func_221015_a",
+                                    "(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/entity/LivingEntity;)Z")) {
+                                var redoCanTarget = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                redoGetClosestPlayer.add(skipOriginal)
+                                redoGetClosestPlayer.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "modifiedCanTargetNOOF",
+                                    "(Lnet/minecraft/entity/EntityPredicate;Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/entity/LivingEntity;)Z",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/entity/EntityPredicate.canTarget (Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/entity/LivingEntity;)Z
+                                oldInstructions.insert(instruction, redoGetClosestPlayer)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(functionName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                return classNode
+            }
+        },
+
+        /**
+         * Partially allows mobs to see and target players using their offset position - allowing them to see it.
+         */
+        "TargetGoal": {
+            "target": {
+                "type": "CLASS",
+                "name": "net.minecraft.entity.ai.goal.TargetGoal"
+            },
+
+            "transformer": function(classNode) {
+                var classPath = "net.minecraft.entity.ai.goal.TargetGoal"
+
+                // Redoes continuous targeting checks.
+                var shouldContinueExecuting = findObfuscatedMethodWithSignature(classNode, "shouldContinueExecuting",
+                    "func_75253_b", "()Z")
+                var functionName = "function shouldContinueExecuting"
+
+                if (shouldContinueExecuting !== null) {
+                    try {
+                        var oldInstructions = shouldContinueExecuting.instructions
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/MobEntity", "getDistanceSq",
+                                    "func_70068_e", "(Lnet/minecraft/entity/Entity;)D")) {
+                                var redoGetDistanceSq = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                redoGetDistanceSq.add(skipOriginal)
+                                redoGetDistanceSq.add(new VarInsnNode(Opcodes.DLOAD, 4)) // d0 D
+                                redoGetDistanceSq.add(new VarInsnNode(Opcodes.DLOAD, 4)) // d0 D
+                                redoGetDistanceSq.add(new InsnNode(Opcodes.DMUL))
+                                redoGetDistanceSq.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "getMinimumDistanceSq",
+                                    "(Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/Entity;D)D",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/entity/MobEntity.getDistanceSq (Lnet/minecraft/entity/Entity;)D
+                                oldInstructions.insert(instruction, redoGetDistanceSq)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(functionName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                // Modifies initial targeting.
+                var isSuitableTarget = findObfuscatedMethodWithSignature(classNode, "isSuitableTarget",
+                    "func_220777_a", "(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/entity/EntityPredicate;)Z")
+                functionName = "function isSuitableTarget"
+
+                if (isSuitableTarget !== null) {
+                    try {
+                        var oldInstructions = isSuitableTarget.instructions
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/EntityPredicate", "canTarget",
+                                    "func_221015_a", "(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/entity/LivingEntity;)Z")) {
+                                var redoCanTarget = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                redoCanTarget.add(skipOriginal)
+                                redoCanTarget.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "modifiedCanTargetNOOF",
+                                    "(Lnet/minecraft/entity/EntityPredicate;Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/entity/LivingEntity;)Z",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/entity/EntityPredicate.canTarget (Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/entity/LivingEntity;)Z
+                                oldInstructions.insert(instruction, redoCanTarget)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(functionName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                return classNode
+            }
+        },
+
+        /**
+         * Improves mob AI by allowing them to see players with only the offset position in view. TODO Shelved
+         */
+        /*"EntitySenses": {
+            "target": {
+                "type": "CLASS",
+                "name": "net.minecraft.entity.ai.goal.EntitySenses"
+            },
+
+            "transformer": function(classNode) {
+                var classPath = "net.minecraft.entity.ai.goal.EntitySenses"
+
+                var canSee = findObfuscatedMethodWithSignature(classNode, "canSee",
+                    "func_75522_a", "(Lnet/minecraft/entity/Entity;)Z")
+                var functionName = "function canSee"
+
+                if (canSee !== null) {
+                    try {
+                        var oldInstructions = canSee.instructions
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/MobEntity", "canEntityBeSeen",
+                                    "func_70685_l", "(Lnet/minecraft/entity/Entity;)Z")) {
+                                var redoCanEntityBeSeen = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                redoCanEntityBeSeen.add(skipOriginal)
+                                redoCanEntityBeSeen.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "modifiedCanEntityBeSeen",
+                                    "(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/entity/Entity;)Z",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/entity/MobEntity.canEntityBeSeen (Lnet/minecraft/entity/Entity;)Z
+                                oldInstructions.insert(instruction, redoCanEntityBeSeen)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(functionName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                return classNode
+            }
+        },*/
 
 
         /**
@@ -2351,6 +3034,73 @@ function initializeCoreMod() {
                             logTransformSuccess(functionName, classPath)
 
                         } else
+                            logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
+
+                    } catch (exception) {
+                        logTransformError(functionName, classPath, exception.message)
+                    }
+
+                } else
+                    logTransformError(functionName, classPath, ErrorMessages.functionNotFound)
+
+                return classNode
+            }
+        },
+
+        /**
+         * Offsets the position of the sound made by firing a bow.
+         */
+        "BowItem": {
+            "target": {
+                "type": "CLASS",
+                "name": "net.minecraft.item.BowItem"
+            },
+
+            "transformer": function(classNode) {
+                var classPath = "net.minecraft.item.BowItem"
+
+                var onPlayerStoppedUsing = findObfuscatedMethodWithSignature(classNode, "onPlayerStoppedUsing", "func_77615_a",
+                    "(Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lnet/minecraft/entity/LivingEntity;I)V")
+                var functionName = "function onPlayerStoppedUsing"
+
+                if (onPlayerStoppedUsing !== null) {
+                    var oldInstructions = onPlayerStoppedUsing.instructions
+
+                    try {
+                        var success = false
+
+                        for (var i = 0; i < oldInstructions.size(); i++) {
+                            var instruction = oldInstructions.get(i)
+
+                            if (checkObfuscatedMethodInsn(instruction, Opcodes.INVOKEVIRTUAL, "net/minecraft/world/World", "playSound", "func_184148_a",
+                                    "(Lnet/minecraft/entity/player/PlayerEntity;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V")) {
+                                var modifiedPlaySound = new InsnList()
+                                var skipOriginal = new LabelNode()
+
+                                modifiedPlaySound.add(skipOriginal)
+                                modifiedPlaySound.add(new VarInsnNode(Opcodes.ALOAD, 3)) // entityLiving Lnet/minecraft/entity/LivingEntity;
+                                modifiedPlaySound.add(new MethodInsnNode(
+                                    Opcodes.INVOKESTATIC,
+                                    "com/epiphany/isawedthisplayerinhalf/helpers/BytecodeHelper",
+                                    "modifiedPlaySound",
+                                    "(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FFLnet/minecraft/entity/LivingEntity;)V",
+                                    false
+                                ))
+
+                                // ...
+                                oldInstructions.insertBefore(instruction, new JumpInsnNode(Opcodes.GOTO, skipOriginal))
+                                // INVOKEVIRTUAL net/minecraft/world/World.playSound (Lnet/minecraft/entity/player/PlayerEntity;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V
+                                oldInstructions.insert(instruction, modifiedPlaySound)
+                                // ...
+
+                                success = true
+                                logTransformSuccess(functionName, classPath)
+
+                                break
+                            }
+                        }
+
+                        if (!success)
                             logTransformError(functionName, classPath, ErrorMessages.injectionPointNotFound)
 
                     } catch (exception) {

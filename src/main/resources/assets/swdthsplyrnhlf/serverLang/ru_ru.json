@@ -1,0 +1,5 @@
+{
+  "network.error.request_display_offsets.invalid_name": "Игрок %s попытался запросить смещения неправильным именем игрока (%s)! - не ответит!",
+  "network.error.set_offsets.invalid_offsets": "Игрок %s попытался отправить неправильные смещения! - ни сохранит, ни отправить другим игрокам!",
+  "network.disconnected_player.invalid_offsets": "Выгнало игрока %s из-за слишком многих попыток отправить неправильные смещения"
+}

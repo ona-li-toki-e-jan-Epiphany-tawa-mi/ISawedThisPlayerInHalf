@@ -2,6 +2,9 @@ package com.epiphany.isawedthisplayerinhalf.networking;
 
 import com.epiphany.isawedthisplayerinhalf.ISawedThisPlayerInHalf;
 import com.epiphany.isawedthisplayerinhalf.Offsetter;
+import com.epiphany.isawedthisplayerinhalf.ServerTranslations;
+import com.epiphany.isawedthisplayerinhalf.config.ClientConfig;
+import com.epiphany.isawedthisplayerinhalf.config.ServerConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
@@ -10,18 +13,55 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.PacketDistributor;
 import org.apache.logging.log4j.Level;
 
+import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
  * A packet used for sending a player's offsets.
  */
 public class SetOffsetsPacket implements IPacket {
+    private static final Map<UUID, Integer> warningCounter = new HashMap<>();
+    // TODO (MAYBE MAYBE NOT) Set up a queue for this if trySetClientOffsets(V,C) in Offsetter is used more than now.
+    private static Vec3d expectedOffsets = null;
+    private static Consumer<Boolean> responseListener = null;
+
+    /**
+     * Updates the offsets that are expected from the server.
+     * When the server sends a SetOffsetsPacket over to the client for their own player, this is used to make sure that
+     *   this change is desired and that it should update the client's offsets.
+     * Once accepted the underlying variable will be set back to null.
+     *
+     * @param newExpectedOffsets The new offsets expected from the server.
+     */
+    static void setExpectedOffsets(@Nullable Vec3d newExpectedOffsets) {
+        expectedOffsets = newExpectedOffsets;
+    }
+
+    /**
+     * Sets the function to call once the server serves a response packet; true if offsets were successfully set, false
+     *   if not.
+     * Once called the underlying variable will be set back to null.
+     *
+     * @param onRespond The function to call when the server responds.
+     */
+    static void setResponseListener(@Nullable Consumer<Boolean> onRespond) {
+        responseListener = onRespond;
+    }
+
     private int playerID;
     private final double xOffset, yOffset, zOffset;
 
@@ -70,19 +110,53 @@ public class SetOffsetsPacket implements IPacket {
         context.enqueueWork(() -> DistExecutor.runForDist(
                 // Client-side.
                 () -> () -> {
+                    Minecraft minecraftInstance = Minecraft.getInstance();
+                    Entity possiblePlayer = minecraftInstance.world.getEntityByID(this.playerID);
+
+
                     // Security.
                     if (!Double.isFinite(this.xOffset) || !Double.isFinite(this.yOffset) || !Double.isFinite(this.zOffset)) {
                         ISawedThisPlayerInHalf.LOGGER.log(Level.WARN,
                                 I18n.format("network.error.set_offsets.invalid_offsets", this.playerID));
+
+                        if (responseListener != null && expectedOffsets != null && possiblePlayer.equals(minecraftInstance.player)) {
+                            responseListener.accept(false);
+                            responseListener = null;
+
+                            expectedOffsets = null;
+                        }
+
                         return MAGIC_BOOLEAN;
                     }
 
 
-                    Minecraft minecraftInstance = Minecraft.getInstance();
-                    Entity possiblePlayer = minecraftInstance.world.getEntityByID(this.playerID);
+                    if (possiblePlayer instanceof PlayerEntity)
+                        if (possiblePlayer.equals(minecraftInstance.player)) {
+                            boolean response;
 
-                    if (possiblePlayer instanceof PlayerEntity && !possiblePlayer.equals(minecraftInstance.player))
-                        Offsetter.setOffsets((PlayerEntity) possiblePlayer, new Vec3d(this.xOffset, this.yOffset, this.zOffset));
+                            // Checks to see if the change is desired.
+                            if (expectedOffsets != null && expectedOffsets.x == this.xOffset && expectedOffsets.y == this.yOffset
+                                    && expectedOffsets.z == this.zOffset) {
+                                Offsetter.setOffsets((PlayerEntity) possiblePlayer, new Vec3d(this.xOffset, this.yOffset, this.zOffset));
+                                ClientConfig.setOffsets(this.xOffset, this.yOffset, this.zOffset);
+
+                                response = true;
+
+                            } else {
+                                response = false;
+                                ISawedThisPlayerInHalf.LOGGER.log(Level.WARN,
+                                        I18n.format("network.error.set_offsets.invalid_offsets", this.playerID));
+                            }
+
+                            expectedOffsets = null;
+
+                            if (responseListener != null) {
+                                responseListener.accept(response);
+                                responseListener = null;
+                            }
+
+                        } else
+                            Offsetter.setOffsets((PlayerEntity) possiblePlayer, new Vec3d(this.xOffset, this.yOffset, this.zOffset));
 
                     return MAGIC_BOOLEAN;
                 },
@@ -95,16 +169,35 @@ public class SetOffsetsPacket implements IPacket {
 
                     // Security.
                     if (!Double.isFinite(this.xOffset) || !Double.isFinite(this.yOffset) || !Double.isFinite(this.zOffset)) {
-                        ISawedThisPlayerInHalf.LOGGER.log(Level.WARN, "Player " + sender.getName().getString() + " attempted to send invalid offsets! - will not store nor send to clients!");
+                        ISawedThisPlayerInHalf.LOGGER.log(Level.WARN, ServerTranslations.translateAndFormatKey(
+                                "network.error.set_offsets.invalid_offsets", sender.getName().getString()));
+
+                        Networker.modChannel.send(PacketDistributor.PLAYER.with(() -> sender), this);
+
+
+                        // Kicks players if they send too many invalid packets.
+                        UUID senderUUID = sender.getUniqueID();
+                        int warnings = warningCounter.getOrDefault(senderUUID, 1);
+
+                        if (ServerConfig.shouldKickOnInvalid() && warnings > ServerConfig.getKickWarningCount()) {
+                            sender.connection.disconnect(new TranslationTextComponent("network.disconnect.invalid_offsets"));
+                            warningCounter.remove(senderUUID);
+
+                            ISawedThisPlayerInHalf.LOGGER.log(Level.WARN, ServerTranslations.translateAndFormatKey(
+                                    "network.disconnected_player.invalid_offsets", sender.getName().getString()));
+
+                        } else
+                            warningCounter.put(senderUUID, warnings + 1);
+
+
+                        if (Offsetter.getOffsetsOrNull(sender) == null)
+                            Offsetter.setOffsets(sender, Vec3d.ZERO);
+
+
                         return MAGIC_BOOLEAN;
                     }
 
-                    int truePlayerID = sender.getEntityId();
-
-                    if (truePlayerID != this.playerID) {
-                        this.playerID = truePlayerID;
-                        ISawedThisPlayerInHalf.LOGGER.log(Level.WARN, "Player " + sender.getName().getString() + " attempted to send offsets using an invalid id! - will use true id instead!");
-                    }
+                    this.playerID = sender.getEntityId();
 
 
                     Offsetter.setOffsets(sender, new Vec3d(this.xOffset, this.yOffset, this.zOffset));
@@ -115,9 +208,6 @@ public class SetOffsetsPacket implements IPacket {
                     PlayerList playerList = sender.getServer().getPlayerList();
 
                     for (UUID otherPlayerUUID : Offsetter.getOffsetPlayerUUIDs()) {
-                        if (otherPlayerUUID.equals(senderUUID))
-                            continue;
-
                         ServerPlayerEntity otherPlayer = playerList.getPlayerByUUID(otherPlayerUUID);
                         Networker.modChannel.send(PacketDistributor.PLAYER.with(() -> otherPlayer), this);
                     }
@@ -127,5 +217,15 @@ public class SetOffsetsPacket implements IPacket {
         ));
 
         context.setPacketHandled(true);
+    }
+
+
+    /**
+     * Removes players' warning counts when they leave.
+     */
+    @OnlyIn(Dist.DEDICATED_SERVER)
+    @SubscribeEvent
+    public static void onPlayerLeaveServer(PlayerEvent.PlayerLoggedOutEvent playerLoggedOutEvent) {
+        warningCounter.remove(playerLoggedOutEvent.getPlayer().getUniqueID());
     }
 }

@@ -1,13 +1,12 @@
 package com.epiphany.isawedthisplayerinhalf;
 
+import com.epiphany.isawedthisplayerinhalf.config.ClientConfig;
 import com.epiphany.isawedthisplayerinhalf.networking.Networker;
 import com.epiphany.isawedthisplayerinhalf.rendering.RenderingOffsetter;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.concurrent.ThreadTaskExecutor;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -17,13 +16,13 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.LogicalSidedProvider;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 /**
  * Contains various functions to offset the actions taken by the player.
@@ -76,6 +75,8 @@ public class Offsetter {
 
     /**
      * Sets the offsets for the given player.
+     * Meant for updating the offsets of players locally, without sharing over the network. For changing the client's
+     *   own offsets on all sides, use {@link Offsetter#trySetClientOffsets(Vec3d, Consumer)}.
      *
      * @param playerEntity The player to set the offsets of.
      * @param offsets The offsets to set to the player.
@@ -83,24 +84,31 @@ public class Offsetter {
     public static void setOffsets(PlayerEntity playerEntity, Vec3d offsets) {
         UUID playerUUID = playerEntity.getUniqueID();
 
-        final boolean MAGIC_BOOLEAN = true;
-        DistExecutor.runForDist(
-                // Client-side.
-                () -> () -> {
-                    enqueueWork(() -> {
-                        playerOffsetMap.put(playerUUID, offsets);
-                        RenderingOffsetter.setOffsets(playerEntity, offsets);
-                    });
+        playerOffsetMap.put(playerUUID, offsets);
+        DistExecutor.runWhenOn(Dist.CLIENT, () -> () ->
+                RenderingOffsetter.setOffsets(playerEntity, offsets));
+    }
 
-                    return MAGIC_BOOLEAN;
-                },
+    /**
+     * Attempts to set the client's offsets, succeeding if the server accepts them.
+     *
+     * @param offsets The offsets to set for the client.
+     * @param onRespond A function that is called once the server returns a response; true if successfully set, false
+     *   if not
+     */
+    @OnlyIn(Dist.CLIENT)
+    public static void trySetClientOffsets(Vec3d offsets, @Nullable Consumer<Boolean> onRespond) {
+        Minecraft minecraft = Minecraft.getInstance();
 
-                // Server-side.
-                () -> () -> {
-                    playerOffsetMap.put(playerUUID, offsets);
-                    return MAGIC_BOOLEAN;
-                }
-        );
+        if (minecraft.isSingleplayer()) {
+            setOffsets(minecraft.player, offsets);
+            ClientConfig.setOffsets(offsets.x, offsets.y, offsets.z);
+            
+            if (onRespond != null)
+                onRespond.accept(true);
+
+        } else
+            Networker.sendServerOffsets(offsets, onRespond);
     }
 
     /**
@@ -111,83 +119,32 @@ public class Offsetter {
     public static void unsetOffsets(PlayerEntity playerEntity) {
         UUID playerUUID = playerEntity.getUniqueID();
 
-        final boolean MAGIC_BOOLEAN = true;
-        DistExecutor.runForDist(
-                // Client-side.
-                () -> () -> {
-                    playerOffsetMap.remove(playerUUID);
-                    RenderingOffsetter.unsetOffsets(playerUUID);
-
-                    return MAGIC_BOOLEAN;
-                },
-
-                // Server-side.
-                () -> () -> {
-                    playerOffsetMap.remove(playerUUID);
-                    return MAGIC_BOOLEAN;
-                }
-        );
+        playerOffsetMap.remove(playerUUID);
+        DistExecutor.runWhenOn(Dist.CLIENT, () -> () ->
+                RenderingOffsetter.unsetOffsets(playerUUID));
     }
 
     /**
      * Clears the offsets of all players.
      */
     public static void clearAllOffsets() {
-        final boolean MAGIC_BOOLEAN = true;
-        DistExecutor.runForDist(
-                // Client-side.
-                () -> () -> {
-                    enqueueWork(() -> {
-                        playerOffsetMap.clear();
-                        RenderingOffsetter.clearAllOffsets();
-                    });
-
-                    return MAGIC_BOOLEAN;
-                },
-
-                // Server-side.
-                () -> () -> {
-                    playerOffsetMap.clear();
-                    return MAGIC_BOOLEAN;
-                }
-        );
-    }
-
-    /**
-     * Runs the given function on the game's main thread.
-     *
-     * The function will be executed immediately if called on the main thread, else it places it onto the work queue to
-     * be executed at the next opportunity.
-     *
-     * @param runnable The function to run.
-     */
-    @OnlyIn(Dist.CLIENT)
-    private static void enqueueWork(Runnable runnable) {
-        ThreadTaskExecutor<?> executor = LogicalSidedProvider.WORKQUEUE.get(LogicalSide.CLIENT);
-
-        if (executor.isOnExecutionThread()) {
-            runnable.run();
-
-        } else
-            executor.deferTask(runnable);
+        playerOffsetMap.clear();
+        DistExecutor.runWhenOn(Dist.CLIENT, () -> RenderingOffsetter::clearAllOffsets);
     }
 
 
 
     /**
-     * Loads the clients offsets when the world loads. And, if on a dedicated server, sends them to it.
+     * Loads the clients offsets when the world loads.
      */
     @OnlyIn(Dist.CLIENT)
     @SuppressWarnings("unused")
     public static void onPostHandleJoinGame() {
         Minecraft minecraft = Minecraft.getInstance();
-        ClientPlayerEntity player = minecraft.player;
-        Vec3d offsets = Config.getOffsets();
-
-        setOffsets(player, offsets);
 
         if (!minecraft.isSingleplayer())
-            Networker.sendServerOffsets(offsets);
+            setOffsets(minecraft.player, Vec3d.ZERO);
+        trySetClientOffsets(ClientConfig.getOffsets(), null);
     }
 
     /**

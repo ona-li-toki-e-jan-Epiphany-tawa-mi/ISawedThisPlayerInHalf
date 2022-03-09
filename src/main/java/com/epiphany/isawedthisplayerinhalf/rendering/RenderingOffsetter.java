@@ -41,11 +41,11 @@ public class RenderingOffsetter {
      */
     public static void replacePlayerRenderers() {
         EntityRendererManager entityRendererManager = Minecraft.getInstance().getRenderManager();
-        PlayerRenderer newDefaultRenderer = new ModifiedPlayerRenderer(entityRendererManager, false);
 
         Map<String, PlayerRenderer> skinMap = (Map<String, PlayerRenderer>) ReflectionHelper.getValueOrDefault(FIELD_skinMap, entityRendererManager, null);
         if (skinMap == null) throw new NullPointerException("Unable to get value from 'FIELD_skinMap'");
 
+        PlayerRenderer newDefaultRenderer = new ModifiedPlayerRenderer(entityRendererManager, false);
         skinMap.replace("default", newDefaultRenderer);
         skinMap.replace("slim", new ModifiedPlayerRenderer(entityRendererManager, true));
         ReflectionHelper.setValue(FIELD_playerRenderer, entityRendererManager, newDefaultRenderer);
@@ -69,7 +69,7 @@ public class RenderingOffsetter {
     /**
      * Calculates and assigns rendering offset information to a player.
      *
-     * Do not run this method directly; use {@link com.epiphany.isawedthisplayerinhalf.Offsetter#getOffsets(PlayerEntity)} instead.
+     * Do not run this method directly; use {@link com.epiphany.isawedthisplayerinhalf.Offsetter#setOffsets(PlayerEntity, Vec3d)} instead.
      *
      * @param playerEntity The player to set the offsets for.
      * @param offsets The physical offsets of the player's body.

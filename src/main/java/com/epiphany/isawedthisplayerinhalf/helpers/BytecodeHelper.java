@@ -14,8 +14,10 @@ import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.controller.LookController;
 import net.minecraft.entity.ai.goal.LookAtGoal;
 import net.minecraft.entity.ai.goal.TemptGoal;
+import net.minecraft.entity.monster.EndermanEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.FishingBobberEntity;
+import net.minecraft.particles.IParticleData;
 import net.minecraft.pathfinding.Path;
 import net.minecraft.pathfinding.PathNavigator;
 import net.minecraft.server.management.PlayerInteractionManager;
@@ -23,6 +25,7 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.*;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -41,6 +44,8 @@ import java.util.function.Predicate;
  */
 @SuppressWarnings("unused")
 public class BytecodeHelper {
+    // EndermanEntity.
+    private static final Field FIELD_enderman;
     // LookAtGoal.
     private static final Field FIELD_entity;
     private static final Field FIELD_closestEntity;
@@ -63,9 +68,20 @@ public class BytecodeHelper {
     // LookController.
     private static final Method METHOD_getEyePosition;
 
-    private static final Random RANDOM;
+    private static final Random RANDOM = new Random();
 
     static {
+        // EndermanEntity.
+        Class<?> stareGoal = ReflectionHelper.classForNameOrNull("net.minecraft.entity.monster.EndermanEntity$StareGoal");
+
+        if (stareGoal == null)
+            throw new NullPointerException("Unable to find class 'net.minecraft.entity.monster.EndermanEntity$StareGoal'");
+
+        FIELD_enderman = ReflectionHelper.getDeclaredFieldOrNull(stareGoal, "enderman", "field_220835_a");
+
+        if (FIELD_enderman == null)
+            throw new NullPointerException("Unable to find field 'FIELD_enderman' under names 'enderman' and 'field_220835_a'");
+
         // LookAtGoal.
         FIELD_entity = ReflectionHelper.getDeclaredFieldOrNull(LookAtGoal.class, "entity", "field_75332_b");
         FIELD_closestEntity = ReflectionHelper.getDeclaredFieldOrNull(LookAtGoal.class, "closestEntity", "field_75334_a");
@@ -134,9 +150,6 @@ public class BytecodeHelper {
 
         if (METHOD_getEyePosition == null)
             throw new NullPointerException("Unable to find field 'METHOD_getEyePosition' under names 'getEyePosition' and 'func_220676_b'");
-
-
-        RANDOM = new Random();
     }
 
 
@@ -217,6 +230,17 @@ public class BytecodeHelper {
     }
 
     /**
+     * Either returns the LivingEntity's offsets or the zero vector, randomly.
+     *
+     * @param livingEntity The LivingEntity to possibly return the offsets of.
+     *
+     * @return Either the LivingEntity's offsets or the zero vector.
+     */
+    public static Vec3d getOffsetsRandomly(LivingEntity livingEntity) {
+        return RANDOM.nextBoolean() ? Offsetter.getOffsets(livingEntity) : Vec3d.ZERO;
+    }
+
+    /**
      * Gets the offsets of the angler of the fishing bobber.
      *
      * @param fishingBobberEntity The fishing bobber to get the angler with which to get the offsets from.
@@ -264,6 +288,23 @@ public class BytecodeHelper {
     }
 
     /**
+     * Gets the minimum distance squared from an entity to an offset one.
+     *
+     * @param entity The first entity to get the distance from.
+     * @param offsetEntity The second, offset, entity to get the distance from.
+     * @param originalDistanceSq The original distance squared between the two - without accounting for offsets.
+     *
+     * @return The minmum distance squared between the two entities.
+     */
+    public static double getMinimumDistanceSq(Entity entity, Entity offsetEntity, double originalDistanceSq) {
+        Vec3d offsets = Offsetter.getOffsets(offsetEntity);
+
+        return !offsets.equals(Vec3d.ZERO) ?
+                Math.min(entity.getDistanceSq(offsetEntity.getPositionVec().add(offsets)), originalDistanceSq) :
+                originalDistanceSq;
+    }
+
+    /**
      * Gets the corrected distance from an entity to the player.
      *
      * @param entity The entity to use for the first position.
@@ -308,9 +349,27 @@ public class BytecodeHelper {
      * @return The player closest to the target, or null.
      */
     public static PlayerEntity modifiedGetClosestPlayerNOOF(World world, EntityPredicate predicate, LivingEntity target, double targetX, double targetY, double targetZ) {
-        return modifiedGetClosestPlayer(world, predicate, target, (livingTarget, playerEntity) -> {
-            return Math.min(playerEntity.getDistanceSq(targetX, targetY, targetZ), modifiedGetDistanceSq(playerEntity, targetX, targetY, targetZ));
-        });
+        return modifiedGetClosestPlayer(world, predicate, target, (livingTarget, playerEntity) ->
+            Math.min(playerEntity.getDistanceSq(targetX, targetY, targetZ), modifiedGetDistanceSq(playerEntity, targetX, targetY, targetZ))
+        );
+    }
+
+    /**
+     * Gets the player that is closest to the target entity, or null, if nothing is found.
+     * Corrected for offsets, checking both the player's normal and offset positions.
+     *
+     * @see net.minecraft.world.IEntityReader#getClosestPlayer(EntityPredicate, LivingEntity).
+     *
+     * @param world The world the target is in.
+     * @param predicate A predicate to control which players can be targeted.
+     * @param target The target entity.
+     *
+     * @return The player closest to the target, or null.
+     */
+    public static PlayerEntity modifiedGetClosestPlayerNOOF(World world, EntityPredicate predicate, LivingEntity target) {
+        return modifiedGetClosestPlayer(world, predicate, target, (livingTarget, playerEntity) ->
+            Math.min(playerEntity.getDistanceSq(target), modifiedGetDistanceSq(target, playerEntity))
+        );
     }
 
     /**
@@ -349,7 +408,7 @@ public class BytecodeHelper {
      *
      * @param predicate A predicate to control whether the entity can be targeted.
      * @param attacker The entity attempting to target.
-     * @param target The player being targeted.
+     * @param target The entity being targeted.
      * @param distanceSqFunction A function that accepts the attacker and target (the one with offsets) and calculates the distance squared between them.
      *      Whether to account for those offsets will depend on application.
      *
@@ -399,6 +458,25 @@ public class BytecodeHelper {
                 return true;
             }
         }
+    }
+
+    /**
+     * Gets whether a player can be targeted with the given predicate, accounting for offsets if the target is a player.
+     *
+     * @param predicate A predicate to control whether the entity can be targeted.
+     * @param attacker The entity attempting to target.
+     * @param target The entity being targeted.
+     *
+     * @return Whether the target can be targeted.
+     */
+    public static boolean modifiedCanTargetNOOF(EntityPredicate predicate, LivingEntity attacker, LivingEntity target) {
+        if (target instanceof PlayerEntity) {
+            return modifiedCanTarget(predicate, attacker, (PlayerEntity) target, (livingTarget, playerEntity) ->
+                    Math.min(livingTarget.getDistanceSq(livingTarget), modifiedGetDistanceSq(livingTarget, playerEntity))
+            );
+
+        } else
+            return predicate.canTarget(attacker, target);
     }
 
 
@@ -551,6 +629,72 @@ public class BytecodeHelper {
             return new Vec3d(x, y, z);
 
         return new Vec3d(x + offsets.x, y + offsets.y, z + offsets.z);
+    }
+
+    /**
+     * Randomly switches the target location of an EndermanEntity.StareGoal between the target's original and offset bodies.
+     *
+     * @param lookController The enderman's look controller.
+     * @param x The targeted x position.
+     * @param eyePosition The target's eye y position.
+     * @param z The targeted z position.
+     * @param stareGoal The enderman's StareGoal. Must be an instance of StareGoal.
+     */
+    public static void applyLookAtOffsetsRandomly(LookController lookController, double x, double eyePosition, double z, Object stareGoal) {
+        EndermanEntity enderman = (EndermanEntity) ReflectionHelper.getValueOrDefault(FIELD_enderman, stareGoal, null);
+        if (enderman == null) throw new NullPointerException("Unable to get value from 'FIELD_enderman'");
+        LivingEntity attackTarget = enderman.getAttackTarget();
+        Vec3d offsets = Offsetter.getOffsets(attackTarget);
+
+        if (offsets.equals(Vec3d.ZERO) || RANDOM.nextBoolean()) {
+            lookController.setLookPosition(x, eyePosition, z);
+            return;
+        }
+
+        lookController.setLookPosition(x + offsets.x, eyePosition + offsets.y, z + offsets.z);
+    }
+
+    /**
+     * Duplicates a particle so that it appears at its origin and at the position that is the players' offsets plus the
+     *   origin, if they have offsets.
+     *
+     * @param world The world to create the particle in.
+     * @param particleData See {@link World#addParticle(IParticleData, double, double, double, double, double, double)}.
+     * @param x See {@link World#addParticle(IParticleData, double, double, double, double, double, double)}.
+     * @param y See {@link World#addParticle(IParticleData, double, double, double, double, double, double)}.
+     * @param z See {@link World#addParticle(IParticleData, double, double, double, double, double, double)}.
+     * @param xSpeed See {@link World#addParticle(IParticleData, double, double, double, double, double, double)}.
+     * @param ySpeed See {@link World#addParticle(IParticleData, double, double, double, double, double, double)}.
+     * @param zSpeed See {@link World#addParticle(IParticleData, double, double, double, double, double, double)}.
+     * @param playerEntity The player with offsets.
+     */
+    public static void duplicateParticleOffset(World world, IParticleData particleData, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, PlayerEntity playerEntity) {
+        Vec3d offsets = Offsetter.getOffsets(playerEntity);
+        if (!offsets.equals(Vec3d.ZERO))
+            world.addParticle(particleData, x + offsets.x, y + offsets.y, z + offsets.z, xSpeed, ySpeed, zSpeed);
+
+        world.addParticle(particleData, x, y, z, xSpeed, ySpeed, zSpeed);
+    }
+
+    /**
+     * Offsets the spawning of a particle with the given player's offsets.
+     *
+     * @param serverWorld The world to spawn the particle in.
+     * @param type See {@link ServerWorld#spawnParticle(IParticleData, double, double, double, int, double, double, double, double)}.
+     * @param posX See {@link ServerWorld#spawnParticle(IParticleData, double, double, double, int, double, double, double, double)}.
+     * @param posY See {@link ServerWorld#spawnParticle(IParticleData, double, double, double, int, double, double, double, double)}.
+     * @param posZ See {@link ServerWorld#spawnParticle(IParticleData, double, double, double, int, double, double, double, double)}.
+     * @param particleCount See {@link ServerWorld#spawnParticle(IParticleData, double, double, double, int, double, double, double, double)}.
+     * @param xOffset See {@link ServerWorld#spawnParticle(IParticleData, double, double, double, int, double, double, double, double)}.
+     * @param yOffset See {@link ServerWorld#spawnParticle(IParticleData, double, double, double, int, double, double, double, double)}.
+     * @param zOffset See {@link ServerWorld#spawnParticle(IParticleData, double, double, double, int, double, double, double, double)}.
+     * @param speed See {@link ServerWorld#spawnParticle(IParticleData, double, double, double, int, double, double, double, double)}.
+     * @param playerEntity The player to get offsets from.
+     * @param <T>  See {@link ServerWorld#spawnParticle(IParticleData, double, double, double, int, double, double, double, double)}.
+     */
+    public static <T extends IParticleData> int modifiedSpawnParticle(ServerWorld serverWorld, T type, double posX, double posY, double posZ, int particleCount, double xOffset, double yOffset, double zOffset, double speed, PlayerEntity playerEntity) {
+        Vec3d offsets = Offsetter.getOffsets(playerEntity);
+        return serverWorld.spawnParticle(type, posX + offsets.x, posY + offsets.y, posZ + offsets.z, particleCount, xOffset, yOffset, zOffset, speed);
     }
 
     /**
@@ -712,6 +856,24 @@ public class BytecodeHelper {
     }
 
     /**
+     * Redoes the range check for an enderman's StareGoal accounting for the target's offsets.
+     *
+     * @param originalDistanceSq The original distanced squared to the target.
+     * @param stareGoal The enderman's StareGoal. Must be an instance of StareGoal.
+     */
+    public static double redoShouldExecuteRangeCheck(double originalDistanceSq, Object stareGoal) {
+        EndermanEntity enderman = (EndermanEntity) ReflectionHelper.getValueOrDefault(FIELD_enderman, stareGoal, null);
+        if (enderman == null) throw new NullPointerException("Unable to get value from 'FIELD_enderman'");
+        LivingEntity attackTarget = enderman.getAttackTarget();
+        Vec3d offsets = Offsetter.getOffsets(attackTarget);
+
+        if (offsets.equals(Vec3d.ZERO))
+            return originalDistanceSq;
+
+        return Math.min(originalDistanceSq, enderman.getDistanceSq(attackTarget.getPositionVec().add(offsets)));
+    }
+
+    /**
      * Redoes the check in {@link LivingEntity#canEntityBeSeen(Entity)} so that mobs can see players' torsos, even if the legs are not in view.
      *
      * @param originalResult The original result of the function.
@@ -723,6 +885,22 @@ public class BytecodeHelper {
      * @return Whether the entity can bee seen by the other.
      */
     public static boolean redoCanEntityBeSeen(boolean originalResult, LivingEntity livingEntity, Entity entity, Vec3d livingEntityPosition, Vec3d entityPosition) {
+        if (!(entity instanceof PlayerEntity))
+            return originalResult;
+
         return originalResult || livingEntity.world.rayTraceBlocks(new RayTraceContext(livingEntityPosition, offsetVector(entityPosition, entity), RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, livingEntity)).getType() == RayTraceResult.Type.MISS;
+    }
+
+    /**
+     * Redoes the check in {@link LivingEntity#canEntityBeSeen(Entity)} so that mobs can see players' torsos, even if the legs are not in view.
+     * TODO Shelved
+     * @param livingEntity The entity that is attempting to see.
+     * @param entity The entity that is possibly being seen.
+     *
+     * @return Whether the entity can bee seen by the other.
+     */
+    @Deprecated
+    public static boolean modifiedCanEntityBeSeen(LivingEntity livingEntity, Entity entity) {
+        return redoCanEntityBeSeen(livingEntity.canEntityBeSeen(entity), livingEntity, entity, livingEntity.getPositionVec(), entity.getPositionVec());
     }
 }

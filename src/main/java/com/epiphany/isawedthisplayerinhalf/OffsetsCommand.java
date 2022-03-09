@@ -1,5 +1,6 @@
 package com.epiphany.isawedthisplayerinhalf;
 
+import com.epiphany.isawedthisplayerinhalf.config.ClientConfig;
 import com.epiphany.isawedthisplayerinhalf.networking.Networker;
 import com.mojang.realmsclient.gui.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -18,22 +19,23 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 @OnlyIn(Dist.CLIENT)
 public class OffsetsCommand {
-    // TODO Improve parsing.
     /**
      * In-game config options implemented via chat "commands."
      */
     @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = true)
     public static void onPlayerChat(ClientChatEvent clientChatEvent) {
         String originalMessage = clientChatEvent.getOriginalMessage();
-        String[] possibleCommand = originalMessage.split(" ");
+        String[] possibleCommand = originalMessage.split(" +");
 
         String possibleCommandStart = possibleCommand[0].toLowerCase();
         if (!"::offsets".equals(possibleCommandStart) && !"::ofs".equals(possibleCommandStart))
             return;
 
         clientChatEvent.setCanceled(true);
-
+        // Ensures that the command is put into the player's history for when they press the up arrow to recall it.
         Minecraft minecraft = Minecraft.getInstance();
+        minecraft.ingameGUI.getChatGUI().addToSentMessages(originalMessage);
+
         ClientPlayerEntity player = minecraft.player;
 
         if (possibleCommand.length >= 2) {
@@ -47,10 +49,10 @@ public class OffsetsCommand {
                     break;
 
                 case "reset":
-                    resetOffsets(player, minecraft);
+                    resetOffsets(player);
                     break;
 
-                case "what":Config.a();break;
+                case "what":ClientConfig.a();break;
 
                 case "help":
                     sendHelpInformation(player);
@@ -87,7 +89,7 @@ public class OffsetsCommand {
     private static void getOffsets(ClientPlayerEntity player, String[] possibleCommand, Minecraft minecraft) {
         // Getting offsets of client.
         if (possibleCommand.length == 2) {
-            Vec3d offsets = Config.getOffsets();
+            Vec3d offsets = ClientConfig.getOffsets();
 
             player.sendMessage(new TranslationTextComponent(
                     "commands.swdthsplyrnhlf.offsets.get", offsets.x, offsets.y, offsets.z));
@@ -166,14 +168,15 @@ public class OffsetsCommand {
                 }
 
 
-                Config.setOffsets(x, y, z);
-                Offsetter.setOffsets(player, new Vec3d(x, y, z));
+                Offsetter.trySetClientOffsets(new Vec3d(x, y, z), (success) -> {
+                    if (success) {
+                        player.sendMessage(new TranslationTextComponent("commands.swdthsplyrnhlf.offsets.set", x, y, z));
 
-                if (!minecraft.isSingleplayer())
-                    Networker.sendServerOffsets(x,y,z);
-
-                player.sendMessage(new TranslationTextComponent(
-                        "commands.swdthsplyrnhlf.offsets.set", x, y, z));
+                    } else
+                        player.sendMessage(new TranslationTextComponent(
+                                "commands.swdthsplyrnhlf.offsets.set.server_error")
+                                .applyTextStyle(TextFormatting.RED));
+                });
 
             } catch (NumberFormatException exception) {
                 // Grabs arguments up to the one that caused the error.
@@ -202,19 +205,19 @@ public class OffsetsCommand {
 
     /**
      * Attempts to reset the client's offsets to (0, 0, 0).
-     *
      * @param player The client.
-     * @param minecraft The current instance of Minecraft.
      */
-    private static void resetOffsets(ClientPlayerEntity player, Minecraft minecraft) {
+    private static void resetOffsets(ClientPlayerEntity player) {
         if (!Offsetter.getOffsets(player).equals(Vec3d.ZERO)) {
-            Config.setOffsets(0, 0, 0);
-            Offsetter.setOffsets(player, Vec3d.ZERO);
+            Offsetter.trySetClientOffsets(Vec3d.ZERO, (success) -> {
+                if (success) {
+                    player.sendMessage(new TranslationTextComponent("commands.swdthsplyrnhlf.offsets.reset"));
 
-            if (!minecraft.isSingleplayer())
-                Networker.sendServerOffsets(0, 0, 0);
-
-            player.sendMessage(new TranslationTextComponent("commands.swdthsplyrnhlf.offsets.reset"));
+                } else
+                    player.sendMessage(new TranslationTextComponent(
+                            "commands.swdthsplyrnhlf.offsets.reset.server_error")
+                            .applyTextStyle(TextFormatting.RED));
+            });
 
         } else
             player.sendMessage(new TranslationTextComponent(

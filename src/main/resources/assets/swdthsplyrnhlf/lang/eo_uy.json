@@ -5,9 +5,11 @@
 
   "commands.swdthsplyrnhlf.offsets.reset": "tenpo ni la nanpa pi ma ante li 0 en 0 en 0",
   "commands.swdthsplyrnhlf.offsets.reset.already_reset": "tenpo pini kin la nanpa pi ma ante li kama 0 en 0 en 0",
+  "commands.swdthsplyrnhlf.offsets.reset.server_error": "li ken ala ante e ma ante tan ni: ma pi jan mute li wile ala",
 
   "commands.swdthsplyrnhlf.offsets.set": "tenpo ni la ma ante li ante (li %f en %f en %f)",
   "commands.swdthsplyrnhlf.offsets.set.already_set": "nanpa pi ma ante li ante sama lon tenpo pini kin li awen %f en %f en %f",
+  "commands.swdthsplyrnhlf.offsets.set.server_error": "li ken ala ante e ma ante tan ni: ma pi jan mute li wile ala",
 
   "commands.swdthsplyrnhlf.offsets.help": "li pana e sijelo sewi sina lon ma ante\nnimi ante: ::ofs",
   "commands.swdthsplyrnhlf.offsets.usage_title": "nasin kepeken:",
@@ -25,5 +27,6 @@
 
 
 
-  "network.error.set_offsets.invalid_offsets": "ma pi jan mute li lukin pana e ma ante ike pi jan ante! jan li nanpa %d. - li poki ala e ona!"
+  "network.error.set_offsets.invalid_offsets": "ma pi jan mute li lukin pana e ma ante ike pi jan ante! jan li nanpa %d. - li poki ala e ona!",
+  "network.disconnect.invalid_offsets": "musi Minka sina li awen pana e ma ante ike! ken la ante musi ni MiTuEJanNi! li jo e ike. anu, ken la sina lukin pali e ike, jan pi pali ike o!"
 }
