@@ -3,6 +3,9 @@ lukin kepeken toki ante: [English](./README.md "View in English"), [Русски
 
 ![mi tu e jan ni](./src/main/resources/modicon.png)
 
+**!!o lukin!! mi awen ala pali e pali ni. 
+mi pona e ona li pona e ike. taso,
+mi pana ala e ijo sin.**
 
 # MiTuEJanNi! (ISawedThisPlayerInHalf!)
 jan sina... li suwi sike suli pa- jan sewi o, sijelo sewi ona li waso a!
