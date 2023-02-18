@@ -3,9 +3,7 @@ lukin kepeken toki ante: [English](./README.md "View in English"), [Русски
 
 ![mi tu e jan ni](./src/main/resources/modicon.png)
 
-**!!o lukin!! mi awen ala pali e pali ni. 
-mi pona e ona li pona e ike. taso,
-mi pana ala e ijo sin.**
+**!!o lukin!! mi awen ala pali e pali ni.**
 
 # MiTuEJanNi! (ISawedThisPlayerInHalf!)
 jan sina... li suwi sike suli pa- jan sewi o, sijelo sewi ona li waso a!
@@ -36,6 +34,7 @@ jan lawa pi ma pi jan mute li ken ante e toki pi musi MiTuEJanNi! kepeken poki n
 ## lupa tawa lipu ante
 [lipu pali KasuFoke (CurseForge)](https://www.curseforge.com/minecraft/mc-mods/i-sawed-this-player-in-half "lipu pali pi ante Mi Tu E Jan Ni! lon lipu KasuFoke (CurseForge)")
 
+[lipu pali PaneMinka (Planet Minecraft)](https://www.planetminecraft.com/mod/isawedthisplayerinhalf "lipu pali pi ante Mi Tu E Jan Ni! lon lipu PaneMinka (Planet Minecraft)")
 
 ## jan suli
 [jan PhoenixSC](https://www.youtube.com/c/PhnixhamstaSC "lipu JuTu (YouTube) PhoenixSC") - [sona pi pali pi ante ni.](https://www.youtube.com/watch?v=QS2GsxZ3d1M "I Separated the Player's Body in Half in Minecraft - PhoenixSC")

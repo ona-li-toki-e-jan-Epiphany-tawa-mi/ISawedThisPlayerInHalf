@@ -2,9 +2,7 @@ View in a different language: [Русский](./README.ru-RU.md "Смотрет
 
 ![mi tu e jan ni](./src/main/resources/modicon.png)
 
-**!!ATTENTION!! I am no longer working on this project. 
-I will maintain it and do bug fixes, but I will not be 
-adding any new features.**
+**!!ATTENTION!! I am no longer working on this project. **
 
 # ISawedThisPlayerInHalf!
 Your player... is ca- oh my god, his torso is flying!
@@ -33,7 +31,10 @@ I would **_not_** recommend using this on a server that does not have the mod.
 Server owners can change which language that ISawedThisPlayerInHalf! displays information in using the config file (in config/isawedthisplayerinhalf-server.toml). 
 
 ## Links
+
 [CurseForge Project Page](https://www.curseforge.com/minecraft/mc-mods/i-sawed-this-player-in-half "I Sawed This Player In Half! Project Page on CurseForge")
+
+[Planet Minecraft Project Page](https://www.planetminecraft.com/mod/isawedthisplayerinhalf "I Sawed This Player In Half! Project Page on Planet Minecraft")
 
 
 ## Credits

@@ -3,9 +3,7 @@
 
 ![mi tu e jan ni](./src/main/resources/modicon.png)
 
-**!!ВНИМАНИЕ!! Я не продолжаю работать над этим проектом.
-Я буду поддерживать и исправлять ошибки, но
-не добавлю новые особенности.**
+**!!ВНИМАНИЕ!! Я не продолжаю работать над этим проектом.**
 
 # ЯРаскололЭтогоИгрокаПополам! (ISawedThisPlayerInHalf!)
 Ваш персонаж... это тор- о боже мой, летает его торс!
@@ -34,8 +32,10 @@
 Владельцы серверов файлом конфигурации (в config/isawedthisplayerinhalf-server.toml) могут изменить, на каком языке ЯРаскололЭтогоИгрокаПополам! отображает информацию.
 
 ## Ссылки
+
 [Страница Проекта на CurseForge](https://www.curseforge.com/minecraft/mc-mods/i-sawed-this-player-in-half "Страница Проекта Я Расколол Этого Игрока Пополам! на CurseForge")
 
+[Страница Проекта на Planet Minecraft](https://www.planetminecraft.com/mod/isawedthisplayerinhalf "Страница Проекта Я Расколол Этого Игрока Пополам! на Planet Minecraft")
 
 ## Благодарности
 [PhoenixSC](https://www.youtube.com/c/PhnixhamstaSC "Канал PhoenixSC на Ютубе") - [идея для мода.](https://www.youtube.com/watch?v=QS2GsxZ3d1M "I Separated the Player's Body in Half in Minecraft - PhoenixSC")
