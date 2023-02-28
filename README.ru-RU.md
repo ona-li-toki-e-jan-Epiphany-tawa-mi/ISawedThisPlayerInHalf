@@ -6,12 +6,14 @@
 **!!ВНИМАНИЕ!! Я не продолжаю работать над этим проектом.**
 
 # ЯРаскололЭтогоИгрокаПополам! (ISawedThisPlayerInHalf!)
+
 Ваш персонаж... это тор- о боже мой, летает его торс!
 
 Этот мод раскалывает персонажа пополам, освободив торс от ног.
 
   
 ## Как пользовать
+
 Эти команды позволяют вам контролировать смещения - новую позицию верхней части тела - в игре.
 
 * Помощь: **::offsets help**
@@ -25,11 +27,13 @@
 
 
 ## Мультиплеер
+
 Моду тоже надо быть на сервере, чтобы пользовать по сети.
 
 Я бы **_не_** рекомендовал использовать это на сервере, у которого мода нет.
 
 Владельцы серверов файлом конфигурации (в config/isawedthisplayerinhalf-server.toml) могут изменить, на каком языке ЯРаскололЭтогоИгрокаПополам! отображает информацию.
+
 
 ## Ссылки
 
@@ -37,5 +41,15 @@
 
 [Страница Проекта на Planet Minecraft](https://www.planetminecraft.com/mod/isawedthisplayerinhalf "Страница Проекта Я Расколол Этого Игрока Пополам! на Planet Minecraft")
 
+
 ## Благодарности
+
 [PhoenixSC](https://www.youtube.com/c/PhnixhamstaSC "Канал PhoenixSC на Ютубе") - [идея для мода.](https://www.youtube.com/watch?v=QS2GsxZ3d1M "I Separated the Player's Body in Half in Minecraft - PhoenixSC")
+
+
+## Скриншоты
+
+![скриншот](screenshots/fishin.png)
+![скриншот](screenshots/pantshead.png)
+![скриншот](screenshots/arrow.png)
+![скриншот](screenshots/toTheRight.png)

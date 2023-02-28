@@ -6,12 +6,14 @@ lukin kepeken toki ante: [English](./README.md "View in English"), [Русски
 **!!o lukin!! mi awen ala pali e pali ni.**
 
 # MiTuEJanNi! (ISawedThisPlayerInHalf!)
+
 jan sina... li suwi sike suli pa- jan sewi o, sijelo sewi ona li waso a!
 
 ante musi ni li tu e sijelo jan li pana e sijelo sewi lon ma ante.
 
 
 ## nasin kepeken
+
 nimi wawa ni pi tomo toki li ken e ni: sina ante e ma ante pi sijelo sewi sina lon musi.
 
 * sona kepeken: **::offsets help**
@@ -25,6 +27,7 @@ sin la sina ken ante e ma ante kepeken poki nimi ante (li lon config/isawedthisp
 
 
 ## musi pi jan mute
+
 ante musi li wile lon ma pi jan mute tawa ni: kepeken e ona lon ona.
 
 kin la kepeken e ni lon ma pi jan mute pi ante musi ni ala li **_ike._**
@@ -32,9 +35,21 @@ kin la kepeken e ni lon ma pi jan mute pi ante musi ni ala li **_ike._**
 jan lawa pi ma pi jan mute li ken ante e toki pi musi MiTuEJanNi! kepeken poki nimi ante (li lon config/isawedthisplayerinhalf-server.toml)
 
 ## lupa tawa lipu ante
+
 [lipu pali KasuFoke (CurseForge)](https://www.curseforge.com/minecraft/mc-mods/i-sawed-this-player-in-half "lipu pali pi ante Mi Tu E Jan Ni! lon lipu KasuFoke (CurseForge)")
 
 [lipu pali PaneMinka (Planet Minecraft)](https://www.planetminecraft.com/mod/isawedthisplayerinhalf "lipu pali pi ante Mi Tu E Jan Ni! lon lipu PaneMinka (Planet Minecraft)")
 
+
 ## jan suli
+
 [jan PhoenixSC](https://www.youtube.com/c/PhnixhamstaSC "lipu JuTu (YouTube) PhoenixSC") - [sona pi pali pi ante ni.](https://www.youtube.com/watch?v=QS2GsxZ3d1M "I Separated the Player's Body in Half in Minecraft - PhoenixSC")
+
+
+
+## sitelen pana
+
+![sitelen](screenshots/fishin.png)
+![sitelen](screenshots/pantshead.png)
+![sitelen](screenshots/arrow.png)
+![sitelen](screenshots/toTheRight.png)
