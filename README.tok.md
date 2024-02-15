@@ -34,12 +34,6 @@ kin la kepeken e ni lon ma pi jan mute pi ante musi ni ala li **_ike._**
 
 jan lawa pi ma pi jan mute li ken ante e toki pi musi MiTuEJanNi! kepeken poki nimi ante (li lon config/isawedthisplayerinhalf-server.toml)
 
-## lupa tawa lipu ante
-
-[lipu pali KasuFoke (CurseForge)](https://www.curseforge.com/minecraft/mc-mods/i-sawed-this-player-in-half "lipu pali pi ante Mi Tu E Jan Ni! lon lipu KasuFoke (CurseForge)")
-
-[lipu pali PaneMinka (Planet Minecraft)](https://www.planetminecraft.com/mod/isawedthisplayerinhalf "lipu pali pi ante Mi Tu E Jan Ni! lon lipu PaneMinka (Planet Minecraft)")
-
 
 ## jan suli
 

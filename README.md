@@ -11,7 +11,7 @@ Your player... is ca- oh my god, his torso is flying!
 
 This mod splits apart the player, freeing the torso from the legs.
 
-  
+
 ## How to Use
 
 These chat commands allow you to control your offsets, the new position of the torso, in-game.
@@ -32,14 +32,7 @@ The mod must also be on the server for multiplayer-compatibility.
 
 I would **_not_** recommend using this on a server that does not have the mod.
 
-Server owners can change which language that ISawedThisPlayerInHalf! displays information in using the config file (in config/isawedthisplayerinhalf-server.toml). 
-
-
-## Links
-
-[CurseForge Project Page](https://www.curseforge.com/minecraft/mc-mods/i-sawed-this-player-in-half "I Sawed This Player In Half! Project Page on CurseForge")
-
-[Planet Minecraft Project Page](https://www.planetminecraft.com/mod/isawedthisplayerinhalf "I Sawed This Player In Half! Project Page on Planet Minecraft")
+Server owners can change which language that ISawedThisPlayerInHalf! displays information in using the config file (in config/isawedthisplayerinhalf-server.toml).
 
 
 ## Credits
