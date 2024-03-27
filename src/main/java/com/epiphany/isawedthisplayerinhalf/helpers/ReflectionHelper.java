@@ -9,7 +9,7 @@ import java.lang.reflect.Method;
 /*
  * MIT License
  *
- * Copyright (c) 2021 Nathaniel Needham
+ * Copyright (c) 2020-2022 Nathaniel Needham
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal

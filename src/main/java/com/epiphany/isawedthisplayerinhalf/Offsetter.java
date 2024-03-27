@@ -27,7 +27,7 @@ import java.util.function.Consumer;
 /*
  * MIT License
  *
- * Copyright (c) 2021 Nathaniel Needham
+ * Copyright (c) 2020-2022 ona-li-toki-e-jan-Epiphany-tawa-mi
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -127,7 +127,7 @@ public class Offsetter {
         if (minecraft.isSingleplayer()) {
             setOffsets(minecraft.player, offsets);
             ClientConfig.setOffsets(offsets.x, offsets.y, offsets.z);
-            
+
             if (onRespond != null)
                 onRespond.accept(true);
 
